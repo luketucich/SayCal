@@ -6,7 +6,7 @@ struct WelcomeView: View {
     
     var body: some View {
         ZStack {
-            // Gradient background - adapts to color scheme
+            // Gradient background
             LinearGradient(
                 colors: colorScheme == .dark ? [
                     Color(red: 0.1, green: 0.1, blue: 0.15),
@@ -46,7 +46,7 @@ struct WelcomeView: View {
                 
                 Spacer()
                 
-                // Get Started button - adapts to color scheme
+                // Get Started button
                 Button(action: {
                     showOnboarding = true
                 }) {
@@ -63,7 +63,7 @@ struct WelcomeView: View {
             }
         }
         .sheet(isPresented: $showOnboarding) {
-            OnboardingBottomSheet()
+            OnboardingSheetView()
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
                 .presentationBackground(Color(.systemBackground))

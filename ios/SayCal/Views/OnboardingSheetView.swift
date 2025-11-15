@@ -1,43 +1,38 @@
 import SwiftUI
 import AuthenticationServices
 
-struct OnboardingBottomSheet: View {
-    @Environment(\.dismiss) var dismiss
-    @Environment(\.colorScheme) var colorScheme
-    
+struct OnboardingSheetView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            
+
+            // MARK: - Header
             VStack(alignment: .leading, spacing: 16) {
                 Text("Get Started")
                     .font(.system(size: 32, weight: .bold))
-                
+
                 Text("Sample text will go here.")
                     .font(.system(size: 17))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            
+
+            // MARK: - Sign-in Buttons
             VStack(spacing: 12) {
-                SignInWithAppleButton(.continue) { request in
-                    dismiss()
-                    request.requestedScopes = [.fullName, .email]
-                } onCompletion: { result in
-                    // TODO: Handle Supabase Auth
-                }
-                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-                .frame(height: 56)
-                .cornerRadius(16)
+                // Apple
+                AppleAuthButton(client: SupabaseManager.client, colorScheme: colorScheme)
                 
+                // Google
                 Button {
-                    // Handle Google sign in
+                    // TODO: Implement Google Sign-In
                 } label: {
                     HStack(spacing: 12) {
                         Text("G")
                             .font(.system(size: 20, weight: .bold))
-                        
                         Text("Continue with Google")
                             .font(.system(size: 22, weight: .medium))
                     }
@@ -47,14 +42,14 @@ struct OnboardingBottomSheet: View {
                     .background(Color(.systemGray5))
                     .cornerRadius(16)
                 }
-                
+
+                // Email
                 Button {
-                    // Handle Email sign in
+                    // TODO: Implement Email Sign-In
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: "envelope.fill")
-                            .font(.system(size: 20, weight: .bold))
-                        
+                            .font(.system(size: 15, weight: .bold))
                         Text("Continue with Email")
                             .font(.system(size: 22, weight: .medium))
                     }
@@ -65,10 +60,14 @@ struct OnboardingBottomSheet: View {
                     .cornerRadius(16)
                 }
             }
-            
+
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 20)
     }
+}
+
+#Preview {
+    OnboardingSheetView()
 }
