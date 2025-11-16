@@ -26,10 +26,13 @@ struct EmailInputView: View {
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
+                    .font(.system(size: 17))
                     .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .font(.body)
+                    .frame(height: 56)
+                    .background(
+                        RoundedRectangle(cornerRadius: 32)
+                            .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                    )
 
                 if let errorMessage {
                     Text(errorMessage)
@@ -50,14 +53,14 @@ struct EmailInputView: View {
                             .frame(height: 56)
                     } else {
                         Text("Continue")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 22, weight: .medium))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
                     }
                 }
                 .background(email.isEmpty ? Color.gray : Color.accentColor)
-                .cornerRadius(12)
+                .cornerRadius(32)
                 .disabled(email.isEmpty || isLoading)
             }
 

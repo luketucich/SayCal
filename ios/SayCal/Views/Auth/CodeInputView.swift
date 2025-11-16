@@ -28,13 +28,9 @@ struct CodeInputView: View {
                 HStack(spacing: 12) {
                     ForEach(0..<6, id: \.self) { index in
                         ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(code.count == index ? Color.accentColor : Color(.systemGray4), lineWidth: 2)
+                            RoundedRectangle(cornerRadius: 32)
+                                .stroke(code.count == index ? Color.accentColor : Color.primary.opacity(0.3), lineWidth: 1)
                                 .frame(width: 48, height: 56)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(.systemGray6))
-                                )
 
                             if index < code.count {
                                 Text(String(code[code.index(code.startIndex, offsetBy: index)]))
@@ -93,14 +89,14 @@ struct CodeInputView: View {
                             .frame(height: 56)
                     } else {
                         Text("Verify Code")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 22, weight: .medium))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
                     }
                 }
                 .background(code.count != 6 ? Color.gray : Color.accentColor)
-                .cornerRadius(12)
+                .cornerRadius(32)
                 .disabled(code.count != 6 || isLoading)
 
                 Button {
@@ -109,7 +105,7 @@ struct CodeInputView: View {
                     }
                 } label: {
                     Text("Resend code")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 17, weight: .regular))
                         .foregroundColor(.accentColor)
                 }
                 .disabled(isLoading)
