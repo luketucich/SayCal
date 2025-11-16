@@ -1,10 +1,3 @@
-//
-//  CodeInputView.swift
-//  SayCal
-//
-//  Created by Claude on 11/16/25.
-//
-
 import SwiftUI
 
 struct CodeInputView: View {

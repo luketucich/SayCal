@@ -20,7 +20,7 @@ struct AppleAuthButton: View {
         )
         .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
         .frame(height: 56)
-        .cornerRadius(16)
+        .cornerRadius(32)
             
             if let errorMessage {
                 Text(errorMessage)
@@ -43,21 +43,6 @@ struct AppleAuthButton: View {
                 try await SupabaseManager.client.auth.signInWithIdToken(
                     credentials: .init(provider: .apple, idToken: idToken)
                 )
-                
-                // Print session info
-                if let session = SupabaseManager.client.auth.currentSession {
-                    print("=== APPLE SIGN IN SUCCESS ===")
-                    print("User ID: \(session.user.id)")
-                    print("Email: \(session.user.email ?? "No email")")
-                    print("Access Token: \(session.accessToken)")
-                    print("Refresh Token: \(session.refreshToken)")
-                    print("Token Type: \(session.tokenType)")
-                    print("Expires At: \(session.expiresAt)")
-                    print("Expires In: \(session.expiresIn) seconds")
-                    print("Provider: \(session.user.appMetadata["provider"] ?? "unknown")")
-                    print("Created At: \(session.user.createdAt)")
-                    print("=============================")
-                }
 
                 // Update user metadata (only on first sign-in)
                 if let fullName = credential.fullName {
@@ -78,12 +63,9 @@ struct AppleAuthButton: View {
                             ]
                         )
                     )
-                    
-                    print("User metadata updated: \(fullNameString)")
                 }
             } catch {
                 errorMessage = error.localizedDescription
-                print("Sign in with Apple failed: \(error.localizedDescription)")
             }
         }
     }

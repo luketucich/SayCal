@@ -1,10 +1,3 @@
-//
-//  EmailAuthView.swift
-//  SayCal
-//
-//  Created by Claude on 11/16/25.
-//
-
 import SwiftUI
 import Supabase
 
@@ -74,16 +67,11 @@ struct EmailAuthView: View {
                 email: email
             )
 
-            print("=== EMAIL OTP SENT ===")
-            print("Email: \(email)")
-            print("======================")
-
             withAnimation {
                 showCodeInput = true
             }
         } catch {
             errorMessage = error.localizedDescription
-            print("Failed to send OTP: \(error.localizedDescription)")
         }
 
         isLoading = false
@@ -100,27 +88,11 @@ struct EmailAuthView: View {
                 type: .email
             )
 
-            // Print session info
-            if let session = SupabaseManager.client.auth.currentSession {
-                print("=== EMAIL OTP VERIFICATION SUCCESS ===")
-                print("User ID: \(session.user.id)")
-                print("Email: \(session.user.email ?? "No email")")
-                print("Access Token: \(session.accessToken)")
-                print("Refresh Token: \(session.refreshToken)")
-                print("Token Type: \(session.tokenType)")
-                print("Expires At: \(session.expiresAt)")
-                print("Expires In: \(session.expiresIn) seconds")
-                print("Provider: \(session.user.appMetadata["provider"] ?? "unknown")")
-                print("Created At: \(session.user.createdAt)")
-                print("=======================================")
-            }
-
             // Dismiss the view - auth manager will handle the state update
             dismiss()
         } catch {
             errorMessage = "Invalid code. Please try again."
             code = ""
-            print("Failed to verify OTP: \(error.localizedDescription)")
         }
 
         isLoading = false

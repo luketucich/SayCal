@@ -14,21 +14,34 @@ struct GoogleAuthButton: View {
                         try await googleSignIn()
                     } catch {
                         errorMessage = error.localizedDescription
-                        print("Sign in error: \(error)")
                     }
                 }
             } label: {
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
+                    // Option 1: Use official Google logo from Assets
+                    // Uncomment this if you add google-logo to Assets.xcassets:
+                    // Image("google-logo")
+                    //     .resizable()
+                    //     .frame(width: 20, height: 20)
+                    
+                    // Option 2: Using SF Symbol as fallback
+                    // Image(systemName: "g.circle.fill")
+                    //     .font(.system(size: 20))
+                    
+                    // Option 3: Simple text "G" (current)
                     Text("G")
-                        .font(.system(size: 20, weight: .bold))
-                    Text("Continue with Google")
+                        .font(.system(size: 20, weight: .semibold))
+                    
+                    Text("Sign in with Google")
                         .font(.system(size: 22, weight: .medium))
                 }
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
-                .background(Color(.systemGray5))
-                .cornerRadius(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 32)
+                        .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                )
             }
             
             if let errorMessage {
@@ -62,21 +75,6 @@ struct GoogleAuthButton: View {
                 accessToken: accessToken
             )
         )
-        
-        // Print session info
-        if let session = SupabaseManager.client.auth.currentSession {
-            print("=== GOOGLE SIGN IN SUCCESS ===")
-            print("User ID: \(session.user.id)")
-            print("Email: \(session.user.email ?? "No email")")
-            print("Access Token: \(session.accessToken)")
-            print("Refresh Token: \(session.refreshToken)")
-            print("Token Type: \(session.tokenType)")
-            print("Expires At: \(session.expiresAt)")
-            print("Expires In: \(session.expiresIn) seconds")
-            print("Provider: \(session.user.appMetadata["provider"] ?? "unknown")")
-            print("Created At: \(session.user.createdAt)")
-            print("=============================")
-        }
     }
 }
 
