@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct EmailAuthButton: View {
+    @State private var showEmailAuth = false
+
     var body: some View {
         Button {
-            // TODO: Implement Email Sign-In
+            showEmailAuth = true
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "envelope.fill")
@@ -23,6 +25,9 @@ struct EmailAuthButton: View {
             .frame(height: 56)
             .background(Color(.systemGray5))
             .cornerRadius(16)
+        }
+        .sheet(isPresented: $showEmailAuth) {
+            EmailAuthView()
         }
     }
 }
