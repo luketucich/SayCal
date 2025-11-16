@@ -14,6 +14,10 @@ struct EmailAuthView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                // Plain background - white for light mode, black for dark mode
+                Color(.systemBackground)
+                    .ignoresSafeArea()
+
                 if showCodeInput {
                     CodeInputView(
                         code: $code,
