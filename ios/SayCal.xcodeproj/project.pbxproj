@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A367C5D32EC950FD00D3CD6B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = A367C5D22EC950FD00D3CD6B /* GoogleSignIn */; };
+		A367C5D52EC950FD00D3CD6B /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A367C5D42EC950FD00D3CD6B /* GoogleSignInSwift */; };
 		A3B1F8E82EC6FA6B000612F8 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = A3B1F8E72EC6FA6B000612F8 /* Auth */; };
 		A3B1F8EA2EC6FA6B000612F8 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = A3B1F8E92EC6FA6B000612F8 /* Functions */; };
 		A3B1F8EC2EC6FA6B000612F8 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = A3B1F8EB2EC6FA6B000612F8 /* PostgREST */; };
@@ -18,9 +20,22 @@
 		A3B1F8D22EC6F824000612F8 /* SayCal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SayCal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A367C5E02EC9606D00D3CD6B /* Exceptions for "SayCal" folder in "SayCal" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A3B1F8D12EC6F824000612F8 /* SayCal */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A3B1F8D42EC6F824000612F8 /* SayCal */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A367C5E02EC9606D00D3CD6B /* Exceptions for "SayCal" folder in "SayCal" target */,
+			);
 			path = SayCal;
 			sourceTree = "<group>";
 		};
@@ -33,9 +48,11 @@
 			files = (
 				A3B1F9282EC7102F000612F8 /* Supabase in Frameworks */,
 				A3B1F8EE2EC6FA6B000612F8 /* Storage in Frameworks */,
+				A367C5D52EC950FD00D3CD6B /* GoogleSignInSwift in Frameworks */,
 				A3B1F8EC2EC6FA6B000612F8 /* PostgREST in Frameworks */,
 				A3B1F8EA2EC6FA6B000612F8 /* Functions in Frameworks */,
 				A3B1F8E82EC6FA6B000612F8 /* Auth in Frameworks */,
+				A367C5D32EC950FD00D3CD6B /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +108,8 @@
 				A3B1F8EB2EC6FA6B000612F8 /* PostgREST */,
 				A3B1F8ED2EC6FA6B000612F8 /* Storage */,
 				A3B1F9272EC7102F000612F8 /* Supabase */,
+				A367C5D22EC950FD00D3CD6B /* GoogleSignIn */,
+				A367C5D42EC950FD00D3CD6B /* GoogleSignInSwift */,
 			);
 			productName = SayCal;
 			productReference = A3B1F8D22EC6F824000612F8 /* SayCal.app */;
@@ -122,6 +141,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				A3B1F8E62EC6FA6B000612F8 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				A367C5D12EC950FD00D3CD6B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A3B1F8D32EC6F824000612F8 /* Products */;
@@ -286,6 +306,7 @@
 				DEVELOPMENT_TEAM = V6KA4MAW4H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SayCal/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -320,6 +341,7 @@
 				DEVELOPMENT_TEAM = V6KA4MAW4H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SayCal/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -367,6 +389,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		A367C5D12EC950FD00D3CD6B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
 		A3B1F8E62EC6FA6B000612F8 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase-community/supabase-swift.git";
@@ -378,6 +408,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		A367C5D22EC950FD00D3CD6B /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A367C5D12EC950FD00D3CD6B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		A367C5D42EC950FD00D3CD6B /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A367C5D12EC950FD00D3CD6B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
 		A3B1F8E72EC6FA6B000612F8 /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A3B1F8E62EC6FA6B000612F8 /* XCRemoteSwiftPackageReference "supabase-swift" */;

@@ -63,7 +63,7 @@ struct WelcomeView: View {
             }
         }
         .sheet(isPresented: $showOnboarding) {
-            OnboardingSheetView()
+            AuthSheet()
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
                 .presentationBackground(Color(.systemBackground))

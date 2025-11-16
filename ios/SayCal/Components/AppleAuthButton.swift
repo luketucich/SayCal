@@ -3,11 +3,12 @@ import AuthenticationServices
 import Supabase
 
 struct AppleAuthButton: View {
-    let client: SupabaseClient
-    let colorScheme: ColorScheme
-
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var errorMessage: String?
+    
     var body: some View {
-        SignInWithAppleButton(
+        VStack {
+            SignInWithAppleButton(
             onRequest: { request in
                 request.requestedScopes = [.email, .fullName]
             },
@@ -20,6 +21,14 @@ struct AppleAuthButton: View {
         .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
         .frame(height: 56)
         .cornerRadius(16)
+            
+            if let errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .font(.caption)
+                    .padding(.top, 4)
+            }
+        }
     }
 
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) async {
@@ -31,12 +40,12 @@ struct AppleAuthButton: View {
                         .flatMap({ String(data: $0, encoding: .utf8) })
                 else { return }
 
-                try await client.auth.signInWithIdToken(
+                try await SupabaseManager.client.auth.signInWithIdToken(
                     credentials: .init(provider: .apple, idToken: idToken)
                 )
                 
                 // Print session info
-                if let session = client.auth.currentSession {
+                if let session = SupabaseManager.client.auth.currentSession {
                     print("=== APPLE SIGN IN SUCCESS ===")
                     print("User ID: \(session.user.id)")
                     print("Email: \(session.user.email ?? "No email")")
@@ -60,7 +69,7 @@ struct AppleAuthButton: View {
 
                     let fullNameString = nameParts.joined(separator: " ")
 
-                    try await client.auth.update(
+                    try await SupabaseManager.client.auth.update(
                         user: UserAttributes(
                             data: [
                                 "full_name": .string(fullNameString),
@@ -73,15 +82,12 @@ struct AppleAuthButton: View {
                     print("User metadata updated: \(fullNameString)")
                 }
             } catch {
+                errorMessage = error.localizedDescription
                 print("Sign in with Apple failed: \(error.localizedDescription)")
-                // TODO: Show user-facing error
             }
         }
     }
 
 #Preview {
-    AppleAuthButton(
-        client: SupabaseManager.client,
-        colorScheme: .light
-    )
+    AppleAuthButton()
 }
