@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Step 4: Collects user's fitness goal
+/// Goal determines calorie adjustment (surplus or deficit)
 struct GoalsView: View {
     @ObservedObject var state: OnboardingState
 
@@ -52,6 +54,7 @@ struct GoalsView: View {
         }
     }
 
+    /// Formats the calorie adjustment for display in the UI
     private func calorieAdjustmentText(for goal: Goal) -> String {
         let adjustment = goal.calorieAdjustment
         if adjustment > 0 {

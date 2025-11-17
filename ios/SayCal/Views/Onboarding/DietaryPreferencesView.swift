@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Step 5: Collects user's dietary preferences (optional)
+/// Multiple selections allowed - used for meal planning and recommendations
 struct DietaryPreferencesView: View {
     @ObservedObject var state: OnboardingState
 
