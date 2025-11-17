@@ -21,6 +21,10 @@ struct DietaryPreferencesView: View {
                     // Skip option
                     if state.selectedDietaryPreferences.isEmpty {
                         InfoCallout(message: "You can skip this step and update preferences later")
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .top).combined(with: .opacity).combined(with: .scale(scale: 0.95)),
+                                removal: .move(edge: .top).combined(with: .opacity).combined(with: .scale(scale: 0.95))
+                            ))
                     }
 
                     // Preference grid with pills
@@ -38,24 +42,32 @@ struct DietaryPreferencesView: View {
                                 let trimmed = newPreference.trimmingCharacters(in: .whitespaces)
 
                                 guard !trimmed.isEmpty else {
-                                    isAddingPreference = false
-                                    newPreference = ""
+                                    withAnimation(.snappy(duration: 0.25)) {
+                                        isAddingPreference = false
+                                        newPreference = ""
+                                    }
                                     return
                                 }
 
                                 guard !dietaryPreferences.contains(where: { $0.lowercased() == trimmed.lowercased() }) else {
-                                    isAddingPreference = false
-                                    newPreference = ""
+                                    withAnimation(.snappy(duration: 0.25)) {
+                                        isAddingPreference = false
+                                        newPreference = ""
+                                    }
                                     return
                                 }
 
-                                dietaryPreferences.insert(trimmed, at: 0)
-                                state.selectedDietaryPreferences.insert(trimmed)
-                                isAddingPreference = false
-                                newPreference = ""
-                            } onCancel: {
-                                isAddingPreference = false
+                                withAnimation(.snappy(duration: 0.3)) {
+                                    dietaryPreferences.insert(trimmed, at: 0)
+                                    state.selectedDietaryPreferences.insert(trimmed)
+                                    isAddingPreference = false
+                                    newPreference = ""
+                                }
                             }
+                            .transition(.asymmetric(
+                                insertion: .scale.combined(with: .opacity),
+                                removal: .scale.combined(with: .opacity)
+                            ))
                         }
                         
                         ForEach(dietaryPreferences, id: \.self) { preference in
@@ -63,7 +75,7 @@ struct DietaryPreferencesView: View {
                                 title: preference.replacingOccurrences(of: "_", with: " ").capitalized,
                                 isSelected: state.selectedDietaryPreferences.contains(preference)
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     if state.selectedDietaryPreferences.contains(preference) {
                                         state.selectedDietaryPreferences.remove(preference)
                                     } else {
@@ -71,11 +83,15 @@ struct DietaryPreferencesView: View {
                                     }
                                 }
                             }
+                            .transition(.asymmetric(
+                                insertion: .scale.combined(with: .opacity),
+                                removal: .scale(scale: 0.8).combined(with: .opacity)
+                            ))
                         }
                         
                         // Add button
                         AddOptionButton {
-                            withAnimation {
+                            withAnimation(.snappy(duration: 0.3)) {
                                 isAddingPreference = true
                                 isTextFieldFocused = true
                             }
@@ -90,6 +106,7 @@ struct DietaryPreferencesView: View {
             // Bottom button area
             OnboardingBottomBar(
                 nextButtonText: state.selectedDietaryPreferences.isEmpty ? "Skip" : "Next",
+                hideWhenFocused: isTextFieldFocused || isAddingPreference,
                 onBack: { state.previousStep() },
                 onNext: { state.nextStep() }
             )

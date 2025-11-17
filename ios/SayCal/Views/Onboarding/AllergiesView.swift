@@ -23,6 +23,10 @@ struct AllergiesView: View {
                     // Skip option
                     if state.selectedAllergies.isEmpty {
                         InfoCallout(message: "You can skip this step and update allergies later")
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .top).combined(with: .opacity).combined(with: .scale(scale: 0.95)),
+                                removal: .move(edge: .top).combined(with: .opacity).combined(with: .scale(scale: 0.95))
+                            ))
                     }
 
                     // Allergy grid with pills
@@ -40,24 +44,32 @@ struct AllergiesView: View {
                                 let trimmed = newAllergy.trimmingCharacters(in: .whitespaces)
 
                                 guard !trimmed.isEmpty else {
-                                    isAddingAllergy = false
-                                    newAllergy = ""
+                                    withAnimation(.snappy(duration: 0.25)) {
+                                        isAddingAllergy = false
+                                        newAllergy = ""
+                                    }
                                     return
                                 }
 
                                 guard !allergies.contains(where: { $0.lowercased() == trimmed.lowercased() }) else {
-                                    isAddingAllergy = false
-                                    newAllergy = ""
+                                    withAnimation(.snappy(duration: 0.25)) {
+                                        isAddingAllergy = false
+                                        newAllergy = ""
+                                    }
                                     return
                                 }
 
-                                allergies.insert(trimmed, at: 0)
-                                state.selectedAllergies.insert(trimmed)
-                                isAddingAllergy = false
-                                newAllergy = ""
-                            } onCancel: {
-                                isAddingAllergy = false
+                                withAnimation(.snappy(duration: 0.3)) {
+                                    allergies.insert(trimmed, at: 0)
+                                    state.selectedAllergies.insert(trimmed)
+                                    isAddingAllergy = false
+                                    newAllergy = ""
+                                }
                             }
+                            .transition(.asymmetric(
+                                insertion: .scale.combined(with: .opacity),
+                                removal: .scale.combined(with: .opacity)
+                            ))
                         }
 
                         ForEach(allergies, id: \.self) { allergy in
@@ -65,7 +77,7 @@ struct AllergiesView: View {
                                 title: allergy.replacingOccurrences(of: "_", with: " ").capitalized,
                                 isSelected: state.selectedAllergies.contains(allergy)
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     if state.selectedAllergies.contains(allergy) {
                                         state.selectedAllergies.remove(allergy)
                                     } else {
@@ -73,11 +85,15 @@ struct AllergiesView: View {
                                     }
                                 }
                             }
+                            .transition(.asymmetric(
+                                insertion: .scale.combined(with: .opacity),
+                                removal: .scale(scale: 0.8).combined(with: .opacity)
+                            ))
                         }
 
                         // Add button
                         AddOptionButton {
-                            withAnimation {
+                            withAnimation(.snappy(duration: 0.3)) {
                                 isAddingAllergy = true
                                 isTextFieldFocused = true
                             }
@@ -93,6 +109,7 @@ struct AllergiesView: View {
             OnboardingBottomBar(
                 nextButtonText: "Complete Setup",
                 nextButtonIcon: "checkmark",
+                hideWhenFocused: isTextFieldFocused || isAddingAllergy,
                 onBack: { state.previousStep() },
                 onNext: {
                     Task {

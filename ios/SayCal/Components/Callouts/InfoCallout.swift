@@ -16,8 +16,7 @@ struct InfoCallout: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color(UIColor.systemGray6))

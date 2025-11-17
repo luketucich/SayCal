@@ -6,7 +6,7 @@ struct CustomInputField: View {
     @Binding var text: String
     @FocusState.Binding var isFocused: Bool
     let onSubmit: () -> Void
-    var onCancel: (() -> Void)? = nil
+
 
     var body: some View {
         TextField(placeholder, text: $text)
@@ -25,24 +25,6 @@ struct CustomInputField: View {
             )
             .focused($isFocused)
             .onSubmit(onSubmit)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Button("Cancel") {
-                        HapticManager.shared.light()
-                        isFocused = false
-                        text = ""
-                        onCancel?()
-                    }
-
-                    Spacer()
-
-                    Button("Add") {
-                        HapticManager.shared.medium()
-                        onSubmit()
-                    }
-                    .disabled(text.trimmingCharacters(in: .whitespaces).isEmpty)
-                }
-            }
     }
 }
 

@@ -25,13 +25,13 @@ struct PrimaryButton: View {
         } label: {
             if isLoading {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color(UIColor.systemBackground)))
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
             } else {
                 Text(title)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(isEnabled ? .white : Color(UIColor.systemGray3))
+                    .foregroundColor(isEnabled ? Color(UIColor.systemBackground) : Color(UIColor.systemGray3))
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
             }

@@ -122,7 +122,6 @@ class OnboardingState: ObservableObject {
 /// Main container view for the onboarding flow with Airbnb-style design
 struct OnboardingContainerView: View {
     @StateObject private var state = OnboardingState()
-    @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
 
     var body: some View {

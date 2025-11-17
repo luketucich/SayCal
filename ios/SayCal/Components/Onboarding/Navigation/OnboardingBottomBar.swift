@@ -6,6 +6,7 @@ struct OnboardingBottomBar: View {
     let nextButtonText: String
     let nextButtonIcon: String
     let isNextEnabled: Bool
+    let hideWhenFocused: Bool
     let onBack: () -> Void
     let onNext: () -> Void
 
@@ -14,6 +15,7 @@ struct OnboardingBottomBar: View {
         nextButtonText: String = "Next",
         nextButtonIcon: String = "arrow.right",
         isNextEnabled: Bool = true,
+        hideWhenFocused: Bool = false,
         onBack: @escaping () -> Void = {},
         onNext: @escaping () -> Void
     ) {
@@ -21,53 +23,56 @@ struct OnboardingBottomBar: View {
         self.nextButtonText = nextButtonText
         self.nextButtonIcon = nextButtonIcon
         self.isNextEnabled = isNextEnabled
+        self.hideWhenFocused = hideWhenFocused
         self.onBack = onBack
         self.onNext = onNext
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-                .overlay(Color(UIColor.systemGray5))
+        if !hideWhenFocused {
+            VStack(spacing: 0) {
+                Divider()
+                    .overlay(Color(UIColor.systemGray5))
 
-            HStack {
-                if showBackButton {
+                HStack {
+                    if showBackButton {
+                        Button {
+                            HapticManager.shared.light()
+                            onBack()
+                        } label: {
+                            Text("Back")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(Color(UIColor.label))
+                                .underline()
+                        }
+                    }
+
+                    Spacer()
+
                     Button {
-                        HapticManager.shared.light()
-                        onBack()
+                        HapticManager.shared.medium()
+                        onNext()
                     } label: {
-                        Text("Back")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(Color(UIColor.label))
-                            .underline()
+                        HStack(spacing: 4) {
+                            Text(nextButtonText)
+                                .font(.system(size: 16, weight: .semibold))
+                            Image(systemName: nextButtonIcon)
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .foregroundColor(isNextEnabled ? Color(UIColor.systemBackground) : Color(UIColor.secondaryLabel))
+                        .padding(.horizontal, 24)
+                        .frame(height: 48)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(isNextEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4))
+                        )
                     }
+                    .disabled(!isNextEnabled)
                 }
-
-                Spacer()
-
-                Button {
-                    HapticManager.shared.medium()
-                    onNext()
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(nextButtonText)
-                            .font(.system(size: 16, weight: .semibold))
-                        Image(systemName: nextButtonIcon)
-                            .font(.system(size: 14, weight: .semibold))
-                    }
-                    .foregroundColor(isNextEnabled ? Color(UIColor.systemBackground) : Color(UIColor.secondaryLabel))
-                    .padding(.horizontal, 24)
-                    .frame(height: 48)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(isNextEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4))
-                    )
-                }
-                .disabled(!isNextEnabled)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(Color(UIColor.systemBackground))
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(Color(UIColor.systemBackground))
         }
     }
 }

@@ -54,7 +54,7 @@ struct EmailInputView: View {
 
 #Preview {
     EmailInputView(
-        email: .constant(""),
+        email: .constant("luketucich@gmail.com"),
         isLoading: .constant(false),
         errorMessage: .constant(nil),
         onContinue: {}
