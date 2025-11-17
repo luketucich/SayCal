@@ -26,6 +26,7 @@ struct TogglePill: View {
 
     var body: some View {
         Button {
+            HapticManager.light()
             action()
         } label: {
             Group {
