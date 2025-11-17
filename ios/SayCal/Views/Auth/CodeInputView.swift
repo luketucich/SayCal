@@ -12,24 +12,18 @@ struct CodeInputView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Enter verification code")
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                Text("We sent a 6-digit code to \(email)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            OnboardingHeader(
+                title: "Enter verification code",
+                subtitle: "We sent a 6-digit code to \(email)"
+            )
 
             VStack(spacing: 16) {
                 // Code input boxes
                 HStack(spacing: 12) {
                     ForEach(0..<6, id: \.self) { index in
                         ZStack {
-                            RoundedRectangle(cornerRadius: 32)
-                                .stroke(code.count == index ? Color.accentColor : Color.primary.opacity(0.3), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(code.count == index ? Color(UIColor.label) : Color.primary.opacity(0.3), lineWidth: 1)
                                 .frame(width: 48, height: 56)
 
                             if index < code.count {
@@ -76,39 +70,21 @@ struct CodeInputView: View {
                         .font(.caption)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                
-                Button {
-                    HapticManager.shared.medium()
+
+                PrimaryButton(
+                    title: "Verify Code",
+                    isEnabled: code.count == 6,
+                    isLoading: isLoading
+                ) {
                     Task {
                         await onVerify()
                     }
-                } label: {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                    } else {
-                        Text("Verify Code")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                    }
                 }
-                .background(code.count != 6 ? Color.gray : Color.accentColor)
-                .cornerRadius(32)
-                .disabled(code.count != 6 || isLoading)
 
-                Button {
-                    HapticManager.shared.light()
+                TextButton(title: "Resend code") {
                     Task {
                         await onResend()
                     }
-                } label: {
-                    Text("Resend code")
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundColor(.accentColor)
                 }
                 .disabled(isLoading)
                 .padding(.top, 8)

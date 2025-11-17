@@ -9,16 +9,10 @@ struct EmailInputView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Enter your email")
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                Text("We'll send you a verification code")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            OnboardingHeader(
+                title: "Enter your email",
+                subtitle: "We'll send you a verification code"
+            )
 
             VStack(spacing: 16) {
                 TextField("Email address", text: $email)
@@ -28,9 +22,9 @@ struct EmailInputView: View {
                     .autocorrectionDisabled()
                     .font(.system(size: 17))
                     .padding()
-                    .frame(height: 56)
+                    .frame(height: 52)
                     .background(
-                        RoundedRectangle(cornerRadius: 32)
+                        RoundedRectangle(cornerRadius: 8)
                             .stroke(Color.primary.opacity(0.3), lineWidth: 1)
                     )
 
@@ -41,28 +35,15 @@ struct EmailInputView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                Button {
-                    HapticManager.shared.medium()
+                PrimaryButton(
+                    title: "Continue",
+                    isEnabled: !email.isEmpty,
+                    isLoading: isLoading
+                ) {
                     Task {
                         await onContinue()
                     }
-                } label: {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                    } else {
-                        Text("Continue")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                    }
                 }
-                .background(email.isEmpty ? Color.gray : Color.accentColor)
-                .cornerRadius(32)
-                .disabled(email.isEmpty || isLoading)
             }
 
             Spacer()
