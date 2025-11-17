@@ -43,6 +43,7 @@ struct EmailAuthView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
+                        HapticManager.shared.light()
                         dismiss()
                     }
                 }
@@ -50,6 +51,7 @@ struct EmailAuthView: View {
                 if showCodeInput {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Back") {
+                            HapticManager.shared.light()
                             withAnimation {
                                 showCodeInput = false
                                 code = ""

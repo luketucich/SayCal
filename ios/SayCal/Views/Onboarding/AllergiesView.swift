@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Step 6: Collects user's food allergies (optional)
-/// Final step - triggers profile creation when "Complete Setup" is pressed
+// Final onboarding step: Track food allergies
+// Pressing "Complete Setup" creates the user profile
 struct AllergiesView: View {
     @ObservedObject var state: OnboardingState
     @EnvironmentObject var auth: AuthManager
@@ -19,6 +19,11 @@ struct AllergiesView: View {
                         title: "Food allergies",
                         subtitle: "Select any allergies you have (optional)"
                     )
+
+                    // Skip option
+                    if state.selectedAllergies.isEmpty {
+                        InfoCallout(message: "You can skip this step and update allergies later")
+                    }
 
                     // Allergy grid with pills
                     LazyVGrid(columns: [
@@ -75,11 +80,6 @@ struct AllergiesView: View {
                                 isTextFieldFocused = true
                             }
                         }
-                    }
-
-                    // Skip option
-                    if state.selectedAllergies.isEmpty {
-                        InfoCallout(message: "You can skip this step and update allergies later")
                     }
 
                     Spacer(minLength: 100)

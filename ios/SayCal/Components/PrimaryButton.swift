@@ -20,6 +20,7 @@ struct PrimaryButton: View {
 
     var body: some View {
         Button {
+            HapticManager.shared.medium()
             action()
         } label: {
             if isLoading {
@@ -54,6 +55,7 @@ struct SecondaryButton: View {
 
     var body: some View {
         Button {
+            HapticManager.shared.medium()
             action()
         } label: {
             Text(title)
@@ -76,6 +78,7 @@ struct TextButton: View {
 
     var body: some View {
         Button {
+            HapticManager.shared.light()
             action()
         } label: {
             Text(title)

@@ -78,6 +78,7 @@ struct CodeInputView: View {
                 }
                 
                 Button {
+                    HapticManager.shared.medium()
                     Task {
                         await onVerify()
                     }
@@ -100,6 +101,7 @@ struct CodeInputView: View {
                 .disabled(code.count != 6 || isLoading)
 
                 Button {
+                    HapticManager.shared.light()
                     Task {
                         await onResend()
                     }

@@ -1,5 +1,6 @@
 import SwiftUI
 
+// Selectable card with optional subtitle (for goals, activity level, etc.)
 struct SelectableCard: View {
     let title: String
     let subtitle: String?
@@ -20,6 +21,7 @@ struct SelectableCard: View {
 
     var body: some View {
         Button {
+            HapticManager.shared.light()
             action()
         } label: {
             VStack(alignment: .leading, spacing: 4) {
@@ -57,6 +59,7 @@ struct SelectablePill: View {
 
     var body: some View {
         Button {
+            HapticManager.shared.light()
             action()
         } label: {
             Text(title)
@@ -86,6 +89,7 @@ struct TabSelector: View {
         HStack(spacing: 0) {
             ForEach(options, id: \.self) { option in
                 Button {
+                    HapticManager.shared.selection()
                     selectedOption = option
                 } label: {
                     Text(option)

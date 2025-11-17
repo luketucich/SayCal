@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Picker sheet for selecting height in feet and inches
+// Two-column picker for imperial height (feet + inches)
 struct FeetInchesPickerSheet: View {
     let title: String
     @Binding var feet: Int
@@ -32,6 +32,7 @@ struct FeetInchesPickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
+                        HapticManager.shared.medium()
                         isPresented = false
                     }
                     .font(.system(size: 16, weight: .semibold))

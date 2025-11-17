@@ -9,6 +9,7 @@ struct GoogleAuthButton: View {
         VStack {
             // Google Sign In Button
             Button {
+                HapticManager.shared.medium()
                 Task {
                     do {
                         try await googleSignIn()
