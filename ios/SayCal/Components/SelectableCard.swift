@@ -24,24 +24,24 @@ struct SelectableCard: View {
         } label: {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.black)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 13))
+                        .foregroundColor(Color(UIColor.secondaryLabel))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.accentColor : Color.primary.opacity(0.3), lineWidth: isSelected ? 2 : 1)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
                     )
             )
         }
@@ -49,8 +49,74 @@ struct SelectableCard: View {
     }
 }
 
+// Compact pill-style selectable card (like the date/duration selector)
+struct SelectablePill: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button {
+            action()
+        } label: {
+            Text(title)
+                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
+                .foregroundColor(.black)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule()
+                        .fill(Color.white)
+                        .overlay(
+                            Capsule()
+                                .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                        )
+                )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// Tab selector style (like Stays/Experiences)
+struct TabSelector: View {
+    let options: [String]
+    @Binding var selectedOption: String
+    
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(options, id: \.self) { option in
+                Button {
+                    selectedOption = option
+                } label: {
+                    Text(option)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(
+                            VStack(spacing: 0) {
+                                Spacer()
+                                if selectedOption == option {
+                                    Rectangle()
+                                        .fill(Color.black)
+                                        .frame(height: 2)
+                                } else {
+                                    Rectangle()
+                                        .fill(Color.clear)
+                                        .frame(height: 2)
+                                }
+                            }
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
 #Preview {
-    VStack(spacing: 12) {
+    VStack(spacing: 16) {
         SelectableCard(
             title: "Lose Weight",
             subtitle: "500 calorie deficit",
@@ -62,6 +128,18 @@ struct SelectableCard: View {
             subtitle: "No calorie adjustment",
             isSelected: false
         ) {}
+        
+        HStack(spacing: 8) {
+            SelectablePill(title: "Weekend", isSelected: false) {}
+            SelectablePill(title: "Week", isSelected: true) {}
+            SelectablePill(title: "Month", isSelected: false) {}
+        }
+        
+        TabSelector(
+            options: ["Metric", "Imperial"],
+            selectedOption: .constant("Metric")
+        )
     }
     .padding()
+    .background(Color(UIColor.systemGray6))
 }

@@ -1,54 +1,134 @@
 import SwiftUI
 
-/// Step 1: Allows user to choose between metric and imperial units
-/// This preference affects how height and weight are displayed throughout the app
+/// Step 1: Units preference selection
 struct UnitsPreferenceView: View {
     @ObservedObject var state: OnboardingState
 
     var body: some View {
-        VStack(spacing: 24) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Choose your units")
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                Text("Select your preferred measurement system")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            VStack(spacing: 12) {
-                SelectableCard(
-                    title: "Metric",
-                    subtitle: "Kilograms (kg), Centimeters (cm)",
-                    isSelected: state.unitsPreference == .metric
-                ) {
-                    state.unitsPreference = .metric
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 32) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Choose your units")
+                            .font(.system(size: 26, weight: .semibold))
+                            .foregroundColor(.black)
+                        
+                        Text("Select your preferred measurement system")
+                            .font(.system(size: 15))
+                            .foregroundColor(Color(UIColor.secondaryLabel))
+                    }
+                    .padding(.top, 24)
+                    
+                    // Selection cards
+                    VStack(spacing: 12) {
+                        UnitCard(
+                            title: "Metric",
+                            subtitle: "Kilograms • Centimeters",
+                            isSelected: state.unitsPreference == .metric
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                state.unitsPreference = .metric
+                            }
+                        }
+                        
+                        UnitCard(
+                            title: "Imperial",
+                            subtitle: "Pounds • Feet & Inches",
+                            isSelected: state.unitsPreference == .imperial
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                state.unitsPreference = .imperial
+                            }
+                        }
+                    }
+                    
+                    Spacer(minLength: 100)
                 }
-
-                SelectableCard(
-                    title: "Imperial",
-                    subtitle: "Pounds (lbs), Feet/Inches (ft/in)",
-                    isSelected: state.unitsPreference == .imperial
-                ) {
-                    state.unitsPreference = .imperial
-                }
+                .padding(.horizontal, 20)
             }
-
-            Spacer()
-
-            PrimaryButton(
-                title: "Continue",
-                isEnabled: state.canProceed
-            ) {
-                state.nextStep()
+            
+            // Bottom button area
+            VStack(spacing: 0) {
+                Divider()
+                    .overlay(Color(UIColor.systemGray5))
+                
+                HStack {
+                    Spacer()
+                    
+                    Button {
+                        state.nextStep()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Next")
+                                .font(.system(size: 16, weight: .semibold))
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .frame(height: 48)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.black)
+                        )
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(Color.white)
             }
         }
-        .padding(24)
+        .background(Color(UIColor.systemBackground))
+    }
+}
+
+// Custom unit selection card
+struct UnitCard: View {
+    let title: String
+    let subtitle: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button {
+            action()
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(.black)
+                    
+                    Text(subtitle)
+                        .font(.system(size: 14))
+                        .foregroundColor(Color(UIColor.secondaryLabel))
+                }
+                
+                Spacer()
+                
+                Circle()
+                    .stroke(isSelected ? Color.black : Color(UIColor.systemGray4), lineWidth: isSelected ? 2 : 1.5)
+                    .frame(width: 20, height: 20)
+                    .overlay(
+                        Circle()
+                            .fill(Color.black)
+                            .frame(width: 8, height: 8)
+                            .opacity(isSelected ? 1 : 0)
+                    )
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
 #Preview {
-    UnitsPreferenceView(state: OnboardingState())
+    NavigationStack {
+        UnitsPreferenceView(state: OnboardingState())
+    }
 }

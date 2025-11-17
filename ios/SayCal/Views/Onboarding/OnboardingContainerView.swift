@@ -2,7 +2,6 @@ import SwiftUI
 import Combine
 
 /// Manages the state for the entire onboarding flow
-/// Tracks user inputs across all onboarding steps
 class OnboardingState: ObservableObject {
     // Current step in the onboarding flow
     @Published var currentStep: Int = 0
@@ -30,7 +29,6 @@ class OnboardingState: ObservableObject {
     let totalSteps = 6
 
     /// Validates whether the user can proceed from the current step
-    /// Each step has different validation requirements
     var canProceed: Bool {
         switch currentStep {
         case 0: // Units preference - always can proceed
@@ -57,19 +55,22 @@ class OnboardingState: ObservableObject {
     /// Advances to the next onboarding step
     func nextStep() {
         if currentStep < totalSteps - 1 {
-            currentStep += 1
+            withAnimation(.easeInOut(duration: 0.3)) {
+                currentStep += 1
+            }
         }
     }
 
     /// Returns to the previous onboarding step
     func previousStep() {
         if currentStep > 0 {
-            currentStep -= 1
+            withAnimation(.easeInOut(duration: 0.3)) {
+                currentStep -= 1
+            }
         }
     }
 
     /// Calculates target calories based on current user stats and selected goal
-    /// Uses the Mifflin-St Jeor equation for BMR calculation
     var targetCalories: Int {
         // Convert weight to kg if needed
         let weightKg: Double
@@ -107,51 +108,60 @@ class OnboardingState: ObservableObject {
     }
 }
 
-/// Main container view for the onboarding flow
-/// Displays a progress indicator and renders the appropriate step view
+/// Main container view for the onboarding flow with Airbnb-style design
 struct OnboardingContainerView: View {
     @StateObject private var state = OnboardingState()
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        ZStack {
-            // Gradient background
-            LinearGradient(
-                colors: colorScheme == .dark ? [
-                    Color(red: 0.15, green: 0.1, blue: 0.3),
-                    Color(red: 0.25, green: 0.15, blue: 0.35),
-                    Color(red: 0.1, green: 0.2, blue: 0.3)
-                ] : [
-                    Color(red: 0.9, green: 0.7, blue: 0.95),
-                    Color(red: 0.7, green: 0.85, blue: 1.0),
-                    Color(red: 0.95, green: 0.8, blue: 0.7)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
+        NavigationStack {
             VStack(spacing: 0) {
-                // Progress indicator
-                HStack(spacing: 8) {
-                    ForEach(0..<state.totalSteps, id: \.self) { index in
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(index <= state.currentStep ? Color.accentColor : Color.primary.opacity(0.3))
-                            .frame(height: 4)
+                // Clean progress indicator
+                ProgressBar(currentStep: state.currentStep, totalSteps: state.totalSteps)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                
+                Divider()
+                    .overlay(Color(UIColor.systemGray5))
+                
+                // Content area
+                currentStepView
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
+            }
+            .background(Color.white)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if state.currentStep > 0 {
+                        Button {
+                            state.previousStep()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.black)
+                        }
                     }
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-                .padding(.bottom, 8)
-
-                // Content area with sheet background
-                VStack(spacing: 0) {
-                    currentStepView
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.black)
+                            .padding(8)
+                            .background(
+                                Circle()
+                                    .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+                            )
+                    }
                 }
-                .background(Color(.systemBackground))
-                .cornerRadius(32)
-                .padding(.top, 8)
-            }.ignoresSafeArea(edges: .bottom)
+            }
         }
     }
 
@@ -173,6 +183,33 @@ struct OnboardingContainerView: View {
         default:
             EmptyView()
         }
+    }
+}
+
+// Clean progress bar component
+struct ProgressBar: View {
+    let currentStep: Int
+    let totalSteps: Int
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Background track
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color(UIColor.systemGray5))
+                    .frame(height: 2)
+                
+                // Progress fill
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.black)
+                    .frame(
+                        width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps),
+                        height: 2
+                    )
+                    .animation(.easeInOut(duration: 0.3), value: currentStep)
+            }
+        }
+        .frame(height: 2)
     }
 }
 
