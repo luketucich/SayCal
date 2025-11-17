@@ -205,7 +205,7 @@ struct PhysicalStatsView: View {
                         get: { Int(state.weightLbs) },
                         set: { state.weightLbs = Double($0) }
                     ),
-                    range: 44...440,
+                    range: 40...600,
                     suffix: " lbs",
                     isPresented: $showWeightPicker
                 )

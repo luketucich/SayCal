@@ -49,13 +49,12 @@ struct EmailInputView: View {
             Spacer()
         }
         .padding(24)
-        .background(Color(UIColor.systemBackground))
     }
 }
 
 #Preview {
     EmailInputView(
-        email: .constant("luketucich@gmail.com"),
+        email: .constant(""),
         isLoading: .constant(false),
         errorMessage: .constant(nil),
         onContinue: {}

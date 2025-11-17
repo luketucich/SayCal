@@ -19,17 +19,6 @@ struct GoogleAuthButton: View {
                 }
             } label: {
                 HStack(spacing: 8) {
-                    // Option 1: Use official Google logo from Assets
-                    // Uncomment this if you add google-logo to Assets.xcassets:
-                    // Image("google-logo")
-                    //     .resizable()
-                    //     .frame(width: 20, height: 20)
-                    
-                    // Option 2: Using SF Symbol as fallback
-                    // Image(systemName: "g.circle.fill")
-                    //     .font(.system(size: 20))
-                    
-                    // Option 3: Simple text "G" (current)
                     Text("G")
                         .font(.system(size: 20, weight: .semibold))
                     
@@ -40,7 +29,7 @@ struct GoogleAuthButton: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(
-                    RoundedRectangle(cornerRadius: 32)
+                    RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.primary.opacity(0.3), lineWidth: 1)
                 )
             }

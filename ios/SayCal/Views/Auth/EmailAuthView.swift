@@ -2,6 +2,7 @@ import SwiftUI
 import Supabase
 
 struct EmailAuthView: View {
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var authManager: AuthManager
 
@@ -15,9 +16,9 @@ struct EmailAuthView: View {
         NavigationStack {
             ZStack {
                 // Plain background - white for light mode, black for dark mode
-                Color(.systemBackground)
+                (colorScheme == .dark ? Color.black : Color.white)
                     .ignoresSafeArea()
-
+                
                 if showCodeInput {
                     CodeInputView(
                         code: $code,
@@ -38,7 +39,6 @@ struct EmailAuthView: View {
                     .transition(.move(edge: .leading))
                 }
             }
-            .navigationTitle("Email Sign In")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -47,7 +47,7 @@ struct EmailAuthView: View {
                         dismiss()
                     }
                 }
-
+                
                 if showCodeInput {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Back") {
