@@ -13,8 +13,8 @@ struct UserProfile: Codable {
     let allergies: [String]?
     let goal: Goal
     let targetCalories: Int
-    let createdAt: Date
-    let updatedAt: Date
+    let createdAt: Date?
+    let updatedAt: Date?
     let onboardingCompleted: Bool
 
     enum CodingKeys: String, CodingKey {
