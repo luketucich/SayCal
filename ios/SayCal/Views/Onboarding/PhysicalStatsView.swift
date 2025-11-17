@@ -11,7 +11,7 @@ struct PhysicalStatsView: View {
                         .font(.title2)
                         .fontWeight(.bold)
 
-                    Text("Help us personalize your experience")
+                    Text("This will be used to calculate your caloric needs")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }

@@ -80,15 +80,15 @@ enum ActivityLevel: String, Codable, CaseIterable {
 enum Goal: String, Codable, CaseIterable {
     case loseWeight = "lose_weight"
     case maintainWeight = "maintain_weight"
-    case gainWeight = "gain_weight"
     case buildMuscle = "build_muscle"
+    case gainWeight = "gain_weight"
     
     var displayName: String {
         switch self {
         case .loseWeight: return "Lose Weight"
         case .maintainWeight: return "Maintain Weight"
-        case .gainWeight: return "Gain Weight"
         case .buildMuscle: return "Build Muscle"
+        case .gainWeight: return "Gain Weight"
         }
     }
     

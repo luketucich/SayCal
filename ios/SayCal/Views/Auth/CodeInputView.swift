@@ -76,7 +76,7 @@ struct CodeInputView: View {
                         .font(.caption)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-
+                
                 Button {
                     Task {
                         await onVerify()
