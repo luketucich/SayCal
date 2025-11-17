@@ -129,11 +129,21 @@ struct PhysicalStatsView: View {
                     }
                 }
 
-                PrimaryButton(
-                    title: "Continue",
-                    isEnabled: state.canProceed
-                ) {
-                    state.nextStep()
+                VStack(spacing: 12) {
+                    PrimaryButton(
+                        title: "Continue",
+                        isEnabled: state.canProceed
+                    ) {
+                        state.nextStep()
+                    }
+
+                    Button {
+                        state.previousStep()
+                    } label: {
+                        Text("Back")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.accentColor)
+                    }
                 }
             }
             .padding(24)
