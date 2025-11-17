@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Step 2: Physical stats collection
+// Onboarding step 2: Collect basic physical stats (sex, age, height, weight)
 struct PhysicalStatsView: View {
     @ObservedObject var state: OnboardingState
     @State private var showAgePicker = false
@@ -53,8 +53,9 @@ struct PhysicalStatsView: View {
                             Text("Age")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(Color(UIColor.secondaryLabel))
-                            
+
                             Button {
+                                HapticManager.shared.light()
                                 showAgePicker.toggle()
                             } label: {
                                 HStack {
@@ -82,8 +83,9 @@ struct PhysicalStatsView: View {
                             Text("Height")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(Color(UIColor.secondaryLabel))
-                            
+
                             Button {
+                                HapticManager.shared.light()
                                 showHeightPicker.toggle()
                             } label: {
                                 HStack {
@@ -117,8 +119,9 @@ struct PhysicalStatsView: View {
                             Text("Weight")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(Color(UIColor.secondaryLabel))
-                            
+
                             Button {
+                                HapticManager.shared.light()
                                 showWeightPicker.toggle()
                             } label: {
                                 HStack {

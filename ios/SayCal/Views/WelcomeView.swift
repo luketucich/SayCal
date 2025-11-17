@@ -35,6 +35,7 @@ struct WelcomeView: View {
                     
                     // Email Sign In button
                     Button {
+                        HapticManager.shared.light()
                         showEmailAuth = true
                     } label: {
                         Text("Use email instead")

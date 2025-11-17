@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Unified pill component for toggleable options (dietary preferences, allergies, gender, etc.)
+// Toggleable pill button - works for preferences, allergies, gender, etc.
 struct TogglePill: View {
     let title: String
     let isSelected: Bool
@@ -8,8 +8,8 @@ struct TogglePill: View {
     let style: PillStyle
 
     enum PillStyle {
-        case capsule        // For dietary preferences and allergies
-        case rounded        // For gender selection
+        case capsule        // preferences and allergies
+        case rounded        // gender selection
     }
 
     init(
@@ -26,6 +26,7 @@ struct TogglePill: View {
 
     var body: some View {
         Button {
+            HapticManager.shared.light()
             action()
         } label: {
             Group {

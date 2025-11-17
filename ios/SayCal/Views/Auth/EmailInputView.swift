@@ -42,6 +42,7 @@ struct EmailInputView: View {
                 }
 
                 Button {
+                    HapticManager.shared.medium()
                     Task {
                         await onContinue()
                     }

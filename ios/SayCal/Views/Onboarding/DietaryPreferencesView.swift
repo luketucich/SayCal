@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Step 5: Dietary preferences
+// Onboarding step 5: Let users pick dietary preferences (vegan, keto, etc.)
 struct DietaryPreferencesView: View {
     @ObservedObject var state: OnboardingState
     @FocusState private var isTextFieldFocused: Bool
@@ -17,7 +17,12 @@ struct DietaryPreferencesView: View {
                         title: "Dietary preferences",
                         subtitle: "Select any that apply (optional)"
                     )
-                    
+
+                    // Skip option
+                    if state.selectedDietaryPreferences.isEmpty {
+                        InfoCallout(message: "You can skip this step and update preferences later")
+                    }
+
                     // Preference grid with pills
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
@@ -74,12 +79,7 @@ struct DietaryPreferencesView: View {
                             }
                         }
                     }
-                    
-                    // Skip option
-                    if state.selectedDietaryPreferences.isEmpty {
-                        InfoCallout(message: "You can skip this step and update preferences later")
-                    }
-                    
+
                     Spacer(minLength: 100)
                 }
                 .padding(.horizontal, 20)

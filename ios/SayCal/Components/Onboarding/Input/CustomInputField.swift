@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Styled text field for custom input in onboarding screens
+// Text field pill for adding custom preferences/allergies
 struct CustomInputField: View {
     let placeholder: String
     @Binding var text: String
@@ -13,6 +13,7 @@ struct CustomInputField: View {
             .foregroundColor(Color(UIColor.label))
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
+            .frame(maxWidth: 160)
             .background(
                 Capsule()
                     .fill(Color(UIColor.systemBackground))
