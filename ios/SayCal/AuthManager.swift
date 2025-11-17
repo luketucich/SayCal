@@ -115,10 +115,11 @@ class AuthManager: ObservableObject {
         // Calculate target calories using Mifflin-St Jeor equation
         let targetCalories = profileInput.calculateTargetCalories(sex: state.sex)
 
-        // Build database payload
-        let newProfile = NewUserProfile(
+        // Build database payload using UserProfile model
+        let newProfile = UserProfile(
             userId: userId,
             unitsPreference: state.unitsPreference,
+            sex: state.sex,
             age: profileInput.age,
             heightCm: profileInput.heightCm,
             weightKg: profileInput.weightKg,
@@ -127,6 +128,8 @@ class AuthManager: ObservableObject {
             allergies: profileInput.allergies,
             goal: profileInput.goal,
             targetCalories: targetCalories,
+            createdAt: nil,  // Set by database
+            updatedAt: nil,  // Set by database
             onboardingCompleted: true
         )
 
@@ -164,35 +167,5 @@ class AuthManager: ObservableObject {
     deinit {
         // Cancel auth state listener when AuthManager is deallocated
         authStateTask?.cancel()
-    }
-}
-
-// MARK: - Helper Structures
-/// Encodable payload for inserting new user profiles into the database
-private struct NewUserProfile: Encodable {
-    let userId: UUID
-    let unitsPreference: UnitsPreference
-    let age: Int
-    let heightCm: Int
-    let weightKg: Double
-    let activityLevel: ActivityLevel
-    let dietaryPreferences: [String]?
-    let allergies: [String]?
-    let goal: Goal
-    let targetCalories: Int
-    let onboardingCompleted: Bool
-
-    enum CodingKeys: String, CodingKey {
-        case userId = "user_id"
-        case unitsPreference = "units_preference"
-        case age
-        case heightCm = "height_cm"
-        case weightKg = "weight_kg"
-        case activityLevel = "activity_level"
-        case dietaryPreferences = "dietary_preferences"
-        case allergies
-        case goal
-        case targetCalories = "target_calories"
-        case onboardingCompleted = "onboarding_completed"
     }
 }

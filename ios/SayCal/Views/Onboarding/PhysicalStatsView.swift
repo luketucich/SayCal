@@ -43,23 +43,19 @@ struct PhysicalStatsView: View {
                         }
                     }
 
-                    // Age slider
+                    // Age picker
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text("Age")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text("\(state.age)")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.accentColor)
-                        }
+                        Text("Age")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.secondary)
 
-                        Slider(value: Binding(
-                            get: { Double(state.age) },
-                            set: { state.age = Int($0) }
-                        ), in: 13...120, step: 1)
-                        .tint(.accentColor)
+                        Picker("Age", selection: $state.age) {
+                            ForEach(13...120, id: \.self) { age in
+                                Text("\(age) years").tag(age)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(height: 120)
                     }
 
                     // Height input
@@ -98,32 +94,37 @@ struct PhysicalStatsView: View {
                         }
                     }
 
-                    // Weight slider
+                    // Weight picker
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text("Weight")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            if state.unitsPreference == .metric {
-                                Text(String(format: "%.1f kg", state.weightKg))
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(.accentColor)
-                            } else {
-                                Text(String(format: "%.1f lbs", state.weightLbs))
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(.accentColor)
-                            }
-                        }
+                        Text("Weight")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.secondary)
 
                         if state.unitsPreference == .metric {
-                            // Slider for weight in kg (20-500 kg)
-                            Slider(value: $state.weightKg, in: 20...500, step: 0.5)
-                                .tint(.accentColor)
+                            // Picker for weight in kg (20-200 kg in 0.5 increments)
+                            Picker("Weight (kg)", selection: Binding(
+                                get: { Int(state.weightKg * 2) }, // Convert to half-kg units
+                                set: { state.weightKg = Double($0) / 2.0 }
+                            )) {
+                                ForEach(40...400, id: \.self) { halfKg in
+                                    let kg = Double(halfKg) / 2.0
+                                    Text(String(format: "%.1f kg", kg)).tag(halfKg)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(height: 120)
                         } else {
-                            // Slider for weight in lbs (44-1100 lbs)
-                            Slider(value: $state.weightLbs, in: 44...1100, step: 1)
-                                .tint(.accentColor)
+                            // Picker for weight in lbs (44-440 lbs)
+                            Picker("Weight (lbs)", selection: Binding(
+                                get: { Int(state.weightLbs) },
+                                set: { state.weightLbs = Double($0) }
+                            )) {
+                                ForEach(44...440, id: \.self) { lbs in
+                                    Text("\(lbs) lbs").tag(lbs)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(height: 120)
                         }
                     }
                 }

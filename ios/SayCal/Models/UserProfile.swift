@@ -4,6 +4,7 @@ import Foundation
 struct UserProfile: Codable {
     let userId: UUID
     let unitsPreference: UnitsPreference
+    let sex: Sex
     let age: Int
     let heightCm: Int
     let weightKg: Double
@@ -12,13 +13,14 @@ struct UserProfile: Codable {
     let allergies: [String]?
     let goal: Goal
     let targetCalories: Int
-    let createdAt: Date
-    let updatedAt: Date
+    let createdAt: Date?
+    let updatedAt: Date?
     let onboardingCompleted: Bool
 
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case unitsPreference = "units_preference"
+        case sex
         case age
         case heightCm = "height_cm"
         case weightKg = "weight_kg"
@@ -186,7 +188,14 @@ struct UserProfileInput {
     }
 }
 
-enum Sex {
-    case male
-    case female
+enum Sex: String, Codable, CaseIterable {
+    case male = "male"
+    case female = "female"
+
+    var displayName: String {
+        switch self {
+        case .male: return "Male"
+        case .female: return "Female"
+        }
+    }
 }
