@@ -12,16 +12,10 @@ struct PhysicalStatsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
                     // Header
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Your physical stats")
-                            .font(.system(size: 26, weight: .semibold))
-                            .foregroundColor(Color(UIColor.label))
-
-                        Text("We'll use this to calculate your caloric needs")
-                            .font(.system(size: 15))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
-                    }
-                    .padding(.top, 24)
+                    OnboardingHeader(
+                        title: "Your physical stats",
+                        subtitle: "We'll use this to calculate your caloric needs"
+                    )
                     
                     // Stats input sections
                     VStack(spacing: 20) {
@@ -32,18 +26,20 @@ struct PhysicalStatsView: View {
                                 .foregroundColor(Color(UIColor.secondaryLabel))
                             
                             HStack(spacing: 12) {
-                                GenderPill(
+                                TogglePill(
                                     title: "Male",
-                                    isSelected: state.sex == .male
+                                    isSelected: state.sex == .male,
+                                    style: .rounded
                                 ) {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         state.sex = .male
                                     }
                                 }
-                                
-                                GenderPill(
+
+                                TogglePill(
                                     title: "Female",
-                                    isSelected: state.sex == .female
+                                    isSelected: state.sex == .female,
+                                    style: .rounded
                                 ) {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         state.sex = .female
@@ -158,45 +154,11 @@ struct PhysicalStatsView: View {
             }
             
             // Bottom button area
-            VStack(spacing: 0) {
-                Divider()
-                    .overlay(Color(UIColor.systemGray5))
-                
-                HStack {
-                    Button {
-                        state.previousStep()
-                    } label: {
-                        Text("Back")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(Color(UIColor.label))
-                            .underline()
-                    }
-                    
-                    Spacer()
-                    
-                    Button {
-                        state.nextStep()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Next")
-                                .font(.system(size: 16, weight: .semibold))
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 24)
-                        .frame(height: 48)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(state.canProceed ? Color(UIColor.label) : Color(UIColor.systemGray4))
-                        )
-                    }
-                    .disabled(!state.canProceed)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(Color(UIColor.systemBackground))
-            }
+            OnboardingBottomBar(
+                isNextEnabled: state.canProceed,
+                onBack: { state.previousStep() },
+                onNext: { state.nextStep() }
+            )
         }
         .background(Color(UIColor.systemBackground))
         .sheet(isPresented: $showAgePicker) {
@@ -246,149 +208,6 @@ struct PhysicalStatsView: View {
                 )
             }
         }
-    }
-}
-
-// Gender selection pill
-struct GenderPill: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button {
-            action()
-        } label: {
-            Text(title)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(isSelected ? .white : Color(UIColor.label))
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(
-                    RoundedRectangle(cornerRadius: 22)
-                        .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 22)
-                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: 1)
-                        )
-                )
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-// Clean picker sheet
-struct PickerSheet: View {
-    let title: String
-    @Binding var selection: Int
-    let range: ClosedRange<Int>
-    let suffix: String
-    @Binding var isPresented: Bool
-    
-    var body: some View {
-        NavigationStack {
-            VStack {
-                Picker("", selection: $selection) {
-                    ForEach(range, id: \.self) { value in
-                        Text("\(value)\(suffix)").tag(value)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(height: 200)
-                
-                Spacer()
-            }
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        isPresented = false
-                    }
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
-                }
-            }
-        }
-        .presentationDetents([.height(300)])
-    }
-}
-
-// Feet and inches picker sheet
-struct FeetInchesPickerSheet: View {
-    let title: String
-    @Binding var feet: Int
-    @Binding var inches: Int
-    @Binding var isPresented: Bool
-    
-    var body: some View {
-        NavigationStack {
-            HStack(spacing: 0) {
-                Picker("Feet", selection: $feet) {
-                    ForEach(4..<8, id: \.self) { ft in
-                        Text("\(ft) ft").tag(ft)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(maxWidth: .infinity)
-                
-                Picker("Inches", selection: $inches) {
-                    ForEach(0..<12, id: \.self) { inch in
-                        Text("\(inch) in").tag(inch)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(maxWidth: .infinity)
-            }
-            .frame(height: 200)
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        isPresented = false
-                    }
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color(UIColor.label))
-                }
-            }
-        }
-        .presentationDetents([.height(300)])
-    }
-}
-
-// Weight picker sheet for kg with decimals
-struct WeightPickerSheet: View {
-    let title: String
-    @Binding var weightKg: Double
-    @Binding var isPresented: Bool
-    
-    var body: some View {
-        NavigationStack {
-            Picker("", selection: Binding(
-                get: { Int(weightKg * 2) },
-                set: { weightKg = Double($0) / 2.0 }
-            )) {
-                ForEach(40...400, id: \.self) { halfKg in
-                    let kg = Double(halfKg) / 2.0
-                    Text(String(format: "%.1f kg", kg)).tag(halfKg)
-                }
-            }
-            .pickerStyle(.wheel)
-            .frame(height: 200)
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        isPresented = false
-                    }
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color(UIColor.label))
-                }
-            }
-        }
-        .presentationDetents([.height(300)])
     }
 }
 
