@@ -6,6 +6,9 @@ class OnboardingState: ObservableObject {
     // Current step in the onboarding flow
     @Published var currentStep: Int = 0
 
+    // Navigation direction (for animation purposes)
+    @Published var isNavigatingForward: Bool = true
+
     // User preferences
     @Published var unitsPreference: UnitsPreference = .metric
     @Published var sex: Sex = .male
@@ -55,6 +58,7 @@ class OnboardingState: ObservableObject {
     /// Advances to the next onboarding step
     func nextStep() {
         if currentStep < totalSteps - 1 {
+            isNavigatingForward = true
             withAnimation(.easeInOut(duration: 0.3)) {
                 currentStep += 1
             }
@@ -64,6 +68,7 @@ class OnboardingState: ObservableObject {
     /// Returns to the previous onboarding step
     func previousStep() {
         if currentStep > 0 {
+            isNavigatingForward = false
             withAnimation(.easeInOut(duration: 0.3)) {
                 currentStep -= 1
             }
@@ -125,12 +130,15 @@ struct OnboardingContainerView: View {
                 Divider()
                     .overlay(Color(UIColor.systemGray5))
                 
-                // Content area
+                // Content area with directional transitions
+                // Next (forward): slide right-to-left
+                // Back (backward): slide left-to-right
                 currentStepView
                     .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .leading)
+                        insertion: .move(edge: state.isNavigatingForward ? .trailing : .leading),
+                        removal: .move(edge: state.isNavigatingForward ? .leading : .trailing)
                     ))
+                    .id(state.currentStep)
             }
             .background(Color(UIColor.systemBackground))
             .navigationBarTitleDisplayMode(.inline)

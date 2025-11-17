@@ -9,16 +9,11 @@ struct EmailInputView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Enter your email")
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                Text("We'll send you a verification code")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            SectionHeader(
+                title: "Enter your email",
+                subtitle: "We'll send you a verification code"
+            )
+            .padding(.horizontal, 24)
 
             VStack(spacing: 16) {
                 TextField("Email address", text: $email)
@@ -26,47 +21,37 @@ struct EmailInputView: View {
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
-                    .font(.system(size: 17))
+                    .font(.system(size: 16))
                     .padding()
                     .frame(height: 56)
                     .background(
-                        RoundedRectangle(cornerRadius: 32)
-                            .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color(UIColor.separator), lineWidth: 1)
                     )
 
                 if let errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
-                        .font(.caption)
+                        .font(.system(size: 13))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                Button {
+                PrimaryButton(
+                    title: "Continue",
+                    isEnabled: !email.isEmpty,
+                    isLoading: isLoading
+                ) {
                     Task {
                         await onContinue()
                     }
-                } label: {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                    } else {
-                        Text("Continue")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                    }
                 }
-                .background(email.isEmpty ? Color.gray : Color.accentColor)
-                .cornerRadius(32)
-                .disabled(email.isEmpty || isLoading)
+                .padding(.top, 8)
             }
+            .padding(.horizontal, 24)
 
             Spacer()
         }
-        .padding(24)
+        .padding(.top, 8)
     }
 }
 
