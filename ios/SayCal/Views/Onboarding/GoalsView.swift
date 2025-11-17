@@ -19,6 +19,38 @@ struct GoalsView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
+                // Target Calories Display
+                VStack(spacing: 12) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Your Target Calories")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+
+                            Text("\(state.targetCalories)")
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundColor(.accentColor)
+
+                            Text("calories per day")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.accentColor.opacity(0.1))
+                    )
+
+                    Text("You can edit your target calories anytime in your profile")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                }
+
                 VStack(spacing: 12) {
                     ForEach(Goal.allCases, id: \.self) { goal in
                         SelectableCard(
