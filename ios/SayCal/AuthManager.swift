@@ -15,6 +15,35 @@ class AuthManager: ObservableObject {
     // MARK: - Private Properties
     private let client = SupabaseManager.client
     private var authStateTask: Task<Void, Never>?
+    
+    // Create a date decoder for Supabase date format
+    private lazy var dateDecoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+            
+            // Try ISO 8601 format first (most common from Supabase)
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+            
+            // Fallback to basic ISO 8601 without fractional seconds
+            formatter.formatOptions = [.withInternetDateTime]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+            
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Cannot decode date string \(dateString)"
+            )
+        }
+        return decoder
+    }()
 
     // MARK: - Initialization
     init() {
@@ -40,6 +69,7 @@ class AuthManager: ObservableObject {
                     print("User not authenticated")
                     // Clear onboarding status when user logs out
                     self.onboardingCompleted = false
+                    UserDefaults.standard.set(false, forKey: "onboardingCompleted")
                 }
 
                 self.isLoading = false
@@ -48,34 +78,69 @@ class AuthManager: ObservableObject {
     }
     
     // MARK: - Onboarding Status Management
-    /// Loads onboarding status from the database
+    /// Loads onboarding status from the database (simplified version)
     /// Called automatically when user logs in to sync with database state
     private func loadOnboardingStatus() async {
         guard let userId = currentUser?.id else { return }
 
         do {
+            // Method 1: Just check if a profile exists and get onboarding status
+            // This avoids date decoding issues entirely
+            let response = try await client
+                .from("user_profiles")
+                .select("onboarding_completed")
+                .eq("user_id", value: userId)
+                .single()
+                .execute()
+
+            // Create a simple struct just for checking onboarding status
+            struct OnboardingCheck: Codable {
+                let onboardingCompleted: Bool
+                
+                enum CodingKeys: String, CodingKey {
+                    case onboardingCompleted = "onboarding_completed"
+                }
+            }
+            
+            // Decode just the onboarding status
+            let status = try JSONDecoder().decode(OnboardingCheck.self, from: response.data)
+            
+            // Update local state
+            self.onboardingCompleted = status.onboardingCompleted
+            UserDefaults.standard.set(status.onboardingCompleted, forKey: "onboardingCompleted")
+            
+            print("✅ Onboarding status loaded: \(status.onboardingCompleted)")
+            
+        } catch {
+            print("❌ Failed to load onboarding status: \(error)")
+            
+            // If there's no profile, user needs onboarding
+            self.onboardingCompleted = false
+            UserDefaults.standard.set(false, forKey: "onboardingCompleted")
+        }
+    }
+    
+    /// Loads the full user profile from database (optional - for future use)
+    /// This version properly handles date decoding
+    func loadFullProfile() async -> UserProfile? {
+        guard let userId = currentUser?.id else { return nil }
+        
+        do {
             let response = try await client
                 .from("user_profiles")
                 .select()
                 .eq("user_id", value: userId)
+                .single()
                 .execute()
-
-            // Decode the user profile from database
-            let profiles = try JSONDecoder().decode([UserProfile].self, from: response.data)
-
-            if let profile = profiles.first {
-                // Profile exists - sync onboarding status from database
-                self.onboardingCompleted = profile.onboardingCompleted
-                UserDefaults.standard.set(profile.onboardingCompleted, forKey: "onboardingCompleted")
-            } else {
-                // No profile exists - user needs to complete onboarding
-                self.onboardingCompleted = false
-                UserDefaults.standard.set(false, forKey: "onboardingCompleted")
-            }
+            
+            // Use the custom date decoder for the full profile
+            let profile = try dateDecoder.decode(UserProfile.self, from: response.data)
+            print("✅ Full profile loaded successfully")
+            return profile
+            
         } catch {
-            print("Failed to load onboarding status: \(error)")
-            // Fall back to cached value if database query fails
-            self.onboardingCompleted = UserDefaults.standard.bool(forKey: "onboardingCompleted")
+            print("❌ Failed to load full profile: \(error)")
+            return nil
         }
     }
     
@@ -144,9 +209,9 @@ class AuthManager: ObservableObject {
             self.onboardingCompleted = true
             UserDefaults.standard.set(true, forKey: "onboardingCompleted")
 
-            print("Profile created successfully!")
+            print("✅ Profile created successfully!")
         } catch {
-            print("Failed to create profile: \(error)")
+            print("❌ Failed to create profile: \(error)")
         }
     }
     
@@ -158,9 +223,9 @@ class AuthManager: ObservableObject {
             // Clear onboarding status and cache
             onboardingCompleted = false
             UserDefaults.standard.set(false, forKey: "onboardingCompleted")
-            print("Sign out successful")
+            print("✅ Sign out successful")
         } catch {
-            print("Sign out failed: \(error.localizedDescription)")
+            print("❌ Sign out failed: \(error.localizedDescription)")
         }
     }
 
