@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Step 6: Collects user's food allergies (optional)
+/// Final step - triggers profile creation when "Complete Setup" is pressed
 struct AllergiesView: View {
     @ObservedObject var state: OnboardingState
     @EnvironmentObject var auth: AuthManager
@@ -39,6 +41,7 @@ struct AllergiesView: View {
                 Spacer()
 
                 VStack(spacing: 12) {
+                    // Complete onboarding and create user profile in database
                     PrimaryButton(
                         title: "Complete Setup",
                         isEnabled: state.canProceed

@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Step 2: Collects user's physical stats (sex, age, height, weight)
+/// Uses sliders for age and weight for better UX
 struct PhysicalStatsView: View {
     @ObservedObject var state: OnboardingState
 
@@ -41,21 +43,23 @@ struct PhysicalStatsView: View {
                         }
                     }
 
-                    // Age input
+                    // Age slider
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Age")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.secondary)
+                        HStack {
+                            Text("Age")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(state.age)")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.accentColor)
+                        }
 
-                        TextField("Enter your age", text: $state.age)
-                            .keyboardType(.numberPad)
-                            .font(.system(size: 17))
-                            .padding()
-                            .frame(height: 56)
-                            .background(
-                                RoundedRectangle(cornerRadius: 32)
-                                    .stroke(Color.primary.opacity(0.3), lineWidth: 1)
-                            )
+                        Slider(value: Binding(
+                            get: { Double(state.age) },
+                            set: { state.age = Int($0) }
+                        ), in: 13...120, step: 1)
+                        .tint(.accentColor)
                     }
 
                     // Height input
@@ -94,32 +98,32 @@ struct PhysicalStatsView: View {
                         }
                     }
 
-                    // Weight input
+                    // Weight slider
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Weight")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.secondary)
+                        HStack {
+                            Text("Weight")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            if state.unitsPreference == .metric {
+                                Text(String(format: "%.1f kg", state.weightKg))
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundColor(.accentColor)
+                            } else {
+                                Text(String(format: "%.1f lbs", state.weightLbs))
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
 
                         if state.unitsPreference == .metric {
-                            TextField("Enter weight in kg", text: $state.weightKg)
-                                .keyboardType(.decimalPad)
-                                .font(.system(size: 17))
-                                .padding()
-                                .frame(height: 56)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 32)
-                                        .stroke(Color.primary.opacity(0.3), lineWidth: 1)
-                                )
+                            // Slider for weight in kg (20-500 kg)
+                            Slider(value: $state.weightKg, in: 20...500, step: 0.5)
+                                .tint(.accentColor)
                         } else {
-                            TextField("Enter weight in lbs", text: $state.weightLbs)
-                                .keyboardType(.decimalPad)
-                                .font(.system(size: 17))
-                                .padding()
-                                .frame(height: 56)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 32)
-                                        .stroke(Color.primary.opacity(0.3), lineWidth: 1)
-                                )
+                            // Slider for weight in lbs (44-1100 lbs)
+                            Slider(value: $state.weightLbs, in: 44...1100, step: 1)
+                                .tint(.accentColor)
                         }
                     }
                 }

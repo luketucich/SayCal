@@ -1,33 +1,45 @@
 import SwiftUI
 import Combine
 
+/// Manages the state for the entire onboarding flow
+/// Tracks user inputs across all onboarding steps
 class OnboardingState: ObservableObject {
+    // Current step in the onboarding flow
     @Published var currentStep: Int = 0
+
+    // User preferences
     @Published var unitsPreference: UnitsPreference = .metric
     @Published var sex: Sex = .male
-    @Published var age: String = ""
+
+    // Physical stats
+    @Published var age: Int = 25
     @Published var heightCm: Int = 170
     @Published var heightFeet: Int = 5
     @Published var heightInches: Int = 7
-    @Published var weightKg: String = ""
-    @Published var weightLbs: String = ""
-    @Published var workoutsPerWeek: Int = 3
+    @Published var weightKg: Double = 70.0
+    @Published var weightLbs: Double = 154.0
+
+    // Activity and goals
     @Published var activityLevel: ActivityLevel = .moderatelyActive
     @Published var goal: Goal = .maintainWeight
+
+    // Dietary information
     @Published var selectedDietaryPreferences: Set<String> = []
     @Published var selectedAllergies: Set<String> = []
 
     let totalSteps = 6
 
+    /// Validates whether the user can proceed from the current step
+    /// Each step has different validation requirements
     var canProceed: Bool {
         switch currentStep {
         case 0: // Units preference - always can proceed
             return true
-        case 1: // Physical stats
-            let ageValid = !age.isEmpty && Int(age) != nil && Int(age)! > 0
+        case 1: // Physical stats - validate age and weight are reasonable
+            let ageValid = age >= 13 && age <= 120
             let weightValid = unitsPreference == .metric ?
-                (!weightKg.isEmpty && Double(weightKg) != nil && Double(weightKg)! > 0) :
-                (!weightLbs.isEmpty && Double(weightLbs) != nil && Double(weightLbs)! > 0)
+                (weightKg >= 20 && weightKg <= 500) :
+                (weightLbs >= 44 && weightLbs <= 1100)
             return ageValid && weightValid
         case 2: // Activity level - always can proceed
             return true
@@ -42,12 +54,14 @@ class OnboardingState: ObservableObject {
         }
     }
 
+    /// Advances to the next onboarding step
     func nextStep() {
         if currentStep < totalSteps - 1 {
             currentStep += 1
         }
     }
 
+    /// Returns to the previous onboarding step
     func previousStep() {
         if currentStep > 0 {
             currentStep -= 1
@@ -55,6 +69,8 @@ class OnboardingState: ObservableObject {
     }
 }
 
+/// Main container view for the onboarding flow
+/// Displays a progress indicator and renders the appropriate step view
 struct OnboardingContainerView: View {
     @StateObject private var state = OnboardingState()
     @Environment(\.colorScheme) var colorScheme

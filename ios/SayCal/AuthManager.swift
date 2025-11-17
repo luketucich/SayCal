@@ -2,118 +2,126 @@ import Foundation
 import Supabase
 import Combine
 
+/// Manages authentication state and user onboarding flow
+/// This class coordinates between Supabase auth and the app's onboarding process
 @MainActor
 class AuthManager: ObservableObject {
+    // MARK: - Published Properties
     @Published var isAuthenticated = false
     @Published var isLoading = true
     @Published var currentUser: User?
     @Published var onboardingCompleted = false
-    
+
+    // MARK: - Private Properties
     private let client = SupabaseManager.client
     private var authStateTask: Task<Void, Never>?
-    
+
+    // MARK: - Initialization
     init() {
-        // Load onboarding status from UserDefaults on init
+        // Load cached onboarding status from UserDefaults for immediate UI updates
         onboardingCompleted = UserDefaults.standard.bool(forKey: "onboardingCompleted")
         setupAuthListener()
     }
     
+    // MARK: - Auth State Listener
+    /// Sets up a listener for authentication state changes
+    /// Automatically loads onboarding status when user logs in
     private func setupAuthListener() {
         authStateTask = Task {
             for await state in client.auth.authStateChanges {
                 self.isAuthenticated = state.session != nil
                 self.currentUser = state.session?.user
-                
+
                 if let session = state.session {
                     print("User authenticated: \(session.user.id)")
-                    // Refresh onboarding status when user logs in
+                    // Refresh onboarding status from database when user logs in
                     await self.loadOnboardingStatus()
                 } else {
                     print("User not authenticated")
-                    // Clear onboarding status on logout
+                    // Clear onboarding status when user logs out
                     self.onboardingCompleted = false
                 }
-                
+
                 self.isLoading = false
             }
         }
     }
     
-    // Load onboarding status from database (call once per session)
+    // MARK: - Onboarding Status Management
+    /// Loads onboarding status from the database
+    /// Called automatically when user logs in to sync with database state
     private func loadOnboardingStatus() async {
         guard let userId = currentUser?.id else { return }
-        
+
         do {
             let response = try await client
                 .from("user_profiles")
                 .select()
                 .eq("user_id", value: userId)
                 .execute()
-            
-            // Try to decode the profile
+
+            // Decode the user profile from database
             let profiles = try JSONDecoder().decode([UserProfile].self, from: response.data)
-            
+
             if let profile = profiles.first {
-                // Profile exists - use its onboarding status
+                // Profile exists - sync onboarding status from database
                 self.onboardingCompleted = profile.onboardingCompleted
                 UserDefaults.standard.set(profile.onboardingCompleted, forKey: "onboardingCompleted")
             } else {
-                // No profile exists yet - user hasn't completed onboarding
+                // No profile exists - user needs to complete onboarding
                 self.onboardingCompleted = false
                 UserDefaults.standard.set(false, forKey: "onboardingCompleted")
             }
         } catch {
             print("Failed to load onboarding status: \(error)")
-            // Fall back to UserDefaults value if query fails
+            // Fall back to cached value if database query fails
             self.onboardingCompleted = UserDefaults.standard.bool(forKey: "onboardingCompleted")
         }
     }
     
-    // Call this when user completes onboarding
+    /// Completes the onboarding process and creates a user profile in the database
+    /// - Parameter state: The onboarding state containing all user inputs
     func completeOnboarding(with state: OnboardingState) async {
         guard let userId = currentUser?.id else { return }
-        
-        // Convert weight to kg if using imperial
+
+        // Convert units to metric for database storage (database stores everything in metric)
         let weightKg: Double
         if state.unitsPreference == .imperial {
-            weightKg = (Double(state.weightLbs) ?? 0).lbsToKg
+            weightKg = state.weightLbs.lbsToKg
         } else {
-            weightKg = Double(state.weightKg) ?? 0
+            weightKg = state.weightKg
         }
-        
-        // Convert height to cm if using imperial
+
         let heightCm: Int
         if state.unitsPreference == .imperial {
             heightCm = feetAndInchesToCm(feet: state.heightFeet, inches: state.heightInches)
         } else {
             heightCm = state.heightCm
         }
-        
-        // Create the profile input
+
+        // Create profile input for calorie calculation
         let profileInput = UserProfileInput(
             userId: userId,
             unitsPreference: state.unitsPreference,
-            age: Int(state.age) ?? 0,
+            age: state.age,
             heightCm: heightCm,
             weightKg: weightKg,
-            workoutsPerWeek: state.workoutsPerWeek,
             activityLevel: state.activityLevel,
             dietaryPreferences: state.selectedDietaryPreferences.isEmpty ? nil : Array(state.selectedDietaryPreferences),
             allergies: state.selectedAllergies.isEmpty ? nil : Array(state.selectedAllergies),
             goal: state.goal
         )
-        
-        // Calculate target calories
+
+        // Calculate target calories using Mifflin-St Jeor equation
         let targetCalories = profileInput.calculateTargetCalories(sex: state.sex)
-        
-        // Build an Encodable payload (no [String: Any])
+
+        // Build database payload
         let newProfile = NewUserProfile(
             userId: userId,
             unitsPreference: state.unitsPreference,
             age: profileInput.age,
             heightCm: profileInput.heightCm,
             weightKg: profileInput.weightKg,
-            workoutsPerWeek: profileInput.workoutsPerWeek,
             activityLevel: profileInput.activityLevel,
             dietaryPreferences: profileInput.dietaryPreferences,
             allergies: profileInput.allergies,
@@ -121,27 +129,30 @@ class AuthManager: ObservableObject {
             targetCalories: targetCalories,
             onboardingCompleted: true
         )
-        
+
         do {
+            // Insert user profile into database
             try await client
                 .from("user_profiles")
                 .insert(newProfile)
                 .execute()
-            
-            // Update local state
+
+            // Update local state and cache
             self.onboardingCompleted = true
             UserDefaults.standard.set(true, forKey: "onboardingCompleted")
-            
+
             print("Profile created successfully!")
         } catch {
             print("Failed to create profile: \(error)")
         }
     }
     
+    // MARK: - Sign Out
+    /// Signs out the current user and clears all local state
     func signOut() async {
         do {
             try await client.auth.signOut()
-            // Clear onboarding status on logout
+            // Clear onboarding status and cache
             onboardingCompleted = false
             UserDefaults.standard.set(false, forKey: "onboardingCompleted")
             print("Sign out successful")
@@ -149,34 +160,34 @@ class AuthManager: ObservableObject {
             print("Sign out failed: \(error.localizedDescription)")
         }
     }
-    
+
     deinit {
+        // Cancel auth state listener when AuthManager is deallocated
         authStateTask?.cancel()
     }
 }
 
-// Encodable payload for inserting into user_profiles
+// MARK: - Helper Structures
+/// Encodable payload for inserting new user profiles into the database
 private struct NewUserProfile: Encodable {
     let userId: UUID
     let unitsPreference: UnitsPreference
     let age: Int
     let heightCm: Int
     let weightKg: Double
-    let workoutsPerWeek: Int
     let activityLevel: ActivityLevel
     let dietaryPreferences: [String]?
     let allergies: [String]?
     let goal: Goal
     let targetCalories: Int
     let onboardingCompleted: Bool
-    
+
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case unitsPreference = "units_preference"
         case age
         case heightCm = "height_cm"
         case weightKg = "weight_kg"
-        case workoutsPerWeek = "workouts_per_week"
         case activityLevel = "activity_level"
         case dietaryPreferences = "dietary_preferences"
         case allergies

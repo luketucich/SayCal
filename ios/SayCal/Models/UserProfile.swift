@@ -7,7 +7,6 @@ struct UserProfile: Codable {
     let age: Int
     let heightCm: Int
     let weightKg: Double
-    let workoutsPerWeek: Int
     let activityLevel: ActivityLevel
     let dietaryPreferences: [String]?
     let allergies: [String]?
@@ -16,14 +15,13 @@ struct UserProfile: Codable {
     let createdAt: Date
     let updatedAt: Date
     let onboardingCompleted: Bool
-    
+
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case unitsPreference = "units_preference"
         case age
         case heightCm = "height_cm"
         case weightKg = "weight_kg"
-        case workoutsPerWeek = "workouts_per_week"
         case activityLevel = "activity_level"
         case dietaryPreferences = "dietary_preferences"
         case allergies
@@ -160,12 +158,11 @@ struct UserProfileInput {
     let age: Int
     let heightCm: Int
     let weightKg: Double
-    let workoutsPerWeek: Int
     let activityLevel: ActivityLevel
     let dietaryPreferences: [String]?
     let allergies: [String]?
     let goal: Goal
-    
+
     // Calculate target calories based on user stats
     func calculateTargetCalories(sex: Sex = .male) -> Int {
         // Using Mifflin-St Jeor Equation for BMR

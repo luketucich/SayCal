@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Step 1: Allows user to choose between metric and imperial units
+/// This preference affects how height and weight are displayed throughout the app
 struct UnitsPreferenceView: View {
     @ObservedObject var state: OnboardingState
 
