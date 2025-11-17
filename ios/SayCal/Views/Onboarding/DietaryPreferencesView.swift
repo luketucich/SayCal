@@ -53,6 +53,8 @@ struct DietaryPreferencesView: View {
                                 state.selectedDietaryPreferences.insert(trimmed)
                                 isAddingPreference = false
                                 newPreference = ""
+                            } onCancel: {
+                                isAddingPreference = false
                             }
                         }
                         

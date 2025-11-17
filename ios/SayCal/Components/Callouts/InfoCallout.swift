@@ -5,7 +5,7 @@ struct InfoCallout: View {
     let message: String
 
     var body: some View {
-        HStack {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "info.circle")
                 .font(.system(size: 14))
                 .foregroundColor(Color(UIColor.tertiaryLabel))
@@ -13,7 +13,9 @@ struct InfoCallout: View {
             Text(message)
                 .font(.system(size: 13))
                 .foregroundColor(Color(UIColor.secondaryLabel))
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(

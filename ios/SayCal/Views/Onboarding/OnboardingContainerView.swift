@@ -1,10 +1,19 @@
 import SwiftUI
 import Combine
 
+/// Navigation direction for onboarding transitions
+enum NavigationDirection {
+    case forward
+    case backward
+}
+
 /// Manages the state for the entire onboarding flow
 class OnboardingState: ObservableObject {
     // Current step in the onboarding flow
     @Published var currentStep: Int = 0
+
+    // Navigation direction for animations
+    @Published var navigationDirection: NavigationDirection = .forward
 
     // User preferences
     @Published var unitsPreference: UnitsPreference = .metric
@@ -55,6 +64,7 @@ class OnboardingState: ObservableObject {
     /// Advances to the next onboarding step
     func nextStep() {
         if currentStep < totalSteps - 1 {
+            navigationDirection = .forward
             withAnimation(.easeInOut(duration: 0.3)) {
                 currentStep += 1
             }
@@ -64,6 +74,7 @@ class OnboardingState: ObservableObject {
     /// Returns to the previous onboarding step
     func previousStep() {
         if currentStep > 0 {
+            navigationDirection = .backward
             withAnimation(.easeInOut(duration: 0.3)) {
                 currentStep -= 1
             }
@@ -128,9 +139,10 @@ struct OnboardingContainerView: View {
                 // Content area
                 currentStepView
                     .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .leading)
+                        insertion: .move(edge: state.navigationDirection == .forward ? .trailing : .leading),
+                        removal: .move(edge: state.navigationDirection == .forward ? .leading : .trailing)
                     ))
+                    .id(state.currentStep)
             }
             .background(Color(UIColor.systemBackground))
             .navigationBarTitleDisplayMode(.inline)

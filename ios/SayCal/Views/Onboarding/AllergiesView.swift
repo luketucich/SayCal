@@ -55,6 +55,8 @@ struct AllergiesView: View {
                                 state.selectedAllergies.insert(trimmed)
                                 isAddingAllergy = false
                                 newAllergy = ""
+                            } onCancel: {
+                                isAddingAllergy = false
                             }
                         }
 
