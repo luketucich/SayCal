@@ -1,5 +1,6 @@
 import Foundation
 import Supabase
+import Combine
 
 @MainActor
 class ProfileManager: ObservableObject {

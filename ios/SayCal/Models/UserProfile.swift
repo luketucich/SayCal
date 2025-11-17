@@ -154,7 +154,7 @@ func feetAndInchesToCm(feet: Int, inches: Int) -> Int {
 }
 
 // MARK: - Profile Creation Helper
-struct UserProfileInput {
+struct UserProfileInput: Encodable {
     let userId: UUID
     let unitsPreference: UnitsPreference
     let age: Int
@@ -165,24 +165,37 @@ struct UserProfileInput {
     let dietaryPreferences: [String]?
     let allergies: [String]?
     let goal: Goal
-    
+
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case unitsPreference = "units_preference"
+        case age
+        case heightCm = "height_cm"
+        case weightKg = "weight_kg"
+        case workoutsPerWeek = "workouts_per_week"
+        case activityLevel = "activity_level"
+        case dietaryPreferences = "dietary_preferences"
+        case allergies
+        case goal
+    }
+
     // Calculate target calories based on user stats
     func calculateTargetCalories(sex: Sex = .male) -> Int {
         // Using Mifflin-St Jeor Equation for BMR
         let bmr: Double
-        
+
         if sex == .male {
             bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
         } else {
             bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
         }
-        
+
         // Calculate TDEE (Total Daily Energy Expenditure)
         let tdee = bmr * activityLevel.activityMultiplier
-        
+
         // Adjust based on goal
         let targetCalories = Int(tdee) + goal.calorieAdjustment
-        
+
         // Ensure minimum safe calories
         let minimumCalories = sex == .male ? 1500 : 1200
         return max(targetCalories, minimumCalories)
