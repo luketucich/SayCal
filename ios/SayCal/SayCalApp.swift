@@ -8,13 +8,17 @@ struct SayCalApp: App {
         WindowGroup {
             Group {
                 if authManager.isLoading {
-                    // Show loading screen while checking auth status
                     LoadingView()
+                    
                 } else if authManager.isAuthenticated {
-                    // User is logged in - show main app
-                    MainAppView()
+                    if authManager.onboardingCompleted {
+                        MainAppView()
+                        
+                    } else {
+                        OnboardingContainerView()
+                    }
+                    
                 } else {
-                    // User is not logged in - show welcome/onboarding
                     WelcomeView()
                 }
             }

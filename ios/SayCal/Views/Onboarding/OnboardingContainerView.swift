@@ -97,7 +97,7 @@ struct OnboardingContainerView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(32)
                 .padding(.top, 8)
-            }
+            }.ignoresSafeArea(edges: .bottom)
         }
     }
 

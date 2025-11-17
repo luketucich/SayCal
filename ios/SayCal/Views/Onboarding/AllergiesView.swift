@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AllergiesView: View {
     @ObservedObject var state: OnboardingState
+    @EnvironmentObject var auth: AuthManager
 
     var body: some View {
         ScrollView {
@@ -42,8 +43,9 @@ struct AllergiesView: View {
                         title: "Complete Setup",
                         isEnabled: state.canProceed
                     ) {
-                        // This will be hooked up later to save the profile
-                        // For now, just a placeholder
+                        Task {
+                            await auth.completeOnboarding(with: state)
+                        }
                     }
 
                     Button {
@@ -62,4 +64,5 @@ struct AllergiesView: View {
 
 #Preview {
     AllergiesView(state: OnboardingState())
+        .environmentObject(AuthManager())
 }
