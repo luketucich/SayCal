@@ -12,8 +12,8 @@ struct UnitsPreferenceView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Choose your units")
                             .font(.system(size: 26, weight: .semibold))
-                            .foregroundColor(.black)
-                        
+                            .foregroundColor(Color(UIColor.label))
+
                         Text("Select your preferred measurement system")
                             .font(.system(size: 15))
                             .foregroundColor(Color(UIColor.secondaryLabel))
@@ -70,13 +70,13 @@ struct UnitsPreferenceView: View {
                         .frame(height: 48)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.black)
+                                .fill(Color(UIColor.label))
                         )
                     }
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
-                .background(Color.white)
+                .background(Color(UIColor.systemBackground))
             }
         }
         .background(Color(UIColor.systemBackground))
@@ -98,8 +98,8 @@ struct UnitCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.black)
-                    
+                        .foregroundColor(Color(UIColor.label))
+
                     Text(subtitle)
                         .font(.system(size: 14))
                         .foregroundColor(Color(UIColor.secondaryLabel))
@@ -108,11 +108,11 @@ struct UnitCard: View {
                 Spacer()
                 
                 Circle()
-                    .stroke(isSelected ? Color.black : Color(UIColor.systemGray4), lineWidth: isSelected ? 2 : 1.5)
+                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: isSelected ? 2 : 1.5)
                     .frame(width: 20, height: 20)
                     .overlay(
                         Circle()
-                            .fill(Color.black)
+                            .fill(Color(UIColor.label))
                             .frame(width: 8, height: 8)
                             .opacity(isSelected ? 1 : 0)
                     )
@@ -120,7 +120,7 @@ struct UnitCard: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(.plain)

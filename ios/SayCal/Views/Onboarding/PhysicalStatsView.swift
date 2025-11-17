@@ -15,8 +15,8 @@ struct PhysicalStatsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Your physical stats")
                             .font(.system(size: 26, weight: .semibold))
-                            .foregroundColor(.black)
-                        
+                            .foregroundColor(Color(UIColor.label))
+
                         Text("We'll use this to calculate your caloric needs")
                             .font(.system(size: 15))
                             .foregroundColor(Color(UIColor.secondaryLabel))
@@ -64,7 +64,7 @@ struct PhysicalStatsView: View {
                                 HStack {
                                     Text("\(state.age) years")
                                         .font(.system(size: 16))
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Color(UIColor.label))
                                     
                                     Spacer()
                                     
@@ -94,11 +94,11 @@ struct PhysicalStatsView: View {
                                     if state.unitsPreference == .metric {
                                         Text("\(state.heightCm) cm")
                                             .font(.system(size: 16))
-                                            .foregroundColor(.black)
+                                            .foregroundColor(Color(UIColor.label))
                                     } else {
                                         Text("\(state.heightFeet)' \(state.heightInches)\"")
                                             .font(.system(size: 16))
-                                            .foregroundColor(.black)
+                                            .foregroundColor(Color(UIColor.label))
                                     }
                                     
                                     Spacer()
@@ -129,11 +129,11 @@ struct PhysicalStatsView: View {
                                     if state.unitsPreference == .metric {
                                         Text(String(format: "%.1f kg", state.weightKg))
                                             .font(.system(size: 16))
-                                            .foregroundColor(.black)
+                                            .foregroundColor(Color(UIColor.label))
                                     } else {
                                         Text("\(Int(state.weightLbs)) lbs")
                                             .font(.system(size: 16))
-                                            .foregroundColor(.black)
+                                            .foregroundColor(Color(UIColor.label))
                                     }
                                     
                                     Spacer()
@@ -168,7 +168,7 @@ struct PhysicalStatsView: View {
                     } label: {
                         Text("Back")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color(UIColor.label))
                             .underline()
                     }
                     
@@ -188,14 +188,14 @@ struct PhysicalStatsView: View {
                         .frame(height: 48)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(state.canProceed ? Color.black : Color(UIColor.systemGray4))
+                                .fill(state.canProceed ? Color(UIColor.label) : Color(UIColor.systemGray4))
                         )
                     }
                     .disabled(!state.canProceed)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
-                .background(Color.white)
+                .background(Color(UIColor.systemBackground))
             }
         }
         .background(Color(UIColor.systemBackground))
@@ -261,15 +261,15 @@ struct GenderPill: View {
         } label: {
             Text(title)
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(isSelected ? .white : .black)
+                .foregroundColor(isSelected ? .white : Color(UIColor.label))
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
                 .background(
                     RoundedRectangle(cornerRadius: 22)
-                        .fill(isSelected ? Color.black : Color.white)
+                        .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
                         .overlay(
                             RoundedRectangle(cornerRadius: 22)
-                                .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: 1)
+                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: 1)
                         )
                 )
         }
@@ -349,7 +349,7 @@ struct FeetInchesPickerSheet: View {
                         isPresented = false
                     }
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(Color(UIColor.label))
                 }
             }
         }
@@ -384,7 +384,7 @@ struct WeightPickerSheet: View {
                         isPresented = false
                     }
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(Color(UIColor.label))
                 }
             }
         }

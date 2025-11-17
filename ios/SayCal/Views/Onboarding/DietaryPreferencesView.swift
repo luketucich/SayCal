@@ -16,8 +16,8 @@ struct DietaryPreferencesView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Dietary preferences")
                             .font(.system(size: 26, weight: .semibold))
-                            .foregroundColor(.black)
-                        
+                            .foregroundColor(Color(UIColor.label))
+
                         Text("Select any that apply (optional)")
                             .font(.system(size: 15))
                             .foregroundColor(Color(UIColor.secondaryLabel))
@@ -33,15 +33,15 @@ struct DietaryPreferencesView: View {
                         if isAddingPreference {
                             TextField("Enter preference", text: $newPreference)
                                 .font(.system(size: 14))
-                                .foregroundColor(.black)
+                                .foregroundColor(Color(UIColor.label))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 10)
                                 .background(
                                     Capsule()
-                                        .fill(Color.white)
+                                        .fill(Color(UIColor.systemBackground))
                                         .overlay(
                                             Capsule()
-                                                .stroke(Color.black, lineWidth: 1.5)
+                                                .stroke(Color(UIColor.label), lineWidth: 1.5)
                                         )
                                 )
                                 .focused($isTextFieldFocused)
@@ -144,7 +144,7 @@ struct DietaryPreferencesView: View {
                     } label: {
                         Text("Back")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color(UIColor.label))
                             .underline()
                     }
                     
@@ -164,13 +164,13 @@ struct DietaryPreferencesView: View {
                         .frame(height: 48)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.black)
+                                .fill(Color(UIColor.label))
                         )
                     }
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
-                .background(Color.white)
+                .background(Color(UIColor.systemBackground))
             }
         }
         .background(Color(UIColor.systemBackground))
@@ -191,21 +191,21 @@ struct DietaryPill: View {
                 if isSelected {
                     Image(systemName: "checkmark")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(isSelected ? .white : .black)
+                        .foregroundColor(.white)
                 }
-                
+
                 Text(title)
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(isSelected ? .white : .black)
+                    .foregroundColor(isSelected ? .white : Color(UIColor.label))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background(
                 Capsule()
-                    .fill(isSelected ? Color.black : Color.white)
+                    .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
                     .overlay(
                         Capsule()
-                            .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
                     )
             )
         }

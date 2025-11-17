@@ -12,24 +12,24 @@ struct MultiSelectCard: View {
             HStack {
                 Text(title)
                     .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(.black)
+                    .foregroundColor(Color(UIColor.label))
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(Color(UIColor.label))
                 }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white)
+                    .fill(Color(UIColor.systemBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
                     )
             )
         }
@@ -50,22 +50,22 @@ struct MultiSelectPill: View {
             HStack(spacing: 6) {
                 Text(title)
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.black)
+                    .foregroundColor(Color(UIColor.label))
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(.black)
+                        .foregroundColor(Color(UIColor.label))
                 }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
                 Capsule()
-                    .fill(Color.white)
+                    .fill(Color(UIColor.systemBackground))
                     .overlay(
                         Capsule()
-                            .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
                     )
             )
         }
