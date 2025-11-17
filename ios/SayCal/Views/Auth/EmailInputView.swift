@@ -49,6 +49,7 @@ struct EmailInputView: View {
             Spacer()
         }
         .padding(24)
+        .background(Color(UIColor.systemBackground))
     }
 }
 
