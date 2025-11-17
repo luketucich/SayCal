@@ -164,35 +164,20 @@ class AuthManager: ObservableObject {
             heightCm = state.heightCm
         }
 
-        // Create profile input for calorie calculation
-        let profileInput = UserProfileInput(
+        // Build database payload using UserProfile model
+        // Target calories are calculated by OnboardingState.targetCalories computed property
+        let newProfile = UserProfile(
             userId: userId,
             unitsPreference: state.unitsPreference,
+            sex: state.sex,
             age: state.age,
             heightCm: heightCm,
             weightKg: weightKg,
             activityLevel: state.activityLevel,
             dietaryPreferences: state.selectedDietaryPreferences.isEmpty ? nil : Array(state.selectedDietaryPreferences),
             allergies: state.selectedAllergies.isEmpty ? nil : Array(state.selectedAllergies),
-            goal: state.goal
-        )
-
-        // Calculate target calories using Mifflin-St Jeor equation
-        let targetCalories = profileInput.calculateTargetCalories(sex: state.sex)
-
-        // Build database payload using UserProfile model
-        let newProfile = UserProfile(
-            userId: userId,
-            unitsPreference: state.unitsPreference,
-            sex: state.sex,
-            age: profileInput.age,
-            heightCm: profileInput.heightCm,
-            weightKg: profileInput.weightKg,
-            activityLevel: profileInput.activityLevel,
-            dietaryPreferences: profileInput.dietaryPreferences,
-            allergies: profileInput.allergies,
-            goal: profileInput.goal,
-            targetCalories: targetCalories,
+            goal: state.goal,
+            targetCalories: state.targetCalories,
             createdAt: nil,  // Set by database
             updatedAt: nil,  // Set by database
             onboardingCompleted: true

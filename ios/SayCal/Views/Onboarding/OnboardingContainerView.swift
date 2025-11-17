@@ -67,6 +67,44 @@ class OnboardingState: ObservableObject {
             currentStep -= 1
         }
     }
+
+    /// Calculates target calories based on current user stats and selected goal
+    /// Uses the Mifflin-St Jeor equation for BMR calculation
+    var targetCalories: Int {
+        // Convert weight to kg if needed
+        let weightKg: Double
+        if unitsPreference == .imperial {
+            weightKg = weightLbs.lbsToKg
+        } else {
+            weightKg = self.weightKg
+        }
+
+        // Convert height to cm if needed
+        let heightCm: Int
+        if unitsPreference == .imperial {
+            heightCm = feetAndInchesToCm(feet: heightFeet, inches: heightInches)
+        } else {
+            heightCm = self.heightCm
+        }
+
+        // Calculate BMR using Mifflin-St Jeor Equation
+        let bmr: Double
+        if sex == .male {
+            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
+        } else {
+            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
+        }
+
+        // Calculate TDEE (Total Daily Energy Expenditure)
+        let tdee = bmr * activityLevel.activityMultiplier
+
+        // Adjust based on selected goal
+        let targetCalories = Int(tdee) + goal.calorieAdjustment
+
+        // Ensure minimum safe calories
+        let minimumCalories = sex == .male ? 1500 : 1200
+        return max(targetCalories, minimumCalories)
+    }
 }
 
 /// Main container view for the onboarding flow
