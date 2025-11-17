@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// Step 6: Collects user's food allergies (optional)
-/// Final step - triggers profile creation when "Complete Setup" is pressed
+// Onboarding step 6 (final): Collect allergies and complete setup
 struct AllergiesView: View {
     @ObservedObject var state: OnboardingState
     @EnvironmentObject var auth: AuthManager
@@ -14,13 +13,11 @@ struct AllergiesView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Header section
                     OnboardingHeader(
                         title: "Food allergies",
                         subtitle: "Select any allergies you have (optional)"
                     )
 
-                    // Allergy grid with pills
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
@@ -68,7 +65,6 @@ struct AllergiesView: View {
                             }
                         }
 
-                        // Add button
                         AddOptionButton {
                             withAnimation {
                                 isAddingAllergy = true
@@ -77,7 +73,6 @@ struct AllergiesView: View {
                         }
                     }
 
-                    // Skip option
                     if state.selectedAllergies.isEmpty {
                         InfoCallout(message: "You can skip this step and update allergies later")
                     }
@@ -87,7 +82,6 @@ struct AllergiesView: View {
                 .padding(.horizontal, 20)
             }
 
-            // Bottom button area
             OnboardingBottomBar(
                 nextButtonText: "Complete Setup",
                 nextButtonIcon: "checkmark",

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Step 2: Physical stats collection
+// Onboarding step 2: Enter age, gender, height, and weight
 struct PhysicalStatsView: View {
     @ObservedObject var state: OnboardingState
     @State private var showAgePicker = false

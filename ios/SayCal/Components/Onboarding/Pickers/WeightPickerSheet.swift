@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Picker sheet for selecting weight in kilograms with decimal precision
+// Weight picker with 0.5 kg precision
 struct WeightPickerSheet: View {
     let title: String
     @Binding var weightKg: Double
@@ -24,6 +24,7 @@ struct WeightPickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
+                        HapticManager.medium()
                         isPresented = false
                     }
                     .font(.system(size: 16, weight: .semibold))

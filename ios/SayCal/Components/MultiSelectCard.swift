@@ -7,6 +7,7 @@ struct MultiSelectCard: View {
 
     var body: some View {
         Button {
+            HapticManager.light()
             action()
         } label: {
             HStack {
@@ -45,6 +46,7 @@ struct MultiSelectPill: View {
 
     var body: some View {
         Button {
+            HapticManager.light()
             action()
         } label: {
             HStack(spacing: 6) {

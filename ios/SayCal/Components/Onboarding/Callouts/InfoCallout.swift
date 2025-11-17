@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Informational callout box with icon
+// Simple info message with an icon
 struct InfoCallout: View {
     let message: String
 
@@ -14,12 +14,6 @@ struct InfoCallout: View {
                 .font(.system(size: 13))
                 .foregroundColor(Color(UIColor.secondaryLabel))
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(UIColor.systemGray6))
-        )
     }
 }
 

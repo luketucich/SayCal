@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// Step 3: Collects user's daily activity level
-/// Activity level is used to calculate TDEE (Total Daily Energy Expenditure)
+// Onboarding step 3: Pick activity level (used to calculate daily calorie needs)
 struct ActivityLevelView: View {
     @ObservedObject var state: OnboardingState
 

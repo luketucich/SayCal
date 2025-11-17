@@ -20,6 +20,7 @@ struct SelectableCard: View {
 
     var body: some View {
         Button {
+            HapticManager.light()
             action()
         } label: {
             VStack(alignment: .leading, spacing: 4) {
@@ -57,6 +58,7 @@ struct SelectablePill: View {
 
     var body: some View {
         Button {
+            HapticManager.light()
             action()
         } label: {
             Text(title)
@@ -86,6 +88,7 @@ struct TabSelector: View {
         HStack(spacing: 0) {
             ForEach(options, id: \.self) { option in
                 Button {
+                    HapticManager.selection()
                     selectedOption = option
                 } label: {
                     Text(option)
