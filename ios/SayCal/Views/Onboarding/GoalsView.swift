@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// Step 4: Collects user's fitness goal
-/// Goal determines calorie adjustment (surplus or deficit)
+// Onboarding step 4: Pick your fitness goal (affects calorie target)
 struct GoalsView: View {
     @ObservedObject var state: OnboardingState
 
@@ -9,13 +8,11 @@ struct GoalsView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Header section
                     OnboardingHeader(
                         title: "Your goal",
                         subtitle: "What are you trying to achieve?"
                     )
 
-                    // Target Calories Display
                     VStack(spacing: 12) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
@@ -51,7 +48,6 @@ struct GoalsView: View {
                         }
                     }
 
-                    // Goal selection
                     VStack(spacing: 12) {
                         ForEach(Goal.allCases, id: \.self) { goal in
                             SelectableCard(
@@ -71,7 +67,6 @@ struct GoalsView: View {
                 .padding(.horizontal, 20)
             }
 
-            // Bottom button area
             OnboardingBottomBar(
                 onBack: { state.previousStep() },
                 onNext: { state.nextStep() }
@@ -80,7 +75,7 @@ struct GoalsView: View {
         .background(Color(UIColor.systemBackground))
     }
 
-    /// Formats the calorie adjustment for display in the UI
+    // Shows how many calories to add/subtract based on the goal
     private func calorieAdjustmentText(for goal: Goal) -> String {
         let adjustment = goal.calorieAdjustment
         if adjustment > 0 {

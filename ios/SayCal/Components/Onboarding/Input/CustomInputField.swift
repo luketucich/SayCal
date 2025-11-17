@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Styled text field for custom input in onboarding screens
+// Text field pill that appears when adding custom dietary preferences/allergies
 struct CustomInputField: View {
     let placeholder: String
     @Binding var text: String
@@ -21,6 +21,7 @@ struct CustomInputField: View {
                             .stroke(Color(UIColor.label), lineWidth: 1.5)
                     )
             )
+            .frame(maxWidth: 180)
             .focused($isFocused)
             .onSubmit(onSubmit)
     }

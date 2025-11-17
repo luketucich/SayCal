@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Standardized header for onboarding screens with title and subtitle
+// Reusable header with title and subtitle for onboarding pages
 struct OnboardingHeader: View {
     let title: String
     let subtitle: String

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A generic picker sheet for selecting a single value from a range
+// Basic number picker (age, height, etc.)
 struct PickerSheet: View {
     let title: String
     @Binding var selection: Int
@@ -26,6 +26,7 @@ struct PickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
+                        HapticManager.medium()
                         isPresented = false
                     }
                     .font(.system(size: 16, weight: .semibold))

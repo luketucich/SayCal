@@ -1,11 +1,12 @@
 import SwiftUI
 
-/// Button for adding custom options (allergies, preferences, etc.)
+// The "Add" button that shows the custom input field
 struct AddOptionButton: View {
     let action: () -> Void
 
     var body: some View {
         Button {
+            HapticManager.light()
             action()
         } label: {
             HStack(spacing: 4) {

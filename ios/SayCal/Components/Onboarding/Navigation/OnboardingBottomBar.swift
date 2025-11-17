@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Standardized bottom navigation bar for onboarding screens
+// Bottom bar with back/next buttons (used on all onboarding screens)
 struct OnboardingBottomBar: View {
     let showBackButton: Bool
     let nextButtonText: String
@@ -33,6 +33,7 @@ struct OnboardingBottomBar: View {
             HStack {
                 if showBackButton {
                     Button {
+                        HapticManager.light()
                         onBack()
                     } label: {
                         Text("Back")
@@ -45,6 +46,7 @@ struct OnboardingBottomBar: View {
                 Spacer()
 
                 Button {
+                    HapticManager.medium()
                     onNext()
                 } label: {
                     HStack(spacing: 4) {

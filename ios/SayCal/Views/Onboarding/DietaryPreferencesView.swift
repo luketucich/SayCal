@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Step 5: Dietary preferences
+// Onboarding step 5: Let users pick their dietary preferences
 struct DietaryPreferencesView: View {
     @ObservedObject var state: OnboardingState
     @FocusState private var isTextFieldFocused: Bool
@@ -12,13 +12,11 @@ struct DietaryPreferencesView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Header
                     OnboardingHeader(
                         title: "Dietary preferences",
                         subtitle: "Select any that apply (optional)"
                     )
-                    
-                    // Preference grid with pills
+
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
@@ -65,8 +63,7 @@ struct DietaryPreferencesView: View {
                                 }
                             }
                         }
-                        
-                        // Add button
+
                         AddOptionButton {
                             withAnimation {
                                 isAddingPreference = true
@@ -74,8 +71,7 @@ struct DietaryPreferencesView: View {
                             }
                         }
                     }
-                    
-                    // Skip option
+
                     if state.selectedDietaryPreferences.isEmpty {
                         InfoCallout(message: "You can skip this step and update preferences later")
                     }
@@ -84,8 +80,7 @@ struct DietaryPreferencesView: View {
                 }
                 .padding(.horizontal, 20)
             }
-            
-            // Bottom button area
+
             OnboardingBottomBar(
                 nextButtonText: state.selectedDietaryPreferences.isEmpty ? "Skip" : "Next",
                 onBack: { state.previousStep() },

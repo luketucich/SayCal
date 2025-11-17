@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Card for selecting units (metric/imperial)
+// Radio-style card for picking metric or imperial units
 struct UnitCard: View {
     let title: String
     let subtitle: String
@@ -9,6 +9,7 @@ struct UnitCard: View {
 
     var body: some View {
         Button {
+            HapticManager.light()
             action()
         } label: {
             HStack {

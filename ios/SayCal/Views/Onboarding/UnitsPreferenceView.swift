@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Step 1: Units preference selection
+// Onboarding step 1: Pick metric or imperial units
 struct UnitsPreferenceView: View {
     @ObservedObject var state: OnboardingState
 
