@@ -119,6 +119,7 @@ class AuthManager: ObservableObject {
         let newProfile = NewUserProfile(
             userId: userId,
             unitsPreference: state.unitsPreference,
+            sex: state.sex,
             age: profileInput.age,
             heightCm: profileInput.heightCm,
             weightKg: profileInput.weightKg,
@@ -172,6 +173,7 @@ class AuthManager: ObservableObject {
 private struct NewUserProfile: Encodable {
     let userId: UUID
     let unitsPreference: UnitsPreference
+    let sex: Sex
     let age: Int
     let heightCm: Int
     let weightKg: Double
@@ -185,6 +187,7 @@ private struct NewUserProfile: Encodable {
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case unitsPreference = "units_preference"
+        case sex
         case age
         case heightCm = "height_cm"
         case weightKg = "weight_kg"
