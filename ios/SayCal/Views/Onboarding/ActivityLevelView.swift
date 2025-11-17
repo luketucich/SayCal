@@ -10,16 +10,10 @@ struct ActivityLevelView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
                     // Header section
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Activity level")
-                            .font(.system(size: 26, weight: .semibold))
-                            .foregroundColor(Color(UIColor.label))
-
-                        Text("How active are you on a typical day?")
-                            .font(.system(size: 15))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
-                    }
-                    .padding(.top, 24)
+                    OnboardingHeader(
+                        title: "Activity level",
+                        subtitle: "How active are you on a typical day?"
+                    )
 
                     // Activity level selection
                     VStack(spacing: 12) {
@@ -41,44 +35,10 @@ struct ActivityLevelView: View {
             }
 
             // Bottom button area
-            VStack(spacing: 0) {
-                Divider()
-                    .overlay(Color(UIColor.systemGray5))
-
-                HStack {
-                    Button {
-                        state.previousStep()
-                    } label: {
-                        Text("Back")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(Color(UIColor.label))
-                            .underline()
-                    }
-
-                    Spacer()
-
-                    Button {
-                        state.nextStep()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Next")
-                                .font(.system(size: 16, weight: .semibold))
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 24)
-                        .frame(height: 48)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color(UIColor.label))
-                        )
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(Color(UIColor.systemBackground))
-            }
+            OnboardingBottomBar(
+                onBack: { state.previousStep() },
+                onNext: { state.nextStep() }
+            )
         }
         .background(Color(UIColor.systemBackground))
     }
