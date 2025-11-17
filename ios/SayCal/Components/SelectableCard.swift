@@ -25,7 +25,7 @@ struct SelectableCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.black)
+                    .foregroundColor(Color(UIColor.label))
 
                 if let subtitle = subtitle {
                     Text(subtitle)
@@ -38,10 +38,10 @@ struct SelectableCard: View {
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white)
+                    .fill(Color(UIColor.systemBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
                     )
             )
         }
@@ -61,15 +61,15 @@ struct SelectablePill: View {
         } label: {
             Text(title)
                 .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(.black)
+                .foregroundColor(Color(UIColor.label))
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
                 .background(
                     Capsule()
-                        .fill(Color.white)
+                        .fill(Color(UIColor.systemBackground))
                         .overlay(
                             Capsule()
-                                .stroke(isSelected ? Color.black : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
                         )
                 )
         }
@@ -90,7 +90,7 @@ struct TabSelector: View {
                 } label: {
                     Text(option)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(Color(UIColor.label))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                         .background(
@@ -98,7 +98,7 @@ struct TabSelector: View {
                                 Spacer()
                                 if selectedOption == option {
                                     Rectangle()
-                                        .fill(Color.black)
+                                        .fill(Color(UIColor.label))
                                         .frame(height: 2)
                                 } else {
                                     Rectangle()

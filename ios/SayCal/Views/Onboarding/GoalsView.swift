@@ -6,84 +6,118 @@ struct GoalsView: View {
     @ObservedObject var state: OnboardingState
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Your goal")
-                        .font(.title2)
-                        .fontWeight(.bold)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 32) {
+                    // Header section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Your goal")
+                            .font(.system(size: 26, weight: .semibold))
+                            .foregroundColor(Color(UIColor.label))
 
-                    Text("What are you trying to achieve?")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                // Target Calories Display
-                VStack(spacing: 12) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Your Target Calories")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-
-                            Text("\(state.targetCalories)")
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundColor(.accentColor)
-
-                            Text("calories per day")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-
-                        Spacer()
+                        Text("What are you trying to achieve?")
+                            .font(.system(size: 15))
+                            .foregroundColor(Color(UIColor.secondaryLabel))
                     }
-                    .padding(20)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.accentColor.opacity(0.1))
-                    )
+                    .padding(.top, 24)
 
-                    Text("You can edit your target calories anytime in your profile")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 8)
-                }
+                    // Target Calories Display
+                    VStack(spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Your Target Calories")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(Color(UIColor.secondaryLabel))
 
-                VStack(spacing: 12) {
-                    ForEach(Goal.allCases, id: \.self) { goal in
-                        SelectableCard(
-                            title: goal.displayName,
-                            subtitle: calorieAdjustmentText(for: goal),
-                            isSelected: state.goal == goal
-                        ) {
-                            state.goal = goal
+                                Text("\(state.targetCalories)")
+                                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color(UIColor.label))
+
+                                Text("calories per day")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(Color(UIColor.tertiaryLabel))
+                            }
+
+                            Spacer()
+                        }
+                        .padding(20)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(UIColor.systemGray6))
+                        )
+
+                        HStack {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 14))
+                                .foregroundColor(Color(UIColor.tertiaryLabel))
+
+                            Text("You can edit your target calories anytime in your profile")
+                                .font(.system(size: 13))
+                                .foregroundColor(Color(UIColor.secondaryLabel))
                         }
                     }
-                }
 
-                Spacer()
-
-                VStack(spacing: 12) {
-                    PrimaryButton(
-                        title: "Continue",
-                        isEnabled: state.canProceed
-                    ) {
-                        state.nextStep()
+                    // Goal selection
+                    VStack(spacing: 12) {
+                        ForEach(Goal.allCases, id: \.self) { goal in
+                            SelectableCard(
+                                title: goal.displayName,
+                                subtitle: calorieAdjustmentText(for: goal),
+                                isSelected: state.goal == goal
+                            ) {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    state.goal = goal
+                                }
+                            }
+                        }
                     }
 
+                    Spacer(minLength: 100)
+                }
+                .padding(.horizontal, 20)
+            }
+
+            // Bottom button area
+            VStack(spacing: 0) {
+                Divider()
+                    .overlay(Color(UIColor.systemGray5))
+
+                HStack {
                     Button {
                         state.previousStep()
                     } label: {
                         Text("Back")
-                            .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(.accentColor)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(UIColor.label))
+                            .underline()
+                    }
+
+                    Spacer()
+
+                    Button {
+                        state.nextStep()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Next")
+                                .font(.system(size: 16, weight: .semibold))
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .frame(height: 48)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(UIColor.label))
+                        )
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(Color(UIColor.systemBackground))
             }
-            .padding(24)
         }
+        .background(Color(UIColor.systemBackground))
     }
 
     /// Formats the calorie adjustment for display in the UI

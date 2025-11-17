@@ -37,10 +37,10 @@ struct PrimaryButton: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(isEnabled ? Color.black : Color.clear)
+                .fill(isEnabled ? Color(UIColor.label) : Color.clear)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(isEnabled ? Color.black : Color(UIColor.systemGray4), lineWidth: 1)
+                        .stroke(isEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: 1)
                 )
         )
         .disabled(!isEnabled || isLoading)
@@ -58,13 +58,13 @@ struct SecondaryButton: View {
         } label: {
             Text(title)
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.black)
+                .foregroundColor(Color(UIColor.label))
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
         }
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.black.opacity(0.2), lineWidth: 1)
+                .stroke(Color(UIColor.separator), lineWidth: 1)
         )
     }
 }
@@ -80,7 +80,7 @@ struct TextButton: View {
         } label: {
             Text(title)
                 .font(.system(size: 15, weight: .regular))
-                .foregroundColor(.black)
+                .foregroundColor(Color(UIColor.label))
                 .underline()
         }
     }

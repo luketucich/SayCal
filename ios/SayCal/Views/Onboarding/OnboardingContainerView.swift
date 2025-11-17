@@ -132,36 +132,8 @@ struct OnboardingContainerView: View {
                         removal: .move(edge: .leading)
                     ))
             }
-            .background(Color.white)
+            .background(Color(UIColor.systemBackground))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    if state.currentStep > 0 {
-                        Button {
-                            state.previousStep()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.black)
-                        }
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.black)
-                            .padding(8)
-                            .background(
-                                Circle()
-                                    .stroke(Color(UIColor.systemGray5), lineWidth: 1)
-                            )
-                    }
-                }
-            }
         }
     }
 
