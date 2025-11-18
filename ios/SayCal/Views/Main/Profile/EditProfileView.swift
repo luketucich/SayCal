@@ -9,6 +9,9 @@ struct EditProfileView: View {
     @Binding var isSaving: Bool
     @Binding var showSaveSuccess: Bool
 
+    /// Binding to save action that ProfileView can call
+    @Binding var saveAction: (() async -> Void)?
+
     // Local state for editing
     // IMPORTANT: heightCm and weightKg are the authoritative values (stored in database).
     // Imperial values (heightFeet, heightInches, weightLbs) are only for display/editing.
@@ -499,10 +502,9 @@ struct EditProfileView: View {
         }
         .onAppear {
             loadProfileData()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SaveProfile"))) { _ in
-            Task {
-                await saveProfile()
+            // Provide the save callback to ProfileView
+            saveAction = { [weak authManager] in
+                await self.saveProfile()
             }
         }
     }
