@@ -8,14 +8,16 @@ struct EditProfileView: View {
     @Binding var showSaveSuccess: Bool
 
     // Local state for editing
+    // IMPORTANT: heightCm and weightKg are the authoritative values (stored in database).
+    // Imperial values (heightFeet, heightInches, weightLbs) are only for display/editing.
     @State private var unitsPreference: UnitsPreference = .metric
     @State private var sex: Sex = .male
     @State private var age: Int = 25
-    @State private var heightCm: Int = 170
-    @State private var heightFeet: Int = 5
-    @State private var heightInches: Int = 7
-    @State private var weightKg: Double = 70.0
-    @State private var weightLbs: Double = 154.0
+    @State private var heightCm: Int = 170  // Authoritative metric value
+    @State private var heightFeet: Int = 5  // Display-only imperial value
+    @State private var heightInches: Int = 7  // Display-only imperial value
+    @State private var weightKg: Double = 70.0  // Authoritative metric value
+    @State private var weightLbs: Double = 154.0  // Display-only imperial value
     @State private var activityLevel: ActivityLevel = .moderatelyActive
     @State private var goal: Goal = .maintainWeight
     @State private var selectedDietaryPreferences: Set<String> = []
@@ -36,6 +38,69 @@ struct EditProfileView: View {
                 )
 
                 VStack(spacing: 24) {
+                    // Goal - Moved to top, shows calories first
+                    VStack(alignment: .leading, spacing: 12) {
+                        FormSectionHeader(title: "Goal")
+
+                        // Target Calories Display - Shows calories first
+                        VStack(spacing: 12) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Your Target Calories")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(Color(UIColor.secondaryLabel))
+
+                                    Text("\(calculateTargetCalories())")
+                                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color(UIColor.label))
+
+                                    Text("calories per day")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(Color(UIColor.tertiaryLabel))
+                                }
+
+                                Spacer()
+                            }
+                            .padding(20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(UIColor.systemGray6))
+                            )
+                        }
+
+                        VStack(spacing: 12) {
+                            ForEach(Goal.allCases, id: \.self) { goalOption in
+                                SelectableCard(
+                                    title: goalOption.displayName,
+                                    subtitle: goalOption.calorieAdjustmentText,
+                                    isSelected: goal == goalOption
+                                ) {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        goal = goalOption
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Activity Level
+                    VStack(alignment: .leading, spacing: 12) {
+                        FormSectionHeader(title: "Activity Level")
+
+                        VStack(spacing: 12) {
+                            ForEach(ActivityLevel.allCases, id: \.self) { level in
+                                SelectableCard(
+                                    title: level.displayName,
+                                    isSelected: activityLevel == level
+                                ) {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        activityLevel = level
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     // Units Preference
                     VStack(alignment: .leading, spacing: 10) {
                         FormSectionHeader(title: "Units")
@@ -123,69 +188,6 @@ struct EditProfileView: View {
                         ) {
                             HapticManager.shared.light()
                             showWeightPicker.toggle()
-                        }
-                    }
-
-                    // Activity Level
-                    VStack(alignment: .leading, spacing: 12) {
-                        FormSectionHeader(title: "Activity Level")
-
-                        VStack(spacing: 12) {
-                            ForEach(ActivityLevel.allCases, id: \.self) { level in
-                                SelectableCard(
-                                    title: level.displayName,
-                                    isSelected: activityLevel == level
-                                ) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        activityLevel = level
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Goal
-                    VStack(alignment: .leading, spacing: 12) {
-                        FormSectionHeader(title: "Goal")
-
-                        // Target Calories Display
-                        VStack(spacing: 12) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Your Target Calories")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(Color(UIColor.secondaryLabel))
-
-                                    Text("\(calculateTargetCalories())")
-                                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                                        .foregroundColor(Color(UIColor.label))
-
-                                    Text("calories per day")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(Color(UIColor.tertiaryLabel))
-                                }
-
-                                Spacer()
-                            }
-                            .padding(20)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(UIColor.systemGray6))
-                            )
-                        }
-
-                        VStack(spacing: 12) {
-                            ForEach(Goal.allCases, id: \.self) { goalOption in
-                                SelectableCard(
-                                    title: goalOption.displayName,
-                                    subtitle: goalOption.calorieAdjustmentText,
-                                    isSelected: goal == goalOption
-                                ) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        goal = goalOption
-                                    }
-                                }
-                            }
                         }
                     }
 
@@ -302,6 +304,9 @@ struct EditProfileView: View {
 
     // MARK: - Helper Functions
 
+    /// Loads profile data from AuthManager into local state.
+    /// The metric values (heightCm, weightKg) are loaded directly from the profile.
+    /// Imperial values are calculated from metric for display purposes only.
     private func loadProfileData() {
         guard let profile = authManager.cachedProfile else { return }
 
@@ -309,66 +314,72 @@ struct EditProfileView: View {
         unitsPreference = profile.unitsPreference
         sex = profile.sex
         age = profile.age
-        heightCm = profile.heightCm
-        weightKg = profile.weightKg
+        heightCm = profile.heightCm  // Authoritative metric value from database
+        weightKg = profile.weightKg  // Authoritative metric value from database
         activityLevel = profile.activityLevel
         goal = profile.goal
         selectedDietaryPreferences = Set(profile.dietaryPreferences ?? [])
         selectedAllergies = Set(profile.allergies ?? [])
 
-        // Sync imperial values from the authoritative metric values
+        // Calculate imperial values from metric for display (not stored)
         let (feet, inches) = heightCm.cmToFeetAndInches
         heightFeet = feet
         heightInches = inches
         weightLbs = weightKg.kgToLbs
     }
 
+    /// Syncs units when user switches between metric and imperial.
+    /// IMPORTANT: We always convert FROM metric TO imperial, never the reverse.
+    /// When switching to imperial, we calculate imperial from the metric values.
+    /// When switching back to metric, we recalculate metric from the current imperial values.
+    /// This ensures that the user's edits in imperial are reflected in the metric values.
     private func syncUnits() {
         if unitsPreference == .imperial {
-            // Convert metric to imperial
+            // Switching to imperial: calculate imperial values from authoritative metric
             let (feet, inches) = heightCm.cmToFeetAndInches
             heightFeet = feet
             heightInches = inches
             weightLbs = weightKg.kgToLbs
         } else {
-            // Convert imperial to metric
+            // Switching back to metric: update metric from current imperial values
+            // (in case user edited in imperial mode)
             heightCm = feetAndInchesToCm(feet: heightFeet, inches: heightInches)
             weightKg = weightLbs.lbsToKg
         }
     }
 
+    /// Calculates target calories using the centralized implementation.
+    /// Always uses the metric values (heightCm, weightKg) which are kept in sync.
     private func calculateTargetCalories() -> Int {
-        // Always use the metric values (which are kept in sync)
-        let bmr: Double
-        if sex == .male {
-            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
-        } else {
-            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
-        }
-
-        let tdee = bmr * activityLevel.activityMultiplier
-        let targetCalories = Int(tdee) + goal.calorieAdjustment
-
-        let minimumCalories = sex == .male ? 1500 : 1200
-        return max(targetCalories, minimumCalories)
+        UserProfile.calculateTargetCalories(
+            sex: sex,
+            age: age,
+            heightCm: heightCm,
+            weightKg: weightKg,
+            activityLevel: activityLevel,
+            goal: goal
+        )
     }
 
+    /// Saves the profile to the database via AuthManager.
+    /// IMPORTANT: We always save metric values (heightCm, weightKg) to the database.
+    /// Imperial values are never persisted - they're calculated on-the-fly for display.
     func saveProfile() async {
         isSaving = true
 
-        // Use the metric values directly (they're already in sync)
         guard let userId = authManager.currentUser?.id else {
             isSaving = false
             return
         }
 
+        // Create updated profile using authoritative metric values
         let updatedProfile = UserProfile(
             userId: userId,
             unitsPreference: unitsPreference,
             sex: sex,
             age: age,
-            heightCm: heightCm,  // Use metric values directly
-            weightKg: weightKg,  // Use metric values directly
+            heightCm: heightCm,  // Always save metric (database stores in metric)
+            weightKg: weightKg,  // Always save metric (database stores in metric)
             activityLevel: activityLevel,
             dietaryPreferences: selectedDietaryPreferences.isEmpty ? nil : Array(selectedDietaryPreferences),
             allergies: selectedAllergies.isEmpty ? nil : Array(selectedAllergies),

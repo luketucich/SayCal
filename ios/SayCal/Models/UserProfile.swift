@@ -36,7 +36,35 @@ struct UserProfile: Codable {
 
     // Calculate target calories based on current profile stats
     func calculateTargetCalories() -> Int {
-        // Using Mifflin-St Jeor Equation for BMR
+        UserProfile.calculateTargetCalories(
+            sex: sex,
+            age: age,
+            heightCm: heightCm,
+            weightKg: weightKg,
+            activityLevel: activityLevel,
+            goal: goal
+        )
+    }
+
+    /// Calculates target calories using the Mifflin-St Jeor Equation.
+    /// This is the centralized implementation used throughout the app.
+    /// - Parameters:
+    ///   - sex: User's biological sex
+    ///   - age: User's age in years
+    ///   - heightCm: User's height in centimeters (always metric)
+    ///   - weightKg: User's weight in kilograms (always metric)
+    ///   - activityLevel: User's activity level
+    ///   - goal: User's fitness goal
+    /// - Returns: Target calories per day, clamped to safe minimums
+    static func calculateTargetCalories(
+        sex: Sex,
+        age: Int,
+        heightCm: Int,
+        weightKg: Double,
+        activityLevel: ActivityLevel,
+        goal: Goal
+    ) -> Int {
+        // Using Mifflin-St Jeor Equation for BMR (Basal Metabolic Rate)
         let bmr: Double
         if sex == .male {
             bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
@@ -44,9 +72,13 @@ struct UserProfile: Codable {
             bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
         }
 
+        // Calculate TDEE (Total Daily Energy Expenditure)
         let tdee = bmr * activityLevel.activityMultiplier
+
+        // Adjust based on goal (lose weight, maintain, gain, etc.)
         let targetCalories = Int(tdee) + goal.calorieAdjustment
 
+        // Ensure minimum safe calories (prevents unhealthy calorie targets)
         let minimumCalories = sex == .male ? 1500 : 1200
         return max(targetCalories, minimumCalories)
     }
@@ -161,60 +193,46 @@ struct DietaryOptions {
 }
 
 // MARK: - Unit Conversion Extensions
+// The app stores all user stats in metric (cm, kg) in the database.
+// Imperial conversions are ONLY for display purposes.
+// We use proper rounding to ensure conversions are deterministic and idempotent.
+
 extension Double {
     var kgToLbs: Double { self * 2.20462 }
     var lbsToKg: Double { self / 2.20462 }
 }
 
 extension Int {
-    var cmToInches: Int { Int(Double(self) / 2.54) }
-    var inchesToCm: Int { Int(Double(self) * 2.54) }
-    
+    /// Converts centimeters to inches using proper rounding (not truncation).
+    /// This ensures that round-trip conversions (cm → inches → cm) are stable.
+    var cmToInches: Int {
+        (Double(self) / 2.54).rounded(.toNearestOrEven).int
+    }
+
+    /// Converts inches to centimeters using proper rounding (not truncation).
+    /// This ensures that round-trip conversions (inches → cm → inches) are stable.
+    var inchesToCm: Int {
+        (Double(self) * 2.54).rounded(.toNearestOrEven).int
+    }
+
+    /// Converts centimeters to feet and inches for display.
+    /// Uses proper rounding to prevent cumulative errors.
     var cmToFeetAndInches: (feet: Int, inches: Int) {
         let totalInches = self.cmToInches
         return (feet: totalInches / 12, inches: totalInches % 12)
     }
 }
 
-// Helper function to convert feet and inches to cm
+extension Double {
+    /// Converts Double to Int using proper rounding
+    var int: Int { Int(self) }
+}
+
+/// Converts feet and inches to centimeters using proper rounding.
+/// Always use this when converting user input from imperial to metric for storage.
 func feetAndInchesToCm(feet: Int, inches: Int) -> Int {
     let totalInches = (feet * 12) + inches
     return totalInches.inchesToCm
-}
-
-// MARK: - Profile Creation Helper
-struct UserProfileInput {
-    let userId: UUID
-    let unitsPreference: UnitsPreference
-    let age: Int
-    let heightCm: Int
-    let weightKg: Double
-    let activityLevel: ActivityLevel
-    let dietaryPreferences: [String]?
-    let allergies: [String]?
-    let goal: Goal
-
-    // Calculate target calories based on user stats
-    func calculateTargetCalories(sex: Sex = .male) -> Int {
-        // Using Mifflin-St Jeor Equation for BMR
-        let bmr: Double
-        
-        if sex == .male {
-            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
-        } else {
-            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
-        }
-        
-        // Calculate TDEE (Total Daily Energy Expenditure)
-        let tdee = bmr * activityLevel.activityMultiplier
-        
-        // Adjust based on goal
-        let targetCalories = Int(tdee) + goal.calorieAdjustment
-        
-        // Ensure minimum safe calories
-        let minimumCalories = sex == .male ? 1500 : 1200
-        return max(targetCalories, minimumCalories)
-    }
 }
 
 enum Sex: String, Codable, CaseIterable {

@@ -14,6 +14,39 @@ struct ObserveProfileView: View {
                 )
 
                 VStack(spacing: 24) {
+                    // Goals Section - Moved to top, shows calories first
+                    ProfileSection(title: "Goals") {
+                        VStack(spacing: 12) {
+                            // Target Calories Display - Primary focus
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Your Target Calories")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(Color(UIColor.secondaryLabel))
+
+                                    Text("\(profile.targetCalories)")
+                                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color(UIColor.label))
+
+                                    Text("calories per day")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(Color(UIColor.tertiaryLabel))
+                                }
+
+                                Spacer()
+                            }
+                            .padding(20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(UIColor.systemGray6))
+                            )
+
+                            // Goal and Activity Level context
+                            ProfileInfoCard(label: "Goal", value: profile.goal.displayName)
+                            ProfileInfoCard(label: "Activity Level", value: profile.activityLevel.displayName)
+                        }
+                    }
+
                     // Basic Information Section
                     ProfileSection(title: "Basic Information") {
                         VStack(spacing: 12) {
@@ -40,40 +73,6 @@ struct ObserveProfileView: View {
                                 ProfileInfoCard(label: "Weight", value: String(format: "%.1f kg", profile.weightKg))
                             }
                         }
-                    }
-
-                    // Activity & Goals Section
-                    ProfileSection(title: "Activity & Goals") {
-                        VStack(spacing: 12) {
-                            ProfileInfoCard(label: "Activity Level", value: profile.activityLevel.displayName)
-                            ProfileInfoCard(label: "Goal", value: profile.goal.displayName)
-                        }
-                    }
-
-                    // Target Calories Display
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Your Target Calories")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(Color(UIColor.secondaryLabel))
-
-                                Text("\(profile.targetCalories)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(UIColor.label))
-
-                                Text("calories per day")
-                                    .font(.system(size: 13))
-                                    .foregroundColor(Color(UIColor.tertiaryLabel))
-                            }
-
-                            Spacer()
-                        }
-                        .padding(20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(UIColor.systemGray6))
-                        )
                     }
 
                     // Dietary Preferences Section
