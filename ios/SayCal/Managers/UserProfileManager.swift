@@ -1,5 +1,6 @@
 import Foundation
 import Supabase
+import Combine
 
 /// Manages user profile operations including persistence, database operations, and calculations.
 /// This manager is responsible for all profile-related business logic and data operations.

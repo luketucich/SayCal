@@ -27,10 +27,8 @@ struct MainAppView: View {
     MainAppView()
         .environmentObject({
             let manager = AuthManager()
-            // Configure for preview convenience
-            manager.isAuthenticated = true
-            manager.isLoading = false
-            manager.onboardingCompleted = true
+            // Note: onboardingCompleted is now a computed property
+            // Preview will work once a profile is loaded in UserProfileManager
             return manager
         }())
 }
