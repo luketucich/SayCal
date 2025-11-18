@@ -23,7 +23,7 @@ struct CaloriesPieChart: View {
     // State for 3D tilt effect
     @State private var tiltX: Double = 0
     @State private var tiltY: Double = 0
-    @State private var isDragging: Bool = false
+    @State private var isDragging: Bool = true
     
     private var macroData: [(name: String, value: Double, color: Color)] {
         [
@@ -87,6 +87,14 @@ struct CaloriesPieChart: View {
             .rotation3DEffect(.degrees(tiltX), axis: (x: 0, y: 1, z: 0))
             .rotation3DEffect(.degrees(tiltY), axis: (x: 1, y: 0, z: 0))
             .gesture(dragGesture)
+            .onAppear {
+                // Hide the ring and labels after 2 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        isDragging = false
+                    }
+                }
+            }
         }
     }
     

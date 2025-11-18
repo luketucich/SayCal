@@ -11,10 +11,15 @@ class AuthManager: ObservableObject {
     @Published var isLoading = true
     @Published var currentUser: User?
     @Published var onboardingCompleted = false
+    @Published var cachedProfile: UserProfile?
 
     // MARK: - Private Properties
     private let client = SupabaseManager.client
     private var authStateTask: Task<Void, Never>?
+    
+    // UserDefaults keys
+    private let onboardingCompletedKey = "onboardingCompleted"
+    private let userProfileKey = "cachedUserProfile"
     
     // Create a date decoder for Supabase date format
     private lazy var dateDecoder: JSONDecoder = {
@@ -48,7 +53,9 @@ class AuthManager: ObservableObject {
     // MARK: - Initialization
     init() {
         // Load cached onboarding status from UserDefaults for immediate UI updates
-        onboardingCompleted = UserDefaults.standard.bool(forKey: "onboardingCompleted")
+        onboardingCompleted = UserDefaults.standard.bool(forKey: onboardingCompletedKey)
+        // Load cached profile from UserDefaults
+        cachedProfile = loadProfileFromUserDefaults()
         setupAuthListener()
     }
     
@@ -67,9 +74,11 @@ class AuthManager: ObservableObject {
                     await self.loadOnboardingStatus()
                 } else {
                     print("User not authenticated")
-                    // Clear onboarding status when user logs out
+                    // Clear onboarding status and cached profile when user logs out
                     self.onboardingCompleted = false
-                    UserDefaults.standard.set(false, forKey: "onboardingCompleted")
+                    self.cachedProfile = nil
+                    UserDefaults.standard.set(false, forKey: self.onboardingCompletedKey)
+                    UserDefaults.standard.removeObject(forKey: self.userProfileKey)
                 }
 
                 self.isLoading = false
@@ -78,45 +87,41 @@ class AuthManager: ObservableObject {
     }
     
     // MARK: - Onboarding Status Management
-    /// Loads onboarding status from the database (simplified version)
+    /// Loads onboarding status and full profile from the database
     /// Called automatically when user logs in to sync with database state
     private func loadOnboardingStatus() async {
         guard let userId = currentUser?.id else { return }
 
         do {
-            // Method 1: Just check if a profile exists and get onboarding status
-            // This avoids date decoding issues entirely
+            // Load the full profile from database
             let response = try await client
                 .from("user_profiles")
-                .select("onboarding_completed")
+                .select()
                 .eq("user_id", value: userId)
                 .single()
                 .execute()
 
-            // Create a simple struct just for checking onboarding status
-            struct OnboardingCheck: Codable {
-                let onboardingCompleted: Bool
-                
-                enum CodingKeys: String, CodingKey {
-                    case onboardingCompleted = "onboarding_completed"
-                }
-            }
+            // Use the custom date decoder for the full profile
+            let profile = try dateDecoder.decode(UserProfile.self, from: response.data)
             
-            // Decode just the onboarding status
-            let status = try JSONDecoder().decode(OnboardingCheck.self, from: response.data)
+            // Update local state and cache
+            self.onboardingCompleted = profile.onboardingCompleted
+            self.cachedProfile = profile
             
-            // Update local state
-            self.onboardingCompleted = status.onboardingCompleted
-            UserDefaults.standard.set(status.onboardingCompleted, forKey: "onboardingCompleted")
+            // Save to UserDefaults
+            UserDefaults.standard.set(profile.onboardingCompleted, forKey: onboardingCompletedKey)
+            saveProfileToUserDefaults(profile)
             
-            print("✅ Onboarding status loaded: \(status.onboardingCompleted)")
+            print("✅ Profile and onboarding status loaded: \(profile.onboardingCompleted)")
             
         } catch {
-            print("❌ Failed to load onboarding status: \(error)")
+            print("❌ Failed to load profile: \(error)")
             
             // If there's no profile, user needs onboarding
             self.onboardingCompleted = false
-            UserDefaults.standard.set(false, forKey: "onboardingCompleted")
+            self.cachedProfile = nil
+            UserDefaults.standard.set(false, forKey: onboardingCompletedKey)
+            UserDefaults.standard.removeObject(forKey: userProfileKey)
         }
     }
     
@@ -192,11 +197,73 @@ class AuthManager: ObservableObject {
 
             // Update local state and cache
             self.onboardingCompleted = true
-            UserDefaults.standard.set(true, forKey: "onboardingCompleted")
+            self.cachedProfile = newProfile
+            
+            // Save to UserDefaults
+            UserDefaults.standard.set(true, forKey: onboardingCompletedKey)
+            saveProfileToUserDefaults(newProfile)
 
             print("✅ Profile created successfully!")
         } catch {
             print("❌ Failed to create profile: \(error)")
+        }
+    }
+    
+    // MARK: - Profile Update
+    /// Updates the user profile in both the database and UserDefaults
+    /// Call this method whenever the user makes changes to their profile
+    /// - Parameter updatedProfile: The updated UserProfile object
+    func updateProfile(_ updatedProfile: UserProfile) async throws {
+        guard let userId = currentUser?.id else {
+            throw NSError(domain: "AuthManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+        }
+        
+        do {
+            // Update profile in database
+            try await client
+                .from("user_profiles")
+                .update(updatedProfile)
+                .eq("user_id", value: userId)
+                .execute()
+            
+            // Update local state and cache
+            self.cachedProfile = updatedProfile
+            saveProfileToUserDefaults(updatedProfile)
+            
+            print("✅ Profile updated successfully!")
+        } catch {
+            print("❌ Failed to update profile: \(error)")
+            throw error
+        }
+    }
+    
+    // MARK: - UserDefaults Helpers
+    /// Saves the user profile to UserDefaults
+    private func saveProfileToUserDefaults(_ profile: UserProfile) {
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(profile)
+            UserDefaults.standard.set(data, forKey: userProfileKey)
+            print("✅ Profile saved to UserDefaults")
+        } catch {
+            print("❌ Failed to save profile to UserDefaults: \(error)")
+        }
+    }
+    
+    /// Loads the user profile from UserDefaults
+    private func loadProfileFromUserDefaults() -> UserProfile? {
+        guard let data = UserDefaults.standard.data(forKey: userProfileKey) else {
+            return nil
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            let profile = try decoder.decode(UserProfile.self, from: data)
+            print("✅ Profile loaded from UserDefaults")
+            return profile
+        } catch {
+            print("❌ Failed to load profile from UserDefaults: \(error)")
+            return nil
         }
     }
     
@@ -205,9 +272,11 @@ class AuthManager: ObservableObject {
     func signOut() async {
         do {
             try await client.auth.signOut()
-            // Clear onboarding status and cache
+            // Clear onboarding status, cached profile, and UserDefaults
             onboardingCompleted = false
-            UserDefaults.standard.set(false, forKey: "onboardingCompleted")
+            cachedProfile = nil
+            UserDefaults.standard.set(false, forKey: onboardingCompletedKey)
+            UserDefaults.standard.removeObject(forKey: userProfileKey)
             print("✅ Sign out successful")
         } catch {
             print("❌ Sign out failed: \(error.localizedDescription)")
