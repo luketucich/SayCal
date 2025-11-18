@@ -36,8 +36,7 @@ struct DailyView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                chart.frame(width: 200, height: 250)
-                Spacer()
+                chart.frame(width: 200, height: 200)
             }
         }
     }
@@ -74,4 +73,16 @@ struct ProfileView: View {
             .padding()
         }
     }
+}
+
+#Preview {
+    MainAppView()
+        .environmentObject({
+            let manager = AuthManager()
+            // Configure for preview convenience
+            manager.isAuthenticated = true
+            manager.isLoading = false
+            manager.onboardingCompleted = true
+            return manager
+        }())
 }

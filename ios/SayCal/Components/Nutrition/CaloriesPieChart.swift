@@ -33,10 +33,27 @@ struct CaloriesPieChart: View {
     
     var body: some View {
         GeometryReader { geometry in
+            let size = min(geometry.size.width, geometry.size.height)
+            
+            // Dynamic blur radii
+            let blurRadii: [CGFloat] = [size * 0.1667, size * 0.2333]
+            
+            // Dynamic line width for ring
+            let ringLineWidth: CGFloat = size * 0.02
+            
+            // Dynamic padding for ring expansion
+            let ringPadding: CGFloat = size * 0.05
+            
+            // Dynamic glow layer values
+            let glowLayers: [CGFloat] = [size * 0.04, size * 0.0333, size * 0.0267, size * 0.02, size * 0.0133]
+            
+            // Dynamic label radius offset
+            let labelOffset: CGFloat = size * 0.15
+            
             ZStack {
-                chartContent
-                percentageRing
-                percentageLabels(size: geometry.size)
+                chartContent(blurRadii: blurRadii, size: size)
+                percentageRing(glowLayers: glowLayers, lineWidth: ringLineWidth, padding: ringPadding)
+                percentageLabels(size: geometry.size, offset: labelOffset)
                     .opacity(isDragging ? 1 : 0)
                     .scaleEffect(isDragging ? 1 : 0.8)
                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isDragging)
@@ -49,16 +66,15 @@ struct CaloriesPieChart: View {
     }
     
     // Main pie chart with blur layers for depth effect
-    private var chartContent: some View {
+    private func chartContent(blurRadii: [CGFloat], size: CGFloat) -> some View {
         ZStack {
-            // Multiple blur layers create depth
-            ForEach([50, 70], id: \.self) { blur in
+            ForEach(blurRadii, id: \.self) { blurRadius in
                 Chart(macroData, id: \.name) { macro in
                     SectorMark(angle: .value("Percentage", macro.value))
                         .foregroundStyle(macro.color)
                 }
                 .chartLegend(.hidden)
-                .blur(radius: CGFloat(blur))
+                .blur(radius: blurRadius)
                 .saturation(1.5)
             }
         }
@@ -66,7 +82,7 @@ struct CaloriesPieChart: View {
     }
     
     // Glowing outer ring around the pie chart
-    private var percentageRing: some View {
+    private func percentageRing(glowLayers: [CGFloat], lineWidth: CGFloat, padding: CGFloat) -> some View {
         ZStack {
             ForEach(Array(macroData.enumerated()), id: \.offset) { index, macro in
                 let start = startAngle(for: index)
@@ -74,34 +90,33 @@ struct CaloriesPieChart: View {
                 
                 ZStack {
                     // Multiple blur layers create the glow effect
-                    ForEach([12, 10, 8, 6, 4], id: \.self) { blur in
+                    ForEach(glowLayers, id: \.self) { glow in
                         Circle()
                             .trim(from: start.degrees / 360, to: end.degrees / 360)
-                            .stroke(macro.color.opacity(blur >= 8 ? 0.5 : 0.7), lineWidth: 6)
+                            .stroke(macro.color.opacity(glow >= (lineWidth * 1.333) ? 0.5 : 0.7), lineWidth: lineWidth)
                             .saturation(1.5)
-//                            .blur(radius: CGFloat(blur))
                             .rotationEffect(.degrees(-90))
                     }
 
                     // Solid ring on top
                     Circle()
                         .trim(from: start.degrees / 360, to: end.degrees / 360)
-                        .stroke(macro.color, lineWidth: 6)
+                        .stroke(macro.color, lineWidth: lineWidth)
                         .saturation(1.5)
                         .rotationEffect(.degrees(-90))
                 }
             }
         }
-        .padding(isDragging ? -15 : 0)
+        .padding(isDragging ? -padding : 0)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isDragging)
     }
     
     // Percentage labels positioned around the outer ring
-    private func percentageLabels(size: CGSize) -> some View {
+    private func percentageLabels(size: CGSize, offset: CGFloat) -> some View {
         ZStack {
             ForEach(Array(macroData.enumerated()), id: \.offset) { index, macro in
                 let angle = midAngle(for: index)
-                let radius = size.width / 2 + 45
+                let radius = size.width / 2 + offset
                 
                 Text("\(Int(macro.value * 100))%")
                     .font(.system(size: size.width * 0.055, weight: .semibold))
