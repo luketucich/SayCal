@@ -91,7 +91,7 @@ struct MultiSelectPillGrid: View {
             // Restore custom items when view appears
             restoreCustomItems()
         }
-        .onChange(of: selectedItems) { _ in
+        .onChange(of: selectedItems) { oldValue, newValue in
             // Restore custom items when selectedItems changes (e.g., when profile data is loaded)
             restoreCustomItems()
         }
