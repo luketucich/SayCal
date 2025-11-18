@@ -42,7 +42,7 @@ struct GoalsView: View {
 
                         // Macro Split Display
                         HStack(spacing: 12) {
-                            let macros = UserProfile.calculateMacroPercentages(for: state.goal)
+                            let macros = UserProfileManager.calculateMacroPercentages(for: state.goal)
 
                             OnboardingMacroCard(
                                 title: "Carbs",
@@ -79,7 +79,7 @@ struct GoalsView: View {
                         ForEach(Goal.allCases, id: \.self) { goal in
                             SelectableCard(
                                 title: goal.displayName,
-                                subtitle: calorieAdjustmentText(for: goal),
+                                subtitle: goal.calorieAdjustmentText,
                                 isSelected: state.goal == goal
                             ) {
                                 withAnimation(.easeInOut(duration: 0.2)) {
@@ -101,18 +101,6 @@ struct GoalsView: View {
             )
         }
         .background(Color(UIColor.systemBackground))
-    }
-
-    // Formats calorie adjustment (+500, -300, etc.)
-    private func calorieAdjustmentText(for goal: Goal) -> String {
-        let adjustment = goal.calorieAdjustment
-        if adjustment > 0 {
-            return "+\(adjustment) calories"
-        } else if adjustment < 0 {
-            return "\(adjustment) calories"
-        } else {
-            return "Maintain current weight"
-        }
     }
 }
 

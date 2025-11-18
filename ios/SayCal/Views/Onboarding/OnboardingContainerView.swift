@@ -99,8 +99,8 @@ class OnboardingState: ObservableObject {
             heightCm = self.heightCm
         }
 
-        // Use centralized calculation function
-        return UserProfile.calculateTargetCalories(
+        // Use centralized calculation function from UserProfileManager
+        return UserProfileManager.calculateTargetCalories(
             sex: sex,
             age: age,
             heightCm: heightCm,

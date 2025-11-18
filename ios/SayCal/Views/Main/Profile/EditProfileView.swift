@@ -579,7 +579,7 @@ struct EditProfileView: View {
     /// Calculates target calories using the centralized implementation.
     /// Always uses the metric values (heightCm, weightKg) which are kept in sync.
     private func calculateTargetCalories() -> Int {
-        UserProfile.calculateTargetCalories(
+        UserProfileManager.calculateTargetCalories(
             sex: sex,
             age: age,
             heightCm: heightCm,
@@ -591,7 +591,7 @@ struct EditProfileView: View {
 
     /// Calculates recommended macro percentages based on the current goal.
     private func calculateMacroPercentages() -> (carbs: Int, fats: Int, protein: Int) {
-        UserProfile.calculateMacroPercentages(for: goal)
+        UserProfileManager.calculateMacroPercentages(for: goal)
     }
 
     /// Saves the profile to the database via AuthManager.
