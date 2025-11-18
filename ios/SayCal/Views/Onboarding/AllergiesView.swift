@@ -61,6 +61,7 @@ struct AllergiesView: View {
 
                                 withAnimation(.snappy(duration: 0.3)) {
                                     allergies.insert(trimmed, at: 0)
+                                    state.selectedAllergies.insert(trimmed)
                                     isAddingAllergy = false
                                     newAllergy = ""
                                 }

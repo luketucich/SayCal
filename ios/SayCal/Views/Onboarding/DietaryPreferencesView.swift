@@ -59,6 +59,7 @@ struct DietaryPreferencesView: View {
 
                                 withAnimation(.snappy(duration: 0.3)) {
                                     dietaryPreferences.insert(trimmed, at: 0)
+                                    state.selectedDietaryPreferences.insert(trimmed)
                                     isAddingPreference = false
                                     newPreference = ""
                                 }
