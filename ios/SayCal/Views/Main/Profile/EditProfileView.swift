@@ -525,7 +525,7 @@ struct EditProfileView: View {
         selectedAllergies = Set(profile.allergies ?? [])
 
         // Check if target calories differ from calculated (indicating manual override)
-        let calculatedCalories = UserProfile.calculateTargetCalories(
+        let calculatedCalories = UserProfileManager.calculateTargetCalories(
             sex: profile.sex,
             age: profile.age,
             heightCm: profile.heightCm,
@@ -538,7 +538,7 @@ struct EditProfileView: View {
         }
 
         // Check if macro percentages differ from calculated (indicating manual override)
-        let calculatedMacros = UserProfile.calculateMacroPercentages(for: profile.goal)
+        let calculatedMacros = UserProfileManager.calculateMacroPercentages(for: profile.goal)
         if profile.carbsPercent != calculatedMacros.carbs {
             manualCarbsPercent = profile.carbsPercent
         }
