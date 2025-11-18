@@ -22,6 +22,7 @@ class AuthManager: ObservableObject {
 
     private let client = SupabaseManager.client
     private var authStateTask: Task<Void, Never>?
+    private var cancellables = Set<AnyCancellable>()
 
     /// Reference to the UserProfileManager for profile operations
     private let profileManager = UserProfileManager.shared
@@ -42,6 +43,26 @@ class AuthManager: ObservableObject {
 
     init() {
         setupAuthListener()
+        setupProfileManagerObserver()
+    }
+
+    // MARK: - Profile Manager Observer
+
+    /// Observes changes to the UserProfileManager and triggers AuthManager updates
+    private func setupProfileManagerObserver() {
+        // When the profile manager's onboardingCompleted changes, notify our observers
+        profileManager.$onboardingCompleted
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        // When the profile manager's currentProfile changes, notify our observers
+        profileManager.$currentProfile
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Auth State Listener
