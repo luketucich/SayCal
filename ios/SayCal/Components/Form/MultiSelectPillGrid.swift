@@ -89,14 +89,22 @@ struct MultiSelectPillGrid: View {
         }
         .onAppear {
             // Restore custom items when view appears
-            let predefinedItems = Set(items)
-            let customItems = selectedItems.filter { !predefinedItems.contains($0) }
+            restoreCustomItems()
+        }
+        .onChange(of: selectedItems) { _ in
+            // Restore custom items when selectedItems changes (e.g., when profile data is loaded)
+            restoreCustomItems()
+        }
+    }
 
-            // Add any custom items that aren't already in the display array
-            for customItem in customItems {
-                if !displayItems.contains(customItem) {
-                    displayItems.insert(customItem, at: 0)
-                }
+    private func restoreCustomItems() {
+        let predefinedItems = Set(items)
+        let customItems = selectedItems.filter { !predefinedItems.contains($0) }
+
+        // Add any custom items that aren't already in the display array
+        for customItem in customItems {
+            if !displayItems.contains(customItem) {
+                displayItems.insert(customItem, at: 0)
             }
         }
     }
