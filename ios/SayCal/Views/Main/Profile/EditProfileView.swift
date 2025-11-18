@@ -503,7 +503,7 @@ struct EditProfileView: View {
         .onAppear {
             loadProfileData()
             // Provide the save callback to ProfileView
-            saveAction = { [weak authManager] in
+            saveAction = {
                 await self.saveProfile()
             }
         }
