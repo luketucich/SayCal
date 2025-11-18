@@ -2,8 +2,24 @@ import Foundation
 import Supabase
 import Combine
 
-/// Manages user profile operations including persistence, database operations, and calculations.
-/// This manager is responsible for all profile-related business logic and data operations.
+/// INTERNAL MANAGER - Do not access directly from views.
+/// All profile operations should go through AuthManager.
+///
+/// Responsibilities:
+/// - Database CRUD operations for user profiles (internal methods)
+/// - UserDefaults caching for offline access
+/// - Profile calculations (calories, macros) - public static methods
+///
+/// Access Pattern:
+/// ❌ Views → UserProfileManager.shared (FORBIDDEN)
+/// ✅ Views → AuthManager → UserProfileManager (CORRECT)
+///
+/// Method Visibility:
+/// - loadProfile(), createProfile(), updateProfile() - INTERNAL ONLY
+/// - calculateTargetCalories(), calculateMacroPercentages() - PUBLIC (static utilities)
+///
+/// This manager is responsible for all profile-related business logic and data operations,
+/// but should only be accessed by AuthManager, not directly by views.
 @MainActor
 class UserProfileManager: ObservableObject {
     // MARK: - Published Properties
@@ -67,10 +83,11 @@ class UserProfileManager: ObservableObject {
 
     // MARK: - Profile Database Operations
 
-    /// Loads the user profile from the database
+    /// Loads the user profile from the database.
+    /// INTERNAL: Should only be called by AuthManager, not directly by views.
     /// - Parameter userId: The user ID to load the profile for
     /// - Returns: The loaded UserProfile, or nil if not found
-    func loadProfile(for userId: UUID) async -> UserProfile? {
+    internal func loadProfile(for userId: UUID) async -> UserProfile? {
         do {
             let response = try await client
                 .from("user_profiles")
@@ -106,7 +123,8 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    /// Creates a new user profile in the database
+    /// Creates a new user profile in the database.
+    /// INTERNAL: Should only be called by AuthManager, not directly by views.
     /// - Parameters:
     ///   - userId: The user ID for the new profile
     ///   - unitsPreference: User's preferred unit system
@@ -122,7 +140,7 @@ class UserProfileManager: ObservableObject {
     ///   - carbsPercent: Carbohydrates percentage
     ///   - fatsPercent: Fats percentage
     ///   - proteinPercent: Protein percentage
-    func createProfile(
+    internal func createProfile(
         userId: UUID,
         unitsPreference: UnitsPreference,
         sex: Sex,
@@ -180,11 +198,12 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    /// Updates an existing user profile in the database
+    /// Updates an existing user profile in the database.
+    /// INTERNAL: Should only be called by AuthManager, not directly by views.
     /// - Parameters:
     ///   - userId: The user ID of the profile to update
     ///   - updatedProfile: The updated UserProfile object
-    func updateProfile(userId: UUID, updatedProfile: UserProfile) async throws {
+    internal func updateProfile(userId: UUID, updatedProfile: UserProfile) async throws {
         // Encodable payload to satisfy Supabase update(_:).
         // Arrays are always provided (empty when the user cleared them).
         struct UserProfileUpdatePayload: Encodable {

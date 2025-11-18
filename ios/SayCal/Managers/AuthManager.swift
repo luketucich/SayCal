@@ -2,9 +2,38 @@ import Foundation
 import Supabase
 import Combine
 
-/// Manages authentication state and coordinates with UserProfileManager.
-/// This class is focused solely on authentication logic (sign-in, sign-out, session management).
-/// All profile-related operations are delegated to UserProfileManager.
+/// AuthManager is the SINGLE PUBLIC INTERFACE for all authentication and profile operations.
+/// Views should NEVER directly access UserProfileManager.
+///
+/// Architecture Pattern (Strict Enforcement):
+/// ┌─────────────────────────────────────────┐
+/// │ Views (ProfileView, EditProfileView)    │
+/// │   - Read: authManager.cachedProfile     │
+/// │   - Write: authManager.updateProfile()  │
+/// └─────────────────────────────────────────┘
+///                    ↓ ↑
+/// ┌─────────────────────────────────────────┐
+/// │ AuthManager (PUBLIC API)                │
+/// │   - Coordinates auth state              │
+/// │   - Delegates to UserProfileManager     │
+/// │   - Manages profile cache optimization  │
+/// └─────────────────────────────────────────┘
+///                    ↓ ↑
+/// ┌─────────────────────────────────────────┐
+/// │ UserProfileManager (INTERNAL)           │
+/// │   - Database operations                 │
+/// │   - UserDefaults caching                │
+/// └─────────────────────────────────────────┘
+///
+/// Database Fetch Policy:
+/// - First login: Fetch from database (no cache exists)
+/// - Cache hit: Use UserDefaults cache (fast app startup)
+/// - Cache miss/stale: Fetch from database
+/// - Manual refresh: Use refreshProfileFromServer()
+/// - Profile updates: Automatically sync to database and cache
+///
+/// This class is focused on authentication logic (sign-in, sign-out, session management)
+/// and coordinates all profile-related operations through UserProfileManager.
 @MainActor
 class AuthManager: ObservableObject {
     // MARK: - Published Properties
@@ -105,9 +134,22 @@ class AuthManager: ObservableObject {
 
     // MARK: - Profile Loading
 
-    /// Loads the user profile from the database (delegates to UserProfileManager)
+    /// Loads the user profile, checking cache first before fetching from database.
+    /// Only fetches from database if:
+    /// - No cached profile exists
+    /// - Cached profile belongs to a different user
     private func loadUserProfile() async {
         guard let userId = currentUser?.id else { return }
+
+        // First check if we have a valid cached profile
+        if let cached = profileManager.currentProfile, cached.userId == userId {
+            // Cache is valid, no need to fetch from database
+            print("✅ Using cached profile for user: \(userId)")
+            return
+        }
+
+        // Only fetch from database if cache is missing or stale
+        print("📥 Fetching profile from database for user: \(userId)")
         _ = await profileManager.loadProfile(for: userId)
     }
 
@@ -115,6 +157,15 @@ class AuthManager: ObservableObject {
     func loadFullProfile() async -> UserProfile? {
         guard let userId = currentUser?.id else { return nil }
         return await profileManager.loadProfile(for: userId)
+    }
+
+    /// Explicitly refreshes profile data from the server.
+    /// Use this when you need to ensure you have the latest data from the database,
+    /// bypassing the cache.
+    func refreshProfileFromServer() async {
+        guard let userId = currentUser?.id else { return }
+        print("🔄 Explicitly refreshing profile from server for user: \(userId)")
+        _ = await profileManager.loadProfile(for: userId)
     }
 
     // MARK: - Onboarding

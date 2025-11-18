@@ -12,8 +12,8 @@ struct ProfileView: View {
     @State private var isSaving = false
     @State private var showSaveSuccess = false
 
-    // Reference to EditProfileView for saving
-    @State private var editProfileViewRef: EditProfileView?
+    // Save callback that EditProfileView will provide
+    @State private var saveAction: (() async -> Void)?
 
     var body: some View {
         NavigationStack {
@@ -37,7 +37,8 @@ struct ProfileView: View {
                     EditProfileView(
                         isEditing: $isEditing,
                         isSaving: $isSaving,
-                        showSaveSuccess: $showSaveSuccess
+                        showSaveSuccess: $showSaveSuccess,
+                        saveAction: $saveAction
                     )
                     .id(profile.userId) // Force refresh when profile changes
                     .navigationBarTitleDisplayMode(.inline)
@@ -56,9 +57,7 @@ struct ProfileView: View {
                                 Button {
                                     HapticManager.shared.medium()
                                     Task {
-                                        // Access the EditProfileView's save method via a workaround
-                                        // We'll need to expose the save function through a callback
-                                        await saveProfile()
+                                        await saveAction?()
                                     }
                                 } label: {
                                     if isSaving {
@@ -88,14 +87,6 @@ struct ProfileView: View {
         } message: {
             Text("Your profile has been updated successfully")
         }
-    }
-
-    // MARK: - Save Handler
-    private func saveProfile() async {
-        // This is a workaround - we need to notify the EditProfileView to save
-        // A better approach would be to use a view model, but for now we'll
-        // make EditProfileView expose its save function
-        NotificationCenter.default.post(name: NSNotification.Name("SaveProfile"), object: nil)
     }
 }
 
