@@ -23,10 +23,19 @@ struct EditProfileView: View {
     @State private var selectedDietaryPreferences: Set<String> = []
     @State private var selectedAllergies: Set<String> = []
 
+    // Manual calorie override
+    @State private var manualCalories: Int? = nil
+    @State private var showCaloriePicker = false
+
     // Picker states
     @State private var showAgePicker = false
     @State private var showHeightPicker = false
     @State private var showWeightPicker = false
+
+    // Computed property for current calories (manual override or calculated)
+    private var currentCalories: Int {
+        manualCalories ?? calculateTargetCalories()
+    }
 
     var body: some View {
         ScrollView {
@@ -50,16 +59,52 @@ struct EditProfileView: View {
                                         .font(.system(size: 15))
                                         .foregroundColor(Color(UIColor.secondaryLabel))
 
-                                    Text("\(calculateTargetCalories())")
+                                    Text("\(currentCalories)")
                                         .font(.system(size: 36, weight: .bold, design: .rounded))
                                         .foregroundColor(Color(UIColor.label))
 
-                                    Text("calories per day")
+                                    Text(manualCalories != nil ? "manual override" : "calories per day")
                                         .font(.system(size: 13))
-                                        .foregroundColor(Color(UIColor.tertiaryLabel))
+                                        .foregroundColor(manualCalories != nil ? Color.orange : Color(UIColor.tertiaryLabel))
                                 }
 
                                 Spacer()
+
+                                HStack(spacing: 12) {
+                                    // Reset button (only show if manual override is active)
+                                    if manualCalories != nil {
+                                        Button(action: {
+                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                                manualCalories = nil
+                                            }
+                                            HapticManager.shared.light()
+                                        }) {
+                                            Image(systemName: "arrow.counterclockwise")
+                                                .font(.system(size: 18, weight: .medium))
+                                                .foregroundColor(.orange)
+                                                .frame(width: 40, height: 40)
+                                                .background(
+                                                    Circle()
+                                                        .fill(Color.orange.opacity(0.15))
+                                                )
+                                        }
+                                    }
+
+                                    // Edit pencil button
+                                    Button(action: {
+                                        showCaloriePicker = true
+                                        HapticManager.shared.light()
+                                    }) {
+                                        Image(systemName: "pencil")
+                                            .font(.system(size: 18, weight: .medium))
+                                            .foregroundColor(Color(UIColor.label))
+                                            .frame(width: 40, height: 40)
+                                            .background(
+                                                Circle()
+                                                    .fill(Color(UIColor.systemGray5))
+                                            )
+                                    }
+                                }
                             }
                             .padding(20)
                             .background(
@@ -77,6 +122,8 @@ struct EditProfileView: View {
                                 ) {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         goal = goalOption
+                                        // Reset to auto-calculated calories when goal changes
+                                        manualCalories = nil
                                     }
                                 }
                             }
@@ -211,6 +258,20 @@ struct EditProfileView: View {
             .padding(.horizontal, 20)
         }
         .background(Color(UIColor.systemBackground))
+        .sheet(isPresented: $showCaloriePicker) {
+            PickerSheet(
+                title: "Select Calorie Goal",
+                selection: Binding(
+                    get: { manualCalories ?? calculateTargetCalories() },
+                    set: { newValue in
+                        manualCalories = newValue
+                    }
+                ),
+                range: 1000...5000,
+                suffix: " calories",
+                isPresented: $showCaloriePicker
+            )
+        }
         .sheet(isPresented: $showAgePicker) {
             PickerSheet(
                 title: "Select Age",
@@ -321,6 +382,19 @@ struct EditProfileView: View {
         selectedDietaryPreferences = Set(profile.dietaryPreferences ?? [])
         selectedAllergies = Set(profile.allergies ?? [])
 
+        // Check if target calories differ from calculated (indicating manual override)
+        let calculatedCalories = UserProfile.calculateTargetCalories(
+            sex: profile.sex,
+            age: profile.age,
+            heightCm: profile.heightCm,
+            weightKg: profile.weightKg,
+            activityLevel: profile.activityLevel,
+            goal: profile.goal
+        )
+        if profile.targetCalories != calculatedCalories {
+            manualCalories = profile.targetCalories
+        }
+
         // Calculate imperial values from metric for display (not stored)
         let (feet, inches) = heightCm.cmToFeetAndInches
         heightFeet = feet
@@ -373,6 +447,7 @@ struct EditProfileView: View {
         }
 
         // Create updated profile using authoritative metric values
+        // Use manual calories if set, otherwise calculate from profile stats
         let updatedProfile = UserProfile(
             userId: userId,
             unitsPreference: unitsPreference,
@@ -384,7 +459,7 @@ struct EditProfileView: View {
             dietaryPreferences: selectedDietaryPreferences.isEmpty ? nil : Array(selectedDietaryPreferences),
             allergies: selectedAllergies.isEmpty ? nil : Array(selectedAllergies),
             goal: goal,
-            targetCalories: calculateTargetCalories(),
+            targetCalories: currentCalories,  // Use manual override or calculated
             createdAt: authManager.cachedProfile?.createdAt,
             updatedAt: Date(),
             onboardingCompleted: true

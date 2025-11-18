@@ -219,19 +219,36 @@ class AuthManager: ObservableObject {
         guard let userId = currentUser?.id else {
             throw NSError(domain: "AuthManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
         }
-        
+
         do {
-            // Update profile in database
+            // Create update payload that explicitly includes nil array fields as empty arrays
+            // This ensures that when users delete all allergies/dietary preferences,
+            // the database is properly updated (nil values might be skipped in JSON encoding)
+            var updatePayload: [String: Any] = [
+                "units_preference": updatedProfile.unitsPreference.rawValue,
+                "sex": updatedProfile.sex.rawValue,
+                "age": updatedProfile.age,
+                "height_cm": updatedProfile.heightCm,
+                "weight_kg": updatedProfile.weightKg,
+                "activity_level": updatedProfile.activityLevel.rawValue,
+                "dietary_preferences": updatedProfile.dietaryPreferences ?? [],
+                "allergies": updatedProfile.allergies ?? [],
+                "goal": updatedProfile.goal.rawValue,
+                "target_calories": updatedProfile.targetCalories,
+                "onboarding_completed": updatedProfile.onboardingCompleted
+            ]
+
+            // Update profile in database using explicit dictionary
             try await client
                 .from("user_profiles")
-                .update(updatedProfile)
+                .update(updatePayload)
                 .eq("user_id", value: userId)
                 .execute()
-            
+
             // Update local state and cache
             self.cachedProfile = updatedProfile
             saveProfileToUserDefaults(updatedProfile)
-            
+
             print("✅ Profile updated successfully!")
         } catch {
             print("❌ Failed to update profile: \(error)")
