@@ -1,3 +1,5 @@
+// Primary, secondary, and text button components
+
 import SwiftUI
 
 struct PrimaryButton: View {
@@ -48,7 +50,7 @@ struct PrimaryButton: View {
     }
 }
 
-// Secondary button style (outlined only)
+// Outlined secondary button
 struct SecondaryButton: View {
     let title: String
     let action: () -> Void
@@ -71,7 +73,7 @@ struct SecondaryButton: View {
     }
 }
 
-// Text link button (no outline)
+// Text button with underline
 struct TextButton: View {
     let title: String
     let action: () -> Void

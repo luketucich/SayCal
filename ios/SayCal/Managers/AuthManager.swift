@@ -13,7 +13,15 @@ class AuthManager: ObservableObject {
     @Published var isAuthenticated = false
 
     /// Indicates whether authentication state is being loaded
-    @Published var isLoading = true
+    @Published private var _isLoading = true
+
+    /// Tracks whether we've completed the initial profile check after authentication
+    @Published private var profileCheckComplete = false
+
+    /// Computed property that indicates loading state including profile verification
+    var isLoading: Bool {
+        _isLoading || !profileCheckComplete
+    }
 
     /// The current authenticated user
     @Published var currentUser: User?
@@ -72,6 +80,9 @@ class AuthManager: ObservableObject {
     private func setupAuthListener() {
         authStateTask = Task {
             for await state in client.auth.authStateChanges {
+                // Reset profile check flag at the start of each auth state change
+                self.profileCheckComplete = false
+
                 self.isAuthenticated = state.session != nil
                 self.currentUser = state.session?.user
 
@@ -85,7 +96,9 @@ class AuthManager: ObservableObject {
                     profileManager.clearCache()
                 }
 
-                self.isLoading = false
+                // Mark profile check as complete after handling auth state
+                self.profileCheckComplete = true
+                self._isLoading = false
             }
         }
     }

@@ -1,3 +1,5 @@
+// Google authentication button component
+
 import SwiftUI
 import GoogleSignIn
 import Supabase
@@ -7,7 +9,6 @@ struct GoogleAuthButton: View {
     
     var body: some View {
         VStack {
-            // Google Sign In Button
             Button {
                 HapticManager.shared.medium()
                 Task {
@@ -44,7 +45,6 @@ struct GoogleAuthButton: View {
     }
     
     private func googleSignIn() async throws {
-        // Get the root view controller
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else {
             throw NSError(domain: "GoogleSignIn", code: -1, userInfo: [NSLocalizedDescriptionKey: "No root view controller found"])

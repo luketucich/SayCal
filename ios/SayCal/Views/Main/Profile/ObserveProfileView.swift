@@ -1,3 +1,5 @@
+// Observable wrapper view for profile data syncing
+
 import SwiftUI
 
 struct ObserveProfileView: View {

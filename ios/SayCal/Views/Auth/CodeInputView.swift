@@ -1,3 +1,5 @@
+// Verification code input view for OTP authentication
+
 import SwiftUI
 
 struct CodeInputView: View {
@@ -18,7 +20,6 @@ struct CodeInputView: View {
             )
 
             VStack(spacing: 16) {
-                // Code input boxes
                 HStack(spacing: 12) {
                     ForEach(0..<6, id: \.self) { index in
                         ZStack {
@@ -34,7 +35,6 @@ struct CodeInputView: View {
                     }
                 }
                 .overlay {
-                    // Hidden text field for actual input
                     TextField("", text: $code)
                         .keyboardType(.numberPad)
                         .textContentType(.oneTimeCode)
@@ -42,14 +42,11 @@ struct CodeInputView: View {
                         .frame(width: 1, height: 1)
                         .opacity(0.01)
                         .onChange(of: code) { oldValue, newValue in
-                            // Limit to 6 digits
                             if newValue.count > 6 {
                                 code = String(newValue.prefix(6))
                             }
-                            // Only allow numbers
                             code = code.filter { $0.isNumber }
 
-                            // Auto-verify when 6 digits entered
                             if code.count == 6 && !isLoading {
                                 Task {
                                     await onVerify()

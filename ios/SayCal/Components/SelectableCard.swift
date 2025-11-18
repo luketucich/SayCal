@@ -1,6 +1,8 @@
+// Reusable card components for single and multi-select options
+
 import SwiftUI
 
-// Selectable card with optional subtitle (for goals, activity level, etc.)
+// Selectable card with optional subtitle
 struct SelectableCard: View {
     let title: String
     let subtitle: String?
@@ -51,7 +53,7 @@ struct SelectableCard: View {
     }
 }
 
-// Compact pill-style selectable card (like the date/duration selector)
+// Compact pill-style selectable card
 struct SelectablePill: View {
     let title: String
     let isSelected: Bool
@@ -80,7 +82,7 @@ struct SelectablePill: View {
     }
 }
 
-// Tab selector style (like Stays/Experiences)
+// Tab selector with underline indicator
 struct TabSelector: View {
     let options: [String]
     @Binding var selectedOption: String

@@ -1,3 +1,5 @@
+// Email input view for authentication
+
 import SwiftUI
 import Supabase
 

@@ -1,3 +1,5 @@
+// Email authentication flow with OTP verification
+
 import SwiftUI
 import Supabase
 
@@ -15,7 +17,6 @@ struct EmailAuthView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Plain background - white for light mode, black for dark mode
                 (colorScheme == .dark ? Color.black : Color.white)
                     .ignoresSafeArea()
                 
@@ -94,7 +95,6 @@ struct EmailAuthView: View {
                 type: .email
             )
 
-            // Dismiss the view - auth manager will handle the state update
             dismiss()
         } catch {
             errorMessage = "Invalid code. Please try again."

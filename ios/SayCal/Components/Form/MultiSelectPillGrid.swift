@@ -1,3 +1,5 @@
+// Grid component for multi-select pills with custom option support
+
 import SwiftUI
 
 struct MultiSelectPillGrid: View {
@@ -78,7 +80,6 @@ struct MultiSelectPillGrid: View {
                     }
                 }
 
-                // Add button
                 AddOptionButton {
                     withAnimation(.snappy(duration: 0.3)) {
                         isAddingItem = true
@@ -88,11 +89,9 @@ struct MultiSelectPillGrid: View {
             }
         }
         .onAppear {
-            // Restore custom items when view appears
             restoreCustomItems()
         }
         .onChange(of: selectedItems) { oldValue, newValue in
-            // Restore custom items when selectedItems changes (e.g., when profile data is loaded)
             restoreCustomItems()
         }
     }

@@ -1,26 +1,22 @@
+// Interactive 3D pie chart displaying macronutrient percentages and remaining calories
+
 import SwiftUI
 import Charts
 
-// An interactive 3D-style pie chart that displays macronutrient percentages and remaining calories
+// Pie chart with drag-to-tilt effect and visual highlights
 struct CaloriesPieChart: View {
-    // For light/dark mode specific coloring
     @Environment(\.colorScheme) var colorScheme: ColorScheme
-    
-    // Macro percentages (should total 1.0)
+
     var proteinPercent: Double = 0.30
     var carbsPercent: Double = 0.40
     var fatsPercent: Double = 0.30
-    
-    // Customizable colors for each macro
+
     var proteinColor: Color = .blue
     var carbsColor: Color = .green
     var fatsColor: Color = .orange
-    
-    // Calorie tracking
+
     var remainingCalories: Int = 1847
     var totalCalories: Int = 2400
-    
-    // State for 3D tilt effect
     @State private var tiltX: Double = 0
     @State private var tiltY: Double = 0
     @State private var isDragging: Bool = true

@@ -1,6 +1,8 @@
+// Weight picker sheet component for selecting weight in kilograms
+
 import SwiftUI
 
-// Picker for metric weight (shows 0.5 kg increments)
+// Weight picker with 0.5 kg increments
 struct WeightPickerSheet: View {
     let title: String
     @Binding var weightKg: Double

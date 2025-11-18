@@ -1,3 +1,5 @@
+// Onboarding step for selecting activity level
+
 import SwiftUI
 
 // Onboarding step 3: How active is the user?

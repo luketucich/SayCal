@@ -1,3 +1,5 @@
+// Main app entry point that manages authentication flow and routing between welcome, onboarding, and main app views
+
 import SwiftUI
 
 @main

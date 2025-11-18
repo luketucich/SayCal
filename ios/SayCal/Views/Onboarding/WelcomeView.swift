@@ -1,3 +1,5 @@
+// Welcome screen with authentication options
+
 import SwiftUI
 
 struct WelcomeView: View {
@@ -6,7 +8,6 @@ struct WelcomeView: View {
     
     var body: some View {
         ZStack {
-            // Gradient background
             LinearGradient(
                 colors: colorScheme == .dark ? [
                     Color(red: 0.15, green: 0.1, blue: 0.3),
@@ -24,16 +25,12 @@ struct WelcomeView: View {
     
             VStack(spacing: 0) {
                 Spacer()
-                
-                // Bottom section with auth buttons
+
                 VStack(spacing: 16) {
-                    // Apple Sign In button
                     AppleAuthButton()
-                    
-                    // Google Sign In button
+
                     GoogleAuthButton()
-                    
-                    // Email Sign In button
+
                     Button {
                         HapticManager.shared.light()
                         showEmailAuth = true
