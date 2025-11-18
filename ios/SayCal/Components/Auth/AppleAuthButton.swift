@@ -1,5 +1,3 @@
-// Apple authentication button component
-
 import SwiftUI
 import AuthenticationServices
 import Supabase

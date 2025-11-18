@@ -1,5 +1,3 @@
-// Multi-select card components with checkmark indicators
-
 import SwiftUI
 
 struct MultiSelectCard: View {

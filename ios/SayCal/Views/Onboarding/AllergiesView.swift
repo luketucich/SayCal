@@ -1,8 +1,5 @@
-// Onboarding step for specifying food allergies
-
 import SwiftUI
 
-// Final onboarding step: Track food allergies
 // Pressing "Complete Setup" creates the user profile
 struct AllergiesView: View {
     @ObservedObject var state: OnboardingState

@@ -1,5 +1,3 @@
-// Welcome screen with authentication options
-
 import SwiftUI
 
 struct WelcomeView: View {

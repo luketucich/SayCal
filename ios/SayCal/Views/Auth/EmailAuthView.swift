@@ -1,5 +1,3 @@
-// Email authentication flow with OTP verification
-
 import SwiftUI
 import Supabase
 

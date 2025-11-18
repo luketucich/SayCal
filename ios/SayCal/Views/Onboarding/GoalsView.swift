@@ -1,9 +1,6 @@
-// Onboarding step for selecting fitness goals
-
 import SwiftUI
 
-// Onboarding step 4: Pick a fitness goal
-// This adjusts daily calorie targets (+ for gain, - for loss)
+// Adjusts daily calorie targets (+ for gain, - for loss)
 struct GoalsView: View {
     @ObservedObject var state: OnboardingState
 

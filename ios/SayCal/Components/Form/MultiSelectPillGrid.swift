@@ -1,5 +1,3 @@
-// Grid component for multi-select pills with custom option support
-
 import SwiftUI
 
 struct MultiSelectPillGrid: View {

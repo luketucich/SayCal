@@ -1,5 +1,3 @@
-// Observable wrapper view for profile data syncing
-
 import SwiftUI
 
 struct ObserveProfileView: View {
@@ -9,17 +7,14 @@ struct ObserveProfileView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
-                // Header section
                 OnboardingHeader(
                     title: "Your Profile",
                     subtitle: "View and manage your information"
                 )
 
                 VStack(spacing: 24) {
-                    // Goals Section - Moved to top, shows calories first
                     ProfileSection(title: "Goals") {
                         VStack(spacing: 12) {
-                            // Target Calories Display - Primary focus
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Your Target Calories")
@@ -43,7 +38,6 @@ struct ObserveProfileView: View {
                                     .fill(Color(UIColor.systemGray6))
                             )
 
-                            // Macro Split Display
                             HStack(spacing: 12) {
                                 MacroDisplayCard(
                                     title: "Carbs",
@@ -64,13 +58,11 @@ struct ObserveProfileView: View {
                                 )
                             }
 
-                            // Goal and Activity Level context
                             ProfileInfoCard(label: "Goal", value: profile.goal.displayName)
                             ProfileInfoCard(label: "Activity Level", value: profile.activityLevel.displayName)
                         }
                     }
 
-                    // Basic Information Section
                     ProfileSection(title: "Basic Information") {
                         VStack(spacing: 12) {
                             ProfileInfoCard(label: "Sex", value: profile.sex.displayName)
@@ -79,7 +71,6 @@ struct ObserveProfileView: View {
                         }
                     }
 
-                    // Physical Stats Section
                     ProfileSection(title: "Physical Stats") {
                         VStack(spacing: 12) {
                             if profile.unitsPreference == .imperial {
@@ -98,7 +89,6 @@ struct ObserveProfileView: View {
                         }
                     }
 
-                    // Dietary Preferences Section
                     ProfileSection(title: "Dietary Preferences") {
                         if let preferences = profile.dietaryPreferences, !preferences.isEmpty {
                             LazyVGrid(columns: [
@@ -123,7 +113,6 @@ struct ObserveProfileView: View {
                         }
                     }
 
-                    // Allergies Section
                     ProfileSection(title: "Allergies") {
                         if let allergies = profile.allergies, !allergies.isEmpty {
                             LazyVGrid(columns: [
@@ -148,7 +137,6 @@ struct ObserveProfileView: View {
                         }
                     }
 
-                    // Sign Out Button
                     Button(action: {
                         HapticManager.shared.medium()
                         Task {

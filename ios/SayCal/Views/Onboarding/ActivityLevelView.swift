@@ -1,8 +1,5 @@
-// Onboarding step for selecting activity level
-
 import SwiftUI
 
-// Onboarding step 3: How active is the user?
 // Used to calculate TDEE (daily calorie burn)
 struct ActivityLevelView: View {
     @ObservedObject var state: OnboardingState

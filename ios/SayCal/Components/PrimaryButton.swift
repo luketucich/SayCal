@@ -1,5 +1,3 @@
-// Primary, secondary, and text button components
-
 import SwiftUI
 
 struct PrimaryButton: View {

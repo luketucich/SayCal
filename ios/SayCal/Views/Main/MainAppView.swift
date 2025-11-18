@@ -1,5 +1,3 @@
-// Main app container with tab-based navigation
-
 import SwiftUI
 
 struct MainAppView: View {

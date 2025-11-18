@@ -38,21 +38,14 @@ import Combine
 class AuthManager: ObservableObject {
     // MARK: - Published Properties
 
-    /// Indicates whether the user is currently authenticated
     @Published var isAuthenticated = false
-
-    /// Indicates whether authentication state is being loaded
     @Published private var _isLoading = true
-
-    /// Tracks whether we've completed the initial profile check after authentication
     @Published private var profileCheckComplete = false
 
-    /// Computed property that indicates loading state including profile verification
     var isLoading: Bool {
         _isLoading || !profileCheckComplete
     }
 
-    /// The current authenticated user
     @Published var currentUser: User?
 
     // MARK: - Private Properties
@@ -60,18 +53,14 @@ class AuthManager: ObservableObject {
     private let client = SupabaseManager.client
     private var authStateTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
-
-    /// Reference to the UserProfileManager for profile operations
     private let profileManager = UserProfileManager.shared
 
     // MARK: - Computed Properties
 
-    /// Indicates whether the user has completed onboarding (delegates to UserProfileManager)
     var onboardingCompleted: Bool {
         profileManager.onboardingCompleted
     }
 
-    /// The cached user profile (delegates to UserProfileManager)
     var cachedProfile: UserProfile? {
         profileManager.currentProfile
     }
@@ -85,7 +74,6 @@ class AuthManager: ObservableObject {
 
     // MARK: - Profile Manager Observer
 
-    /// Observes changes to the UserProfileManager and triggers AuthManager updates
     private func setupProfileManagerObserver() {
         // When the profile manager's onboardingCompleted changes, notify our observers
         profileManager.$onboardingCompleted
@@ -104,8 +92,6 @@ class AuthManager: ObservableObject {
 
     // MARK: - Auth State Listener
 
-    /// Sets up a listener for authentication state changes.
-    /// Automatically loads the user profile when the user logs in.
     private func setupAuthListener() {
         authStateTask = Task {
             for await state in client.auth.authStateChanges {
@@ -134,10 +120,7 @@ class AuthManager: ObservableObject {
 
     // MARK: - Profile Loading
 
-    /// Loads the user profile, checking cache first before fetching from database.
-    /// Only fetches from database if:
-    /// - No cached profile exists
-    /// - Cached profile belongs to a different user
+    // Check cache first, only fetch from database if cache is missing or stale
     private func loadUserProfile() async {
         guard let userId = currentUser?.id else { return }
 
@@ -153,15 +136,11 @@ class AuthManager: ObservableObject {
         _ = await profileManager.loadProfile(for: userId)
     }
 
-    /// Loads the full user profile from database (for external use)
     func loadFullProfile() async -> UserProfile? {
         guard let userId = currentUser?.id else { return nil }
         return await profileManager.loadProfile(for: userId)
     }
 
-    /// Explicitly refreshes profile data from the server.
-    /// Use this when you need to ensure you have the latest data from the database,
-    /// bypassing the cache.
     func refreshProfileFromServer() async {
         guard let userId = currentUser?.id else { return }
         print("🔄 Explicitly refreshing profile from server for user: \(userId)")
@@ -170,10 +149,7 @@ class AuthManager: ObservableObject {
 
     // MARK: - Onboarding
 
-    /// Completes the onboarding process and creates a user profile in the database.
-    /// IMPORTANT: The database always stores height and weight in metric (cm, kg).
-    /// If the user's preference is imperial, we convert their input to metric before saving.
-    /// - Parameter state: The onboarding state containing all user inputs
+    // Database stores height/weight in metric - convert from imperial if needed
     func completeOnboarding(with state: OnboardingState) async {
         guard let userId = currentUser?.id else { return }
 
@@ -228,9 +204,6 @@ class AuthManager: ObservableObject {
 
     // MARK: - Profile Update
 
-    /// Updates the user profile in both the database and UserDefaults.
-    /// Call this method whenever the user makes changes to their profile.
-    /// - Parameter updatedProfile: The updated UserProfile object
     func updateProfile(_ updatedProfile: UserProfile) async throws {
         guard let userId = currentUser?.id else {
             throw NSError(domain: "AuthManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
@@ -242,7 +215,6 @@ class AuthManager: ObservableObject {
 
     // MARK: - Sign Out
 
-    /// Signs out the current user and clears all local state
     func signOut() async {
         do {
             try await client.auth.signOut()

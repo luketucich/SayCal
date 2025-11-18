@@ -1,8 +1,5 @@
-// Haptic feedback manager for user interactions
-
 import UIKit
 
-// Singleton manager for haptic feedback
 class HapticManager {
     static let shared = HapticManager()
 

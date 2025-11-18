@@ -1,8 +1,5 @@
-// Bottom navigation bar component for onboarding screens
-
 import SwiftUI
 
-// Navigation bar with back and next buttons
 struct OnboardingBottomBar: View {
     let showBackButton: Bool
     let nextButtonText: String
