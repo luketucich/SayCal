@@ -24,10 +24,7 @@ import Combine
 class UserProfileManager: ObservableObject {
     // MARK: - Published Properties
 
-    /// The currently loaded user profile
     @Published var currentProfile: UserProfile?
-
-    /// Indicates whether the user has completed onboarding
     @Published var onboardingCompleted: Bool = false
 
     // MARK: - Private Properties
@@ -52,7 +49,6 @@ class UserProfileManager: ObservableObject {
 
     // MARK: - Date Decoder
 
-    /// Custom date decoder for Supabase date format
     private lazy var dateDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom { decoder in
@@ -83,10 +79,7 @@ class UserProfileManager: ObservableObject {
 
     // MARK: - Profile Database Operations
 
-    /// Loads the user profile from the database.
-    /// INTERNAL: Should only be called by AuthManager, not directly by views.
-    /// - Parameter userId: The user ID to load the profile for
-    /// - Returns: The loaded UserProfile, or nil if not found
+    // INTERNAL: Should only be called by AuthManager
     internal func loadProfile(for userId: UUID) async -> UserProfile? {
         do {
             let response = try await client
@@ -123,23 +116,7 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    /// Creates a new user profile in the database.
-    /// INTERNAL: Should only be called by AuthManager, not directly by views.
-    /// - Parameters:
-    ///   - userId: The user ID for the new profile
-    ///   - unitsPreference: User's preferred unit system
-    ///   - sex: User's biological sex
-    ///   - age: User's age
-    ///   - heightCm: User's height in centimeters (always metric)
-    ///   - weightKg: User's weight in kilograms (always metric)
-    ///   - activityLevel: User's activity level
-    ///   - goal: User's fitness goal
-    ///   - dietaryPreferences: Optional dietary preferences
-    ///   - allergies: Optional allergies
-    ///   - targetCalories: Target daily calories
-    ///   - carbsPercent: Carbohydrates percentage
-    ///   - fatsPercent: Fats percentage
-    ///   - proteinPercent: Protein percentage
+    // INTERNAL: Should only be called by AuthManager
     internal func createProfile(
         userId: UUID,
         unitsPreference: UnitsPreference,
@@ -198,11 +175,7 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    /// Updates an existing user profile in the database.
-    /// INTERNAL: Should only be called by AuthManager, not directly by views.
-    /// - Parameters:
-    ///   - userId: The user ID of the profile to update
-    ///   - updatedProfile: The updated UserProfile object
+    // INTERNAL: Should only be called by AuthManager
     internal func updateProfile(userId: UUID, updatedProfile: UserProfile) async throws {
         // Encodable payload to satisfy Supabase update(_:).
         // Arrays are always provided (empty when the user cleared them).
@@ -261,7 +234,6 @@ class UserProfileManager: ObservableObject {
 
     // MARK: - UserDefaults Persistence
 
-    /// Saves the user profile to UserDefaults for offline access
     private func saveProfileToUserDefaults(_ profile: UserProfile) {
         do {
             let encoder = JSONEncoder()
@@ -273,7 +245,6 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    /// Loads the user profile from UserDefaults
     private func loadProfileFromUserDefaults() -> UserProfile? {
         guard let data = UserDefaults.standard.data(forKey: userProfileKey) else {
             return nil
@@ -290,7 +261,6 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    /// Clears all cached profile data from UserDefaults
     func clearCache() {
         currentProfile = nil
         onboardingCompleted = false
@@ -301,16 +271,7 @@ class UserProfileManager: ObservableObject {
 
     // MARK: - Profile Calculations
 
-    /// Calculates target calories using the Mifflin-St Jeor Equation.
-    /// This is the centralized implementation used throughout the app.
-    /// - Parameters:
-    ///   - sex: User's biological sex
-    ///   - age: User's age in years
-    ///   - heightCm: User's height in centimeters (always metric)
-    ///   - weightKg: User's weight in kilograms (always metric)
-    ///   - activityLevel: User's activity level
-    ///   - goal: User's fitness goal
-    /// - Returns: Target calories per day, clamped to safe minimums
+    // Centralized calorie calculation using Mifflin-St Jeor Equation
     static func calculateTargetCalories(
         sex: Sex,
         age: Int,
@@ -338,10 +299,6 @@ class UserProfileManager: ObservableObject {
         return max(targetCalories, minimumCalories)
     }
 
-    /// Calculates recommended macro percentages based on user's fitness goal.
-    /// Returns a tuple of (carbs%, fats%, protein%) that always sums to 100.
-    /// - Parameter goal: User's fitness goal
-    /// - Returns: Tuple of recommended macro percentages (carbs, fats, protein)
     static func calculateMacroPercentages(for goal: Goal) -> (carbs: Int, fats: Int, protein: Int) {
         switch goal {
         case .loseWeight:
@@ -361,9 +318,6 @@ class UserProfileManager: ObservableObject {
 
     // MARK: - Convenience Methods
 
-    /// Calculates target calories for a given profile
-    /// - Parameter profile: The user profile
-    /// - Returns: Calculated target calories
     func calculateTargetCalories(for profile: UserProfile) -> Int {
         UserProfileManager.calculateTargetCalories(
             sex: profile.sex,
@@ -375,9 +329,6 @@ class UserProfileManager: ObservableObject {
         )
     }
 
-    /// Calculates recommended macro percentages for a given profile
-    /// - Parameter profile: The user profile
-    /// - Returns: Tuple of recommended macro percentages
     func calculateMacroPercentages(for profile: UserProfile) -> (carbs: Int, fats: Int, protein: Int) {
         UserProfileManager.calculateMacroPercentages(for: profile.goal)
     }

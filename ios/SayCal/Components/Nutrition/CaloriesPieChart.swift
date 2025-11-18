@@ -1,9 +1,6 @@
-// Interactive 3D pie chart displaying macronutrient percentages and remaining calories
-
 import SwiftUI
 import Charts
 
-// Pie chart with drag-to-tilt effect and visual highlights
 struct CaloriesPieChart: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 

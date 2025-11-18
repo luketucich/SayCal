@@ -1,5 +1,3 @@
-// Weight picker sheet component for selecting weight in kilograms
-
 import SwiftUI
 
 // Weight picker with 0.5 kg increments

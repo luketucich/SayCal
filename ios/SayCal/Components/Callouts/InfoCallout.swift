@@ -1,8 +1,5 @@
-// Info callout component with icon for displaying tips and messages
-
 import SwiftUI
 
-// Callout box with info icon
 struct InfoCallout: View {
     let message: String
 

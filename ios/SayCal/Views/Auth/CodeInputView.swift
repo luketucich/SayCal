@@ -1,5 +1,3 @@
-// Verification code input view for OTP authentication
-
 import SwiftUI
 
 struct CodeInputView: View {

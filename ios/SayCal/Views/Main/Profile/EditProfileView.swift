@@ -1,5 +1,3 @@
-// Edit profile view for updating user information and preferences
-
 import SwiftUI
 import Auth
 
@@ -8,31 +6,24 @@ struct EditProfileView: View {
     @Binding var isEditing: Bool
     @Binding var isSaving: Bool
     @Binding var showSaveSuccess: Bool
-
-    /// Binding to save action that ProfileView can call
     @Binding var saveAction: (() async -> Void)?
 
-    // Local state for editing
-    // IMPORTANT: heightCm and weightKg are the authoritative values (stored in database).
-    // Imperial values (heightFeet, heightInches, weightLbs) are only for display/editing.
+    // IMPORTANT: heightCm and weightKg are authoritative (stored in database)
+    // Imperial values are display-only
     @State private var unitsPreference: UnitsPreference = .metric
     @State private var sex: Sex = .male
     @State private var age: Int = 25
-    @State private var heightCm: Int = 170  // Authoritative metric value
-    @State private var heightFeet: Int = 5  // Display-only imperial value
-    @State private var heightInches: Int = 7  // Display-only imperial value
-    @State private var weightKg: Double = 70.0  // Authoritative metric value
-    @State private var weightLbs: Double = 154.0  // Display-only imperial value
+    @State private var heightCm: Int = 170
+    @State private var heightFeet: Int = 5
+    @State private var heightInches: Int = 7
+    @State private var weightKg: Double = 70.0
+    @State private var weightLbs: Double = 154.0
     @State private var activityLevel: ActivityLevel = .moderatelyActive
     @State private var goal: Goal = .maintainWeight
     @State private var selectedDietaryPreferences: Set<String> = []
     @State private var selectedAllergies: Set<String> = []
-
-    // Manual calorie override
     @State private var manualCalories: Int? = nil
     @State private var showCaloriePicker = false
-
-    // Manual macro overrides
     @State private var manualCarbsPercent: Int? = nil
     @State private var manualFatsPercent: Int? = nil
     @State private var manualProteinPercent: Int? = nil
@@ -51,17 +42,14 @@ struct EditProfileView: View {
         }
     }
 
-    // Picker states
     @State private var showAgePicker = false
     @State private var showHeightPicker = false
     @State private var showWeightPicker = false
 
-    // Computed property for current calories (manual override or calculated)
     private var currentCalories: Int {
         manualCalories ?? calculateTargetCalories()
     }
 
-    // Computed properties for current macros (manual override or calculated)
     private var currentCarbsPercent: Int {
         manualCarbsPercent ?? calculateMacroPercentages().carbs
     }
@@ -74,7 +62,6 @@ struct EditProfileView: View {
         manualProteinPercent ?? calculateMacroPercentages().protein
     }
 
-    // Check if any macro has been manually overridden
     private var hasMacroOverride: Bool {
         manualCarbsPercent != nil || manualFatsPercent != nil || manualProteinPercent != nil
     }
@@ -82,18 +69,15 @@ struct EditProfileView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
-                // Editing header
                 OnboardingHeader(
                     title: "Edit Profile",
                     subtitle: "Update your information"
                 )
 
                 VStack(spacing: 24) {
-                    // Goals - Moved to top, shows calories first
                     VStack(alignment: .leading, spacing: 12) {
                         FormSectionHeader(title: "Goals")
 
-                        // Target Calories Display - Shows calories first
                         VStack(spacing: 12) {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
@@ -113,7 +97,6 @@ struct EditProfileView: View {
                                 Spacer()
 
                                 HStack(spacing: 12) {
-                                    // Reset button (only show if manual override is active)
                                     if manualCalories != nil {
                                         Button(action: {
                                             withAnimation(.easeInOut(duration: 0.2)) {
@@ -132,7 +115,6 @@ struct EditProfileView: View {
                                         }
                                     }
 
-                                    // Edit pencil button
                                     Button(action: {
                                         showCaloriePicker = true
                                         HapticManager.shared.light()
@@ -158,7 +140,6 @@ struct EditProfileView: View {
                         // Macro Percentages Display
                         VStack(spacing: 12) {
                             HStack(spacing: 12) {
-                                // Carbs
                                 MacroCard(
                                     title: "Carbs",
                                     percentage: currentCarbsPercent,
@@ -170,7 +151,6 @@ struct EditProfileView: View {
                                     }
                                 )
 
-                                // Fats
                                 MacroCard(
                                     title: "Fats",
                                     percentage: currentFatsPercent,
@@ -182,7 +162,6 @@ struct EditProfileView: View {
                                     }
                                 )
 
-                                // Protein
                                 MacroCard(
                                     title: "Protein",
                                     percentage: currentProteinPercent,
@@ -195,7 +174,6 @@ struct EditProfileView: View {
                                 )
                             }
 
-                            // Reset button and info message
                             HStack {
                                 if hasMacroOverride {
                                     Button(action: {
@@ -251,7 +229,6 @@ struct EditProfileView: View {
                         }
                     }
 
-                    // Activity Level
                     VStack(alignment: .leading, spacing: 12) {
                         FormSectionHeader(title: "Activity Level")
 
@@ -269,7 +246,6 @@ struct EditProfileView: View {
                         }
                     }
 
-                    // Units Preference
                     VStack(alignment: .leading, spacing: 10) {
                         FormSectionHeader(title: "Units")
 
@@ -298,7 +274,6 @@ struct EditProfileView: View {
                         }
                     }
 
-                    // Sex Selection
                     VStack(alignment: .leading, spacing: 10) {
                         FormSectionHeader(title: "Sex")
 
@@ -325,7 +300,6 @@ struct EditProfileView: View {
                         }
                     }
 
-                    // Age Selector
                     VStack(alignment: .leading, spacing: 10) {
                         FormSectionHeader(title: "Age")
 
@@ -335,7 +309,6 @@ struct EditProfileView: View {
                         }
                     }
 
-                    // Height Selector
                     VStack(alignment: .leading, spacing: 10) {
                         FormSectionHeader(title: "Height")
 
@@ -347,7 +320,6 @@ struct EditProfileView: View {
                         }
                     }
 
-                    // Weight Selector
                     VStack(alignment: .leading, spacing: 10) {
                         FormSectionHeader(title: "Weight")
 
@@ -359,14 +331,12 @@ struct EditProfileView: View {
                         }
                     }
 
-                    // Dietary Preferences
                     MultiSelectPillGrid(
                         title: "Dietary Preferences",
                         selectedItems: $selectedDietaryPreferences,
                         items: DietaryOptions.dietaryPreferences
                     )
 
-                    // Allergies
                     MultiSelectPillGrid(
                         title: "Allergies",
                         selectedItems: $selectedAllergies,
@@ -502,7 +472,6 @@ struct EditProfileView: View {
         }
         .onAppear {
             loadProfileData()
-            // Provide the save callback to ProfileView
             saveAction = {
                 await self.saveProfile()
             }
@@ -511,24 +480,20 @@ struct EditProfileView: View {
 
     // MARK: - Helper Functions
 
-    /// Loads profile data from AuthManager into local state.
-    /// The metric values (heightCm, weightKg) are loaded directly from the profile.
-    /// Imperial values are calculated from metric for display purposes only.
+    // Metric values are authoritative, imperial calculated for display only
     private func loadProfileData() {
         guard let profile = authManager.cachedProfile else { return }
 
-        // Load profile data into local state
         unitsPreference = profile.unitsPreference
         sex = profile.sex
         age = profile.age
-        heightCm = profile.heightCm  // Authoritative metric value from database
-        weightKg = profile.weightKg  // Authoritative metric value from database
+        heightCm = profile.heightCm
+        weightKg = profile.weightKg
         activityLevel = profile.activityLevel
         goal = profile.goal
         selectedDietaryPreferences = Set(profile.dietaryPreferences ?? [])
         selectedAllergies = Set(profile.allergies ?? [])
 
-        // Check if target calories differ from calculated (indicating manual override)
         let calculatedCalories = UserProfileManager.calculateTargetCalories(
             sex: profile.sex,
             age: profile.age,
@@ -541,7 +506,6 @@ struct EditProfileView: View {
             manualCalories = profile.targetCalories
         }
 
-        // Check if macro percentages differ from calculated (indicating manual override)
         let calculatedMacros = UserProfileManager.calculateMacroPercentages(for: profile.goal)
         if profile.carbsPercent != calculatedMacros.carbs {
             manualCarbsPercent = profile.carbsPercent
@@ -553,35 +517,25 @@ struct EditProfileView: View {
             manualProteinPercent = profile.proteinPercent
         }
 
-        // Calculate imperial values from metric for display (not stored)
         let (feet, inches) = heightCm.cmToFeetAndInches
         heightFeet = feet
         heightInches = inches
         weightLbs = weightKg.kgToLbs
     }
 
-    /// Syncs units when user switches between metric and imperial.
-    /// IMPORTANT: We always convert FROM metric TO imperial, never the reverse.
-    /// When switching to imperial, we calculate imperial from the metric values.
-    /// When switching back to metric, we recalculate metric from the current imperial values.
-    /// This ensures that the user's edits in imperial are reflected in the metric values.
+    // Always convert from metric to imperial, recalculate metric from imperial edits
     private func syncUnits() {
         if unitsPreference == .imperial {
-            // Switching to imperial: calculate imperial values from authoritative metric
             let (feet, inches) = heightCm.cmToFeetAndInches
             heightFeet = feet
             heightInches = inches
             weightLbs = weightKg.kgToLbs
         } else {
-            // Switching back to metric: update metric from current imperial values
-            // (in case user edited in imperial mode)
             heightCm = feetAndInchesToCm(feet: heightFeet, inches: heightInches)
             weightKg = weightLbs.lbsToKg
         }
     }
 
-    /// Calculates target calories using the centralized implementation.
-    /// Always uses the metric values (heightCm, weightKg) which are kept in sync.
     private func calculateTargetCalories() -> Int {
         UserProfileManager.calculateTargetCalories(
             sex: sex,
@@ -593,14 +547,11 @@ struct EditProfileView: View {
         )
     }
 
-    /// Calculates recommended macro percentages based on the current goal.
     private func calculateMacroPercentages() -> (carbs: Int, fats: Int, protein: Int) {
         UserProfileManager.calculateMacroPercentages(for: goal)
     }
 
-    /// Saves the profile to the database via AuthManager.
-    /// IMPORTANT: We always save metric values (heightCm, weightKg) to the database.
-    /// Imperial values are never persisted - they're calculated on-the-fly for display.
+    // Always save metric values - imperial never persisted
     func saveProfile() async {
         isSaving = true
 
@@ -609,23 +560,21 @@ struct EditProfileView: View {
             return
         }
 
-        // Create updated profile using authoritative metric values
-        // Use manual calories/macros if set, otherwise calculate from profile stats
         let updatedProfile = UserProfile(
             userId: userId,
             unitsPreference: unitsPreference,
             sex: sex,
             age: age,
-            heightCm: heightCm,  // Always save metric (database stores in metric)
-            weightKg: weightKg,  // Always save metric (database stores in metric)
+            heightCm: heightCm,
+            weightKg: weightKg,
             activityLevel: activityLevel,
             dietaryPreferences: selectedDietaryPreferences.isEmpty ? nil : Array(selectedDietaryPreferences),
             allergies: selectedAllergies.isEmpty ? nil : Array(selectedAllergies),
             goal: goal,
-            targetCalories: currentCalories,  // Use manual override or calculated
-            carbsPercent: currentCarbsPercent,  // Use manual override or calculated
-            fatsPercent: currentFatsPercent,  // Use manual override or calculated
-            proteinPercent: currentProteinPercent,  // Use manual override or calculated
+            targetCalories: currentCalories,
+            carbsPercent: currentCarbsPercent,
+            fatsPercent: currentFatsPercent,
+            proteinPercent: currentProteinPercent,
             createdAt: authManager.cachedProfile?.createdAt,
             updatedAt: Date(),
             onboardingCompleted: true

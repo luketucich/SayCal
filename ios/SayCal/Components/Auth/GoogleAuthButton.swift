@@ -1,5 +1,3 @@
-// Google authentication button component
-
 import SwiftUI
 import GoogleSignIn
 import Supabase

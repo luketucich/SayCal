@@ -1,5 +1,3 @@
-// User profile data models and related enums
-
 import Foundation
 
 // User profile model for the user_profiles table

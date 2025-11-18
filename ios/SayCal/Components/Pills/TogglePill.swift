@@ -1,8 +1,5 @@
-// Toggleable pill button component in capsule or rounded styles
-
 import SwiftUI
 
-// Toggleable pill button
 struct TogglePill: View {
     let title: String
     let isSelected: Bool

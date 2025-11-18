@@ -1,5 +1,3 @@
-// Onboarding container managing multi-step user setup flow
-
 import SwiftUI
 import Combine
 

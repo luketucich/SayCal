@@ -1,8 +1,5 @@
-// Reusable card components for single and multi-select options
-
 import SwiftUI
 
-// Selectable card with optional subtitle
 struct SelectableCard: View {
     let title: String
     let subtitle: String?
