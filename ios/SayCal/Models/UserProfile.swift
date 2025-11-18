@@ -13,6 +13,9 @@ struct UserProfile: Codable {
     let allergies: [String]?
     let goal: Goal
     let targetCalories: Int
+    let carbsPercent: Int
+    let fatsPercent: Int
+    let proteinPercent: Int
     let createdAt: Date?
     let updatedAt: Date?
     let onboardingCompleted: Bool
@@ -29,6 +32,9 @@ struct UserProfile: Codable {
         case allergies
         case goal
         case targetCalories = "target_calories"
+        case carbsPercent = "carbs_percent"
+        case fatsPercent = "fats_percent"
+        case proteinPercent = "protein_percent"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case onboardingCompleted = "onboarding_completed"
@@ -82,6 +88,31 @@ struct UserProfile: Codable {
         let minimumCalories = sex == .male ? 1500 : 1200
         return max(targetCalories, minimumCalories)
     }
+
+    /// Calculates recommended macro percentages based on the user's goal.
+    /// - Parameter goal: User's fitness goal
+    /// - Returns: A tuple of (carbs, fats, protein) percentages that sum to 100
+    static func calculateRecommendedMacros(for goal: Goal) -> (carbs: Int, fats: Int, protein: Int) {
+        switch goal {
+        case .loseWeight:
+            // Higher protein to preserve muscle, moderate fats, lower carbs
+            return (carbs: 30, fats: 30, protein: 40)
+        case .maintainWeight:
+            // Balanced macros for maintenance
+            return (carbs: 40, fats: 30, protein: 30)
+        case .buildMuscle:
+            // Higher protein and carbs for muscle building
+            return (carbs: 40, fats: 25, protein: 35)
+        case .gainWeight:
+            // Higher carbs and protein for weight gain
+            return (carbs: 45, fats: 25, protein: 30)
+        }
+    }
+
+    /// Calculate recommended macros based on the user's current goal
+    func calculateRecommendedMacros() -> (carbs: Int, fats: Int, protein: Int) {
+        UserProfile.calculateRecommendedMacros(for: goal)
+    }
 }
 
 // MARK: - Enums for constrained fields
@@ -131,7 +162,7 @@ enum Goal: String, Codable, CaseIterable {
     case maintainWeight = "maintain_weight"
     case buildMuscle = "build_muscle"
     case gainWeight = "gain_weight"
-    
+
     var displayName: String {
         switch self {
         case .loseWeight: return "Lose Weight"
@@ -140,7 +171,7 @@ enum Goal: String, Codable, CaseIterable {
         case .gainWeight: return "Gain Weight"
         }
     }
-    
+
     // Calorie adjustment based on goal
     var calorieAdjustment: Int {
         switch self {
@@ -161,6 +192,17 @@ enum Goal: String, Codable, CaseIterable {
         } else {
             return "Maintain current weight"
         }
+    }
+
+    // Recommended macro split based on goal
+    var recommendedMacros: (carbs: Int, fats: Int, protein: Int) {
+        UserProfile.calculateRecommendedMacros(for: self)
+    }
+
+    // Display text for recommended macros
+    var macroSplitText: String {
+        let macros = recommendedMacros
+        return "\(macros.carbs)% carbs, \(macros.fats)% fats, \(macros.protein)% protein"
     }
 }
 

@@ -185,6 +185,9 @@ class AuthManager: ObservableObject {
             allergies: state.selectedAllergies.isEmpty ? nil : Array(state.selectedAllergies),
             goal: state.goal,
             targetCalories: state.targetCalories,
+            carbsPercent: state.carbsPercent,
+            fatsPercent: state.fatsPercent,
+            proteinPercent: state.proteinPercent,
             createdAt: nil,  // Set by database
             updatedAt: nil,  // Set by database
             onboardingCompleted: true
@@ -235,6 +238,9 @@ class AuthManager: ObservableObject {
                 "allergies": updatedProfile.allergies ?? [],
                 "goal": updatedProfile.goal.rawValue,
                 "target_calories": updatedProfile.targetCalories,
+                "carbs_percent": updatedProfile.carbsPercent,
+                "fats_percent": updatedProfile.fatsPercent,
+                "protein_percent": updatedProfile.proteinPercent,
                 "onboarding_completed": updatedProfile.onboardingCompleted
             ]
 

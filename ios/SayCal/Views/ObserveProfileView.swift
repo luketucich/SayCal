@@ -47,6 +47,41 @@ struct ObserveProfileView: View {
                         }
                     }
 
+                    // Macro Split Section
+                    ProfileSection(title: "Macro Split") {
+                        VStack(spacing: 12) {
+                            // Visual macro split bar
+                            HStack(spacing: 0) {
+                                Rectangle()
+                                    .fill(Color.blue)
+                                    .frame(width: macroBarWidth(for: profile.carbsPercent))
+
+                                Rectangle()
+                                    .fill(Color.orange)
+                                    .frame(width: macroBarWidth(for: profile.fatsPercent))
+
+                                Rectangle()
+                                    .fill(Color.green)
+                                    .frame(width: macroBarWidth(for: profile.proteinPercent))
+                            }
+                            .frame(height: 8)
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                            // Macro percentages
+                            VStack(spacing: 8) {
+                                MacroInfoRow(label: "Carbs", percentage: profile.carbsPercent, color: .blue)
+                                MacroInfoRow(label: "Fats", percentage: profile.fatsPercent, color: .orange)
+                                MacroInfoRow(label: "Protein", percentage: profile.proteinPercent, color: .green)
+                            }
+                            .padding(.top, 8)
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+                        )
+                    }
+
                     // Basic Information Section
                     ProfileSection(title: "Basic Information") {
                         VStack(spacing: 12) {
@@ -153,6 +188,12 @@ struct ObserveProfileView: View {
         }
         .background(Color(UIColor.systemBackground))
     }
+
+    // Calculate width for macro bar
+    private func macroBarWidth(for percentage: Int) -> CGFloat {
+        let screenWidth = UIScreen.main.bounds.width - 80 // Account for padding
+        return screenWidth * CGFloat(percentage) / 100.0
+    }
 }
 
 // MARK: - Reusable Components
@@ -216,5 +257,29 @@ struct ProfilePillBadge: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color(UIColor.systemGray5), lineWidth: 1)
             )
+    }
+}
+
+struct MacroInfoRow: View {
+    let label: String
+    let percentage: Int
+    let color: Color
+
+    var body: some View {
+        HStack {
+            Circle()
+                .fill(color)
+                .frame(width: 10, height: 10)
+
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundColor(Color(UIColor.secondaryLabel))
+
+            Spacer()
+
+            Text("\(percentage)%")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(color)
+        }
     }
 }

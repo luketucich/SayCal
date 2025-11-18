@@ -31,11 +31,16 @@ class OnboardingState: ObservableObject {
     @Published var activityLevel: ActivityLevel = .moderatelyActive
     @Published var goal: Goal = .maintainWeight
 
+    // Macro percentages
+    @Published var carbsPercent: Int = 40
+    @Published var fatsPercent: Int = 30
+    @Published var proteinPercent: Int = 30
+
     // Dietary information
     @Published var selectedDietaryPreferences: Set<String> = []
     @Published var selectedAllergies: Set<String> = []
 
-    let totalSteps = 6
+    let totalSteps = 7
 
     /// Validates whether the user can proceed from the current step
     var canProceed: Bool {
@@ -52,9 +57,11 @@ class OnboardingState: ObservableObject {
             return true
         case 3: // Goals - always can proceed
             return true
-        case 4: // Dietary preferences - optional, can always proceed
+        case 4: // Macros - validate that percentages sum to 100
+            return carbsPercent + fatsPercent + proteinPercent == 100
+        case 5: // Dietary preferences - optional, can always proceed
             return true
-        case 5: // Allergies - optional, can always proceed
+        case 6: // Allergies - optional, can always proceed
             return true
         default:
             return false
@@ -152,8 +159,10 @@ struct OnboardingContainerView: View {
         case 3:
             GoalsView(state: state)
         case 4:
-            DietaryPreferencesView(state: state)
+            MacrosView(state: state)
         case 5:
+            DietaryPreferencesView(state: state)
+        case 6:
             AllergiesView(state: state)
         default:
             EmptyView()

@@ -61,6 +61,11 @@ struct GoalsView: View {
                             ) {
                                 withAnimation(.easeInOut(duration: 0.2)) {
                                     state.goal = goal
+                                    // Reset macro percentages to recommended for the new goal
+                                    let macros = goal.recommendedMacros
+                                    state.carbsPercent = macros.carbs
+                                    state.fatsPercent = macros.fats
+                                    state.proteinPercent = macros.protein
                                 }
                             }
                         }

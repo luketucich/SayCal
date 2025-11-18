@@ -27,6 +27,12 @@ struct EditProfileView: View {
     @State private var manualCalories: Int? = nil
     @State private var showCaloriePicker = false
 
+    // Macro percentages
+    @State private var carbsPercent: Int = 40
+    @State private var fatsPercent: Int = 30
+    @State private var proteinPercent: Int = 30
+    @State private var manualMacros: Bool = false
+
     // Picker states
     @State private var showAgePicker = false
     @State private var showHeightPicker = false
@@ -124,6 +130,12 @@ struct EditProfileView: View {
                                         goal = goalOption
                                         // Reset to auto-calculated calories when goal changes
                                         manualCalories = nil
+                                        // Reset macro percentages to recommended for the new goal
+                                        let macros = goalOption.recommendedMacros
+                                        carbsPercent = macros.carbs
+                                        fatsPercent = macros.fats
+                                        proteinPercent = macros.protein
+                                        manualMacros = false
                                     }
                                 }
                             }
@@ -146,6 +158,95 @@ struct EditProfileView: View {
                                 }
                             }
                         }
+                    }
+
+                    // Macro Split
+                    VStack(alignment: .leading, spacing: 12) {
+                        FormSectionHeader(title: "Macro Split")
+
+                        VStack(spacing: 16) {
+                            // Visual macro split bar
+                            HStack(spacing: 0) {
+                                Rectangle()
+                                    .fill(Color.blue)
+                                    .frame(width: macroBarWidth(for: carbsPercent))
+
+                                Rectangle()
+                                    .fill(Color.orange)
+                                    .frame(width: macroBarWidth(for: fatsPercent))
+
+                                Rectangle()
+                                    .fill(Color.green)
+                                    .frame(width: macroBarWidth(for: proteinPercent))
+                            }
+                            .frame(height: 8)
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                            // Macro sliders
+                            VStack(spacing: 16) {
+                                MacroEditSlider(
+                                    label: "Carbs",
+                                    percentage: $carbsPercent,
+                                    color: .blue,
+                                    onChange: { manualMacros = true }
+                                )
+
+                                MacroEditSlider(
+                                    label: "Fats",
+                                    percentage: $fatsPercent,
+                                    color: .orange,
+                                    onChange: { manualMacros = true }
+                                )
+
+                                MacroEditSlider(
+                                    label: "Protein",
+                                    percentage: $proteinPercent,
+                                    color: .green,
+                                    onChange: { manualMacros = true }
+                                )
+                            }
+
+                            // Total validation
+                            let total = carbsPercent + fatsPercent + proteinPercent
+                            HStack {
+                                Image(systemName: total == 100 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(total == 100 ? .green : .orange)
+
+                                Text(total == 100 ? "Total: 100%" : "Total: \(total)% (must equal 100%)")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(total == 100 ? Color(UIColor.secondaryLabel) : .orange)
+
+                                Spacer()
+
+                                // Reset to recommended button
+                                if manualMacros {
+                                    Button(action: {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            let recommended = goal.recommendedMacros
+                                            carbsPercent = recommended.carbs
+                                            fatsPercent = recommended.fats
+                                            proteinPercent = recommended.protein
+                                            manualMacros = false
+                                        }
+                                        HapticManager.shared.light()
+                                    }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "arrow.counterclockwise")
+                                                .font(.system(size: 12, weight: .medium))
+                                            Text("Reset")
+                                                .font(.system(size: 13, weight: .medium))
+                                        }
+                                        .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(UIColor.systemGray6))
+                        )
                     }
 
                     // Units Preference
@@ -382,6 +483,19 @@ struct EditProfileView: View {
         selectedDietaryPreferences = Set(profile.dietaryPreferences ?? [])
         selectedAllergies = Set(profile.allergies ?? [])
 
+        // Load macro percentages
+        carbsPercent = profile.carbsPercent
+        fatsPercent = profile.fatsPercent
+        proteinPercent = profile.proteinPercent
+
+        // Check if macros differ from recommended (indicating manual override)
+        let recommendedMacros = profile.goal.recommendedMacros
+        if profile.carbsPercent != recommendedMacros.carbs ||
+           profile.fatsPercent != recommendedMacros.fats ||
+           profile.proteinPercent != recommendedMacros.protein {
+            manualMacros = true
+        }
+
         // Check if target calories differ from calculated (indicating manual override)
         let calculatedCalories = UserProfile.calculateTargetCalories(
             sex: profile.sex,
@@ -460,6 +574,9 @@ struct EditProfileView: View {
             allergies: selectedAllergies.isEmpty ? nil : Array(selectedAllergies),
             goal: goal,
             targetCalories: currentCalories,  // Use manual override or calculated
+            carbsPercent: carbsPercent,
+            fatsPercent: fatsPercent,
+            proteinPercent: proteinPercent,
             createdAt: authManager.cachedProfile?.createdAt,
             updatedAt: Date(),
             onboardingCompleted: true
@@ -473,6 +590,54 @@ struct EditProfileView: View {
         } catch {
             print("Failed to save profile: \(error)")
             isSaving = false
+        }
+    }
+
+    // Calculate width for macro bar
+    private func macroBarWidth(for percentage: Int) -> CGFloat {
+        let screenWidth = UIScreen.main.bounds.width - 112 // Account for padding
+        return screenWidth * CGFloat(percentage) / 100.0
+    }
+}
+
+// Macro slider component for editing
+struct MacroEditSlider: View {
+    let label: String
+    @Binding var percentage: Int
+    let color: Color
+    let onChange: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Circle()
+                    .fill(color)
+                    .frame(width: 10, height: 10)
+
+                Text(label)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color(UIColor.label))
+
+                Spacer()
+
+                Text("\(percentage)%")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(color)
+                    .frame(width: 50, alignment: .trailing)
+            }
+
+            Slider(
+                value: Binding(
+                    get: { Double(percentage) },
+                    set: { newValue in
+                        percentage = Int(newValue)
+                        onChange()
+                    }
+                ),
+                in: 0...100,
+                step: 5
+            )
+            .tint(color)
         }
     }
 }
