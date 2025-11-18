@@ -1,6 +1,10 @@
 import Foundation
 
-// MARK: - User Profile Model
+// MARK: - User Profile Data Models
+// This file contains pure data models representing user profile information.
+// No business logic or persistence should be added here.
+
+/// Main user profile model representing the user_profiles table in Supabase
 struct UserProfile: Codable {
     let userId: UUID
     let unitsPreference: UnitsPreference
@@ -39,88 +43,14 @@ struct UserProfile: Codable {
         case updatedAt = "updated_at"
         case onboardingCompleted = "onboarding_completed"
     }
-
-    // Calculate target calories based on current profile stats
-    func calculateTargetCalories() -> Int {
-        UserProfile.calculateTargetCalories(
-            sex: sex,
-            age: age,
-            heightCm: heightCm,
-            weightKg: weightKg,
-            activityLevel: activityLevel,
-            goal: goal
-        )
-    }
-
-    // Calculate recommended macro percentages based on current goal
-    func calculateMacroPercentages() -> (carbs: Int, fats: Int, protein: Int) {
-        UserProfile.calculateMacroPercentages(for: goal)
-    }
-
-    /// Calculates target calories using the Mifflin-St Jeor Equation.
-    /// This is the centralized implementation used throughout the app.
-    /// - Parameters:
-    ///   - sex: User's biological sex
-    ///   - age: User's age in years
-    ///   - heightCm: User's height in centimeters (always metric)
-    ///   - weightKg: User's weight in kilograms (always metric)
-    ///   - activityLevel: User's activity level
-    ///   - goal: User's fitness goal
-    /// - Returns: Target calories per day, clamped to safe minimums
-    static func calculateTargetCalories(
-        sex: Sex,
-        age: Int,
-        heightCm: Int,
-        weightKg: Double,
-        activityLevel: ActivityLevel,
-        goal: Goal
-    ) -> Int {
-        // Using Mifflin-St Jeor Equation for BMR (Basal Metabolic Rate)
-        let bmr: Double
-        if sex == .male {
-            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
-        } else {
-            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
-        }
-
-        // Calculate TDEE (Total Daily Energy Expenditure)
-        let tdee = bmr * activityLevel.activityMultiplier
-
-        // Adjust based on goal (lose weight, maintain, gain, etc.)
-        let targetCalories = Int(tdee) + goal.calorieAdjustment
-
-        // Ensure minimum safe calories (prevents unhealthy calorie targets)
-        let minimumCalories = sex == .male ? 1500 : 1200
-        return max(targetCalories, minimumCalories)
-    }
-
-    /// Calculates recommended macro percentages based on user's fitness goal.
-    /// Returns a tuple of (carbs%, fats%, protein%) that always sums to 100.
-    /// - Parameter goal: User's fitness goal
-    /// - Returns: Tuple of recommended macro percentages (carbs, fats, protein)
-    static func calculateMacroPercentages(for goal: Goal) -> (carbs: Int, fats: Int, protein: Int) {
-        switch goal {
-        case .loseWeight:
-            // Higher protein to preserve muscle, moderate carbs and fats
-            return (carbs: 35, fats: 30, protein: 35)
-        case .maintainWeight:
-            // Balanced macros for maintenance
-            return (carbs: 40, fats: 30, protein: 30)
-        case .buildMuscle:
-            // High protein for muscle growth, higher carbs for energy
-            return (carbs: 40, fats: 25, protein: 35)
-        case .gainWeight:
-            // High carbs and protein for weight gain
-            return (carbs: 45, fats: 25, protein: 30)
-        }
-    }
 }
 
-// MARK: - Enums for constrained fields
+// MARK: - Units Preference
+
 enum UnitsPreference: String, Codable, CaseIterable {
     case metric = "metric"
     case imperial = "imperial"
-    
+
     var displayName: String {
         switch self {
         case .metric: return "Metric (kg, cm)"
@@ -129,13 +59,15 @@ enum UnitsPreference: String, Codable, CaseIterable {
     }
 }
 
+// MARK: - Activity Level
+
 enum ActivityLevel: String, Codable, CaseIterable {
     case sedentary = "sedentary"
     case lightlyActive = "lightly_active"
     case moderatelyActive = "moderately_active"
     case veryActive = "very_active"
     case extremelyActive = "extremely_active"
-    
+
     var displayName: String {
         switch self {
         case .sedentary: return "Sedentary (little or no exercise)"
@@ -145,8 +77,8 @@ enum ActivityLevel: String, Codable, CaseIterable {
         case .extremelyActive: return "Extremely Active (physical job & daily exercise)"
         }
     }
-    
-    // Multiplier for TDEE calculation
+
+    /// Multiplier for TDEE (Total Daily Energy Expenditure) calculation
     var activityMultiplier: Double {
         switch self {
         case .sedentary: return 1.2
@@ -158,12 +90,14 @@ enum ActivityLevel: String, Codable, CaseIterable {
     }
 }
 
+// MARK: - Fitness Goal
+
 enum Goal: String, Codable, CaseIterable {
     case loseWeight = "lose_weight"
     case maintainWeight = "maintain_weight"
     case buildMuscle = "build_muscle"
     case gainWeight = "gain_weight"
-    
+
     var displayName: String {
         switch self {
         case .loseWeight: return "Lose Weight"
@@ -172,8 +106,8 @@ enum Goal: String, Codable, CaseIterable {
         case .gainWeight: return "Gain Weight"
         }
     }
-    
-    // Calorie adjustment based on goal
+
+    /// Calorie adjustment based on fitness goal
     var calorieAdjustment: Int {
         switch self {
         case .loseWeight: return -500  // 500 calorie deficit
@@ -183,7 +117,7 @@ enum Goal: String, Codable, CaseIterable {
         }
     }
 
-    // Display text for calorie adjustment
+    /// Display text for calorie adjustment
     var calorieAdjustmentText: String {
         let adjustment = calorieAdjustment
         if adjustment > 0 {
@@ -196,7 +130,23 @@ enum Goal: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - Common dietary preferences and allergies
+// MARK: - Biological Sex
+
+enum Sex: String, Codable, CaseIterable {
+    case male = "male"
+    case female = "female"
+
+    var displayName: String {
+        switch self {
+        case .male: return "Male"
+        case .female: return "Female"
+        }
+    }
+}
+
+// MARK: - Dietary Options
+
+/// Common dietary preferences and allergies for user selection
 struct DietaryOptions {
     static let dietaryPreferences = [
         "vegetarian",
@@ -210,7 +160,7 @@ struct DietaryOptions {
         "animal_based",
         "carnivore"
     ]
-    
+
     static let commonAllergies = [
         "peanuts",
         "tree_nuts",
@@ -230,8 +180,14 @@ struct DietaryOptions {
 // We use proper rounding to ensure conversions are deterministic and idempotent.
 
 extension Double {
+    /// Converts kilograms to pounds
     var kgToLbs: Double { self * 2.20462 }
+
+    /// Converts pounds to kilograms
     var lbsToKg: Double { self / 2.20462 }
+
+    /// Converts Double to Int using proper rounding
+    var int: Int { Int(self) }
 }
 
 extension Int {
@@ -255,26 +211,9 @@ extension Int {
     }
 }
 
-extension Double {
-    /// Converts Double to Int using proper rounding
-    var int: Int { Int(self) }
-}
-
 /// Converts feet and inches to centimeters using proper rounding.
 /// Always use this when converting user input from imperial to metric for storage.
 func feetAndInchesToCm(feet: Int, inches: Int) -> Int {
     let totalInches = (feet * 12) + inches
     return totalInches.inchesToCm
-}
-
-enum Sex: String, Codable, CaseIterable {
-    case male = "male"
-    case female = "female"
-
-    var displayName: String {
-        switch self {
-        case .male: return "Male"
-        case .female: return "Female"
-        }
-    }
 }
