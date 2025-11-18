@@ -3,6 +3,8 @@ import Charts
 
 // An interactive 3D-style pie chart that displays macronutrient percentages and remaining calories
 struct CaloriesPieChart: View {
+    // For light/dark mode specific coloring
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
     
     // Macro percentages (should total 1.0)
     var proteinPercent: Double = 0.30
@@ -35,23 +37,46 @@ struct CaloriesPieChart: View {
         GeometryReader { geometry in
             let size = min(geometry.size.width, geometry.size.height)
             
-            // Dynamic blur radii
+            // Dynamic blur radii for depth effect
             let blurRadii: [CGFloat] = [size * 0.1667, size * 0.2333]
             
             // Dynamic line width for ring
-            let ringLineWidth: CGFloat = size * 0.02
+            let ringLineWidth: CGFloat = size * 0.01
             
             // Dynamic padding for ring expansion
             let ringPadding: CGFloat = size * 0.05
             
-            // Dynamic glow layer values
+            // Dynamic glow layer values for ring
             let glowLayers: [CGFloat] = [size * 0.04, size * 0.0333, size * 0.0267, size * 0.02, size * 0.0133]
             
             // Dynamic label radius offset
             let labelOffset: CGFloat = size * 0.15
             
+            // Dynamic shift factor for lighting (adjust as needed)
+            let shiftFactor: Double = 0.02
+            
+            // Highlight centers shift opposite to tilt for realistic lighting
+            let primaryHighlightCenter = UnitPoint(
+                x: 0.5 - tiltX * shiftFactor,
+                y: 0.97 - tiltY * shiftFactor
+            )
+            
+            let secondaryHighlightCenter = UnitPoint(
+                x: 0.6 - tiltX * shiftFactor,
+                y: 0.2 - tiltY * shiftFactor
+            )
+            
+            // Shadow center shifts with tilt
+            let shadowCenter = UnitPoint(
+                x: 0.5 + tiltX * shiftFactor,
+                y: 0.5 + tiltY * shiftFactor
+            )
+            
             ZStack {
+                Circle()
+                    .fill(colorScheme == .dark ? Color.black : Color.white)
                 chartContent(blurRadii: blurRadii, size: size)
+                highlightOverlay(size: size, primaryHighlightCenter: primaryHighlightCenter, secondaryHighlightCenter: secondaryHighlightCenter, shadowCenter: shadowCenter)
                 percentageRing(glowLayers: glowLayers, lineWidth: ringLineWidth, padding: ringPadding)
                 percentageLabels(size: geometry.size, offset: labelOffset)
                     .opacity(isDragging ? 1 : 0)
@@ -79,6 +104,52 @@ struct CaloriesPieChart: View {
             }
         }
         .clipShape(Circle())
+    }
+    
+    // Natural white lighting/highlights overlay with dynamic shadow for marble-like effect
+    private func highlightOverlay(size: CGFloat, primaryHighlightCenter: UnitPoint, secondaryHighlightCenter: UnitPoint, shadowCenter: UnitPoint) -> some View {
+        ZStack {
+            // Primary specular highlight at bottom (brighter, focused spot)
+            Circle()
+                .fill(
+                    RadialGradient(
+                        gradient: Gradient(colors: [.white.opacity(1.0), .white.opacity(0.5), Color.clear]),
+                        center: primaryHighlightCenter,
+                        startRadius: 0,
+                        endRadius: size * 0.35 // Slightly larger radius for bigger highlight
+                    )
+                )
+                .blendMode(.screen) // Screen blend for brighter highlight effect
+                .blur(radius: size * 0.03) // Small blur for slight diffusion
+                .clipShape(Circle())
+            
+            // Secondary highlight at top (softer, longer gradient)
+            Circle()
+                .fill(
+                    RadialGradient(
+                        gradient: Gradient(colors: [.white.opacity(0.6), .white.opacity(0.3), Color.clear]),
+                        center: secondaryHighlightCenter,
+                        startRadius: 0,
+                        endRadius: size * 0.7 // Larger radius for longer, stretched effect
+                    )
+                )
+                .blendMode(.screen)
+                .blur(radius: size * 0.05) // Additional blur for softer appearance
+                .clipShape(Circle())
+            
+            // Soft shadow for 3D depth
+            Circle()
+                .fill(
+                    RadialGradient(
+                        gradient: Gradient(colors: [.black.opacity(0.2), Color.clear]),
+                        center: shadowCenter,
+                        startRadius: 0,
+                        endRadius: size * 0.5
+                    )
+                )
+                .blendMode(.multiply) // Multiply blend for subtle darkening
+                .clipShape(Circle())
+        }
     }
     
     // Glowing outer ring around the pie chart
@@ -134,22 +205,15 @@ struct CaloriesPieChart: View {
         VStack(spacing: size.height * 0.02) {
             Text("\(remainingCalories)")
                 .font(.system(size: size.width * 0.213, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .shadow(color: .white.opacity(0.8), radius: 20)
-                .shadow(color: .white.opacity(0.6), radius: 10)
-                .shadow(color: .white.opacity(0.4), radius: 5)
+                .foregroundStyle(Color(UIColor.label))
             
             Text("calories left")
                 .font(.system(size: size.width * 0.06, weight: .semibold))
-                .foregroundStyle(.white)
-                .shadow(color: .white.opacity(0.6), radius: 10)
-                .shadow(color: .white.opacity(0.4), radius: 5)
+                .foregroundStyle(colorScheme == .dark ? Color.black : Color.white)
             
             Text("of \(totalCalories)")
                 .font(.system(size: size.width * 0.047, weight: .semibold))
-                .foregroundStyle(.white)
-                .shadow(color: .white.opacity(0.6), radius: 10)
-                .shadow(color: .white.opacity(0.4), radius: 5)
+                .foregroundStyle(colorScheme == .dark ? Color.black : Color.white)
         }
     }
     
