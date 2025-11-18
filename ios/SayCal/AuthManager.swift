@@ -220,28 +220,41 @@ class AuthManager: ObservableObject {
             throw NSError(domain: "AuthManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
         }
 
-        do {
-            // Create update payload that explicitly includes nil array fields as empty arrays
-            // This ensures that when users delete all allergies/dietary preferences,
-            // the database is properly updated (nil values might be skipped in JSON encoding)
-            var updatePayload: [String: Any] = [
-                "units_preference": updatedProfile.unitsPreference.rawValue,
-                "sex": updatedProfile.sex.rawValue,
-                "age": updatedProfile.age,
-                "height_cm": updatedProfile.heightCm,
-                "weight_kg": updatedProfile.weightKg,
-                "activity_level": updatedProfile.activityLevel.rawValue,
-                "dietary_preferences": updatedProfile.dietaryPreferences ?? [],
-                "allergies": updatedProfile.allergies ?? [],
-                "goal": updatedProfile.goal.rawValue,
-                "target_calories": updatedProfile.targetCalories,
-                "onboarding_completed": updatedProfile.onboardingCompleted
-            ]
+        // Encodable payload to satisfy Supabase update(_:).
+        // Arrays are always provided (empty when the user cleared them).
+        struct UserProfileUpdatePayload: Encodable {
+            let units_preference: UnitsPreference
+            let sex: Sex
+            let age: Int
+            let height_cm: Int
+            let weight_kg: Double
+            let activity_level: ActivityLevel
+            let dietary_preferences: [String]
+            let allergies: [String]
+            let goal: Goal
+            let target_calories: Int
+            let onboarding_completed: Bool
+        }
 
-            // Update profile in database using explicit dictionary
+        do {
+            let payload = UserProfileUpdatePayload(
+                units_preference: updatedProfile.unitsPreference,
+                sex: updatedProfile.sex,
+                age: updatedProfile.age,
+                height_cm: updatedProfile.heightCm,
+                weight_kg: updatedProfile.weightKg,
+                activity_level: updatedProfile.activityLevel,
+                dietary_preferences: updatedProfile.dietaryPreferences ?? [],
+                allergies: updatedProfile.allergies ?? [],
+                goal: updatedProfile.goal,
+                target_calories: updatedProfile.targetCalories,
+                onboarding_completed: updatedProfile.onboardingCompleted
+            )
+
+            // Update profile in database using Encodable payload
             try await client
                 .from("user_profiles")
-                .update(updatePayload)
+                .update(payload)
                 .eq("user_id", value: userId)
                 .execute()
 
