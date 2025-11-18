@@ -35,8 +35,6 @@ struct CaloriesPieChart: View {
         GeometryReader { geometry in
             ZStack {
                 chartContent
-                Circle()
-                    .stroke(Color(UIColor.label), lineWidth: 2)
                 percentageRing
                 percentageLabels(size: geometry.size)
                     .opacity(isDragging ? 1 : 0)
@@ -61,8 +59,16 @@ struct CaloriesPieChart: View {
                 }
                 .chartLegend(.hidden)
                 .blur(radius: CGFloat(blur))
-                .saturation(1.3)
+                .saturation(1.5)
             }
+
+            // Solid chart on top for vibrant colors
+            Chart(macroData, id: \.name) { macro in
+                SectorMark(angle: .value("Percentage", macro.value))
+                    .foregroundStyle(macro.color)
+            }
+            .chartLegend(.hidden)
+            .saturation(1.5)
         }
         .clipShape(Circle())
     }
@@ -79,23 +85,23 @@ struct CaloriesPieChart: View {
                     ForEach([12, 10, 8, 6, 4], id: \.self) { blur in
                         Circle()
                             .trim(from: start.degrees / 360, to: end.degrees / 360)
-                            .stroke(macro.color.opacity(blur >= 8 ? 0.3 : 0.5), lineWidth: 6)
-                            .saturation(1.3)
+                            .stroke(macro.color.opacity(blur >= 8 ? 0.5 : 0.7), lineWidth: 6)
+                            .saturation(1.5)
 //                            .blur(radius: CGFloat(blur))
                             .rotationEffect(.degrees(-90))
                     }
-                    
+
                     // Solid ring on top
                     Circle()
                         .trim(from: start.degrees / 360, to: end.degrees / 360)
-                        .stroke(macro.color.opacity(0.9), lineWidth: 6)
-                        .saturation(1.3)
-                        .blur(radius: 1)
+                        .stroke(macro.color, lineWidth: 6)
+                        .saturation(1.5)
                         .rotationEffect(.degrees(-90))
                 }
             }
         }
-        .padding(-15)
+        .padding(isDragging ? -15 : 0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isDragging)
     }
     
     // Percentage labels positioned around the outer ring
