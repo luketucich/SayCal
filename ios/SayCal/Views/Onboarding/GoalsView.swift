@@ -40,12 +40,41 @@ struct GoalsView: View {
                                 .fill(Color(UIColor.systemGray6))
                         )
 
+                        // Macro Split Display
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Recommended Macro Split")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(Color(UIColor.secondaryLabel))
+
+                            HStack(spacing: 12) {
+                                let macros = UserProfile.calculateMacroPercentages(for: state.goal)
+
+                                OnboardingMacroCard(
+                                    title: "Carbs",
+                                    percentage: macros.carbs,
+                                    color: .blue
+                                )
+
+                                OnboardingMacroCard(
+                                    title: "Fats",
+                                    percentage: macros.fats,
+                                    color: .orange
+                                )
+
+                                OnboardingMacroCard(
+                                    title: "Protein",
+                                    percentage: macros.protein,
+                                    color: .green
+                                )
+                            }
+                        }
+
                         HStack {
                             Image(systemName: "info.circle")
                                 .font(.system(size: 14))
                                 .foregroundColor(Color(UIColor.tertiaryLabel))
 
-                            Text("You can edit your target calories anytime in your profile")
+                            Text("You can edit your target calories and macros anytime in your profile")
                                 .font(.system(size: 13))
                                 .foregroundColor(Color(UIColor.secondaryLabel))
                         }
@@ -90,6 +119,31 @@ struct GoalsView: View {
         } else {
             return "Maintain current weight"
         }
+    }
+}
+
+// MARK: - Onboarding Macro Card Component
+struct OnboardingMacroCard: View {
+    let title: String
+    let percentage: Int
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Text(title)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color(UIColor.secondaryLabel))
+
+            Text("\(percentage)%")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(color.opacity(0.1))
+        )
     }
 }
 

@@ -173,6 +173,8 @@ class AuthManager: ObservableObject {
 
         // Build database payload using UserProfile model
         // Target calories are calculated by OnboardingState.targetCalories computed property
+        // Macro percentages are calculated based on the user's goal
+        let macros = UserProfile.calculateMacroPercentages(for: state.goal)
         let newProfile = UserProfile(
             userId: userId,
             unitsPreference: state.unitsPreference,
@@ -185,6 +187,9 @@ class AuthManager: ObservableObject {
             allergies: state.selectedAllergies.isEmpty ? nil : Array(state.selectedAllergies),
             goal: state.goal,
             targetCalories: state.targetCalories,
+            carbsPercent: macros.carbs,
+            fatsPercent: macros.fats,
+            proteinPercent: macros.protein,
             createdAt: nil,  // Set by database
             updatedAt: nil,  // Set by database
             onboardingCompleted: true
@@ -233,6 +238,9 @@ class AuthManager: ObservableObject {
             let allergies: [String]
             let goal: Goal
             let target_calories: Int
+            let carbs_percent: Int
+            let fats_percent: Int
+            let protein_percent: Int
             let onboarding_completed: Bool
         }
 
@@ -248,6 +256,9 @@ class AuthManager: ObservableObject {
                 allergies: updatedProfile.allergies ?? [],
                 goal: updatedProfile.goal,
                 target_calories: updatedProfile.targetCalories,
+                carbs_percent: updatedProfile.carbsPercent,
+                fats_percent: updatedProfile.fatsPercent,
+                protein_percent: updatedProfile.proteinPercent,
                 onboarding_completed: updatedProfile.onboardingCompleted
             )
 

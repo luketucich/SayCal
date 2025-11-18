@@ -13,6 +13,9 @@ struct UserProfile: Codable {
     let allergies: [String]?
     let goal: Goal
     let targetCalories: Int
+    let carbsPercent: Int
+    let fatsPercent: Int
+    let proteinPercent: Int
     let createdAt: Date?
     let updatedAt: Date?
     let onboardingCompleted: Bool
@@ -29,6 +32,9 @@ struct UserProfile: Codable {
         case allergies
         case goal
         case targetCalories = "target_calories"
+        case carbsPercent = "carbs_percent"
+        case fatsPercent = "fats_percent"
+        case proteinPercent = "protein_percent"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case onboardingCompleted = "onboarding_completed"
@@ -44,6 +50,11 @@ struct UserProfile: Codable {
             activityLevel: activityLevel,
             goal: goal
         )
+    }
+
+    // Calculate recommended macro percentages based on current goal
+    func calculateMacroPercentages() -> (carbs: Int, fats: Int, protein: Int) {
+        UserProfile.calculateMacroPercentages(for: goal)
     }
 
     /// Calculates target calories using the Mifflin-St Jeor Equation.
@@ -81,6 +92,27 @@ struct UserProfile: Codable {
         // Ensure minimum safe calories (prevents unhealthy calorie targets)
         let minimumCalories = sex == .male ? 1500 : 1200
         return max(targetCalories, minimumCalories)
+    }
+
+    /// Calculates recommended macro percentages based on user's fitness goal.
+    /// Returns a tuple of (carbs%, fats%, protein%) that always sums to 100.
+    /// - Parameter goal: User's fitness goal
+    /// - Returns: Tuple of recommended macro percentages (carbs, fats, protein)
+    static func calculateMacroPercentages(for goal: Goal) -> (carbs: Int, fats: Int, protein: Int) {
+        switch goal {
+        case .loseWeight:
+            // Higher protein to preserve muscle, moderate carbs and fats
+            return (carbs: 35, fats: 30, protein: 35)
+        case .maintainWeight:
+            // Balanced macros for maintenance
+            return (carbs: 40, fats: 30, protein: 30)
+        case .buildMuscle:
+            // High protein for muscle growth, higher carbs for energy
+            return (carbs: 40, fats: 25, protein: 35)
+        case .gainWeight:
+            // High carbs and protein for weight gain
+            return (carbs: 45, fats: 25, protein: 30)
+        }
     }
 }
 
