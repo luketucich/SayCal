@@ -33,6 +33,23 @@ struct UserProfile: Codable {
         case updatedAt = "updated_at"
         case onboardingCompleted = "onboarding_completed"
     }
+
+    // Calculate target calories based on current profile stats
+    func calculateTargetCalories() -> Int {
+        // Using Mifflin-St Jeor Equation for BMR
+        let bmr: Double
+        if sex == .male {
+            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
+        } else {
+            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
+        }
+
+        let tdee = bmr * activityLevel.activityMultiplier
+        let targetCalories = Int(tdee) + goal.calorieAdjustment
+
+        let minimumCalories = sex == .male ? 1500 : 1200
+        return max(targetCalories, minimumCalories)
+    }
 }
 
 // MARK: - Enums for constrained fields
@@ -99,6 +116,18 @@ enum Goal: String, Codable, CaseIterable {
         case .maintainWeight: return 0
         case .buildMuscle: return 300   // 300 calorie surplus
         case .gainWeight: return 500    // 500 calorie surplus
+        }
+    }
+
+    // Display text for calorie adjustment
+    var calorieAdjustmentText: String {
+        let adjustment = calorieAdjustment
+        if adjustment > 0 {
+            return "+\(adjustment) calories"
+        } else if adjustment < 0 {
+            return "\(adjustment) calories"
+        } else {
+            return "Maintain current weight"
         }
     }
 }

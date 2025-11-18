@@ -1,4 +1,5 @@
 import SwiftUI
+import Auth
 
 struct EditProfileView: View {
     @EnvironmentObject var authManager: AuthManager
@@ -37,9 +38,7 @@ struct EditProfileView: View {
                 VStack(spacing: 24) {
                     // Units Preference
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Units")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
+                        FormSectionHeader(title: "Units")
 
                         HStack(spacing: 12) {
                             TogglePill(
@@ -68,9 +67,7 @@ struct EditProfileView: View {
 
                     // Sex Selection
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Sex")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
+                        FormSectionHeader(title: "Sex")
 
                         HStack(spacing: 12) {
                             TogglePill(
@@ -97,111 +94,41 @@ struct EditProfileView: View {
 
                     // Age Selector
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Age")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
+                        FormSectionHeader(title: "Age")
 
-                        Button {
+                        FormPickerButton(label: "\(age) years") {
                             HapticManager.shared.light()
                             showAgePicker.toggle()
-                        } label: {
-                            HStack {
-                                Text("\(age) years")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(Color(UIColor.label))
-
-                                Spacer()
-
-                                Image(systemName: "chevron.down")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color(UIColor.tertiaryLabel))
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 14)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color(UIColor.systemGray5), lineWidth: 1)
-                            )
                         }
                     }
 
                     // Height Selector
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Height")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
+                        FormSectionHeader(title: "Height")
 
-                        Button {
+                        FormPickerButton(
+                            label: unitsPreference == .metric ? "\(heightCm) cm" : "\(heightFeet)' \(heightInches)\""
+                        ) {
                             HapticManager.shared.light()
                             showHeightPicker.toggle()
-                        } label: {
-                            HStack {
-                                if unitsPreference == .metric {
-                                    Text("\(heightCm) cm")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(Color(UIColor.label))
-                                } else {
-                                    Text("\(heightFeet)' \(heightInches)\"")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(Color(UIColor.label))
-                                }
-
-                                Spacer()
-
-                                Image(systemName: "chevron.down")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color(UIColor.tertiaryLabel))
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 14)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color(UIColor.systemGray5), lineWidth: 1)
-                            )
                         }
                     }
 
                     // Weight Selector
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Weight")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
+                        FormSectionHeader(title: "Weight")
 
-                        Button {
+                        FormPickerButton(
+                            label: unitsPreference == .metric ? String(format: "%.1f kg", weightKg) : "\(Int(weightLbs)) lbs"
+                        ) {
                             HapticManager.shared.light()
                             showWeightPicker.toggle()
-                        } label: {
-                            HStack {
-                                if unitsPreference == .metric {
-                                    Text(String(format: "%.1f kg", weightKg))
-                                        .font(.system(size: 16))
-                                        .foregroundColor(Color(UIColor.label))
-                                } else {
-                                    Text("\(Int(weightLbs)) lbs")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(Color(UIColor.label))
-                                }
-
-                                Spacer()
-
-                                Image(systemName: "chevron.down")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color(UIColor.tertiaryLabel))
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 14)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color(UIColor.systemGray5), lineWidth: 1)
-                            )
                         }
                     }
 
                     // Activity Level
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Activity Level")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
+                        FormSectionHeader(title: "Activity Level")
 
                         VStack(spacing: 12) {
                             ForEach(ActivityLevel.allCases, id: \.self) { level in
@@ -219,9 +146,7 @@ struct EditProfileView: View {
 
                     // Goal
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Goal")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
+                        FormSectionHeader(title: "Goal")
 
                         // Target Calories Display
                         VStack(spacing: 12) {
@@ -253,7 +178,7 @@ struct EditProfileView: View {
                             ForEach(Goal.allCases, id: \.self) { goalOption in
                                 SelectableCard(
                                     title: goalOption.displayName,
-                                    subtitle: calorieAdjustmentText(for: goalOption),
+                                    subtitle: goalOption.calorieAdjustmentText,
                                     isSelected: goal == goalOption
                                 ) {
                                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -265,58 +190,18 @@ struct EditProfileView: View {
                     }
 
                     // Dietary Preferences
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Dietary Preferences")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
-
-                        LazyVGrid(columns: [
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ], spacing: 10) {
-                            ForEach(DietaryOptions.dietaryPreferences, id: \.self) { preference in
-                                TogglePill(
-                                    title: preference.replacingOccurrences(of: "_", with: " ").capitalized,
-                                    isSelected: selectedDietaryPreferences.contains(preference)
-                                ) {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        if selectedDietaryPreferences.contains(preference) {
-                                            selectedDietaryPreferences.remove(preference)
-                                        } else {
-                                            selectedDietaryPreferences.insert(preference)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    MultiSelectPillGrid(
+                        title: "Dietary Preferences",
+                        selectedItems: $selectedDietaryPreferences,
+                        items: DietaryOptions.dietaryPreferences
+                    )
 
                     // Allergies
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Allergies")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(UIColor.secondaryLabel))
-
-                        LazyVGrid(columns: [
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ], spacing: 10) {
-                            ForEach(DietaryOptions.commonAllergies, id: \.self) { allergy in
-                                TogglePill(
-                                    title: allergy.replacingOccurrences(of: "_", with: " ").capitalized,
-                                    isSelected: selectedAllergies.contains(allergy)
-                                ) {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        if selectedAllergies.contains(allergy) {
-                                            selectedAllergies.remove(allergy)
-                                        } else {
-                                            selectedAllergies.insert(allergy)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    MultiSelectPillGrid(
+                        title: "Allergies",
+                        selectedItems: $selectedAllergies,
+                        items: DietaryOptions.commonAllergies
+                    )
                 }
 
                 Spacer(minLength: 100)
@@ -466,17 +351,6 @@ struct EditProfileView: View {
 
         let minimumCalories = sex == .male ? 1500 : 1200
         return max(targetCalories, minimumCalories)
-    }
-
-    private func calorieAdjustmentText(for goal: Goal) -> String {
-        let adjustment = goal.calorieAdjustment
-        if adjustment > 0 {
-            return "+\(adjustment) calories"
-        } else if adjustment < 0 {
-            return "\(adjustment) calories"
-        } else {
-            return "Maintain current weight"
-        }
     }
 
     func saveProfile() async {
