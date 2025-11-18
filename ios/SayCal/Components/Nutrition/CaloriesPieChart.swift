@@ -61,14 +61,6 @@ struct CaloriesPieChart: View {
                 .blur(radius: CGFloat(blur))
                 .saturation(1.5)
             }
-
-            // Solid chart on top for vibrant colors
-            Chart(macroData, id: \.name) { macro in
-                SectorMark(angle: .value("Percentage", macro.value))
-                    .foregroundStyle(macro.color)
-            }
-            .chartLegend(.hidden)
-            .saturation(1.5)
         }
         .clipShape(Circle())
     }
@@ -198,5 +190,4 @@ struct CaloriesPieChart: View {
     )
     .frame(width: 300, height: 300)
     .padding()
-    .background(Color(.systemBackground))
 }
