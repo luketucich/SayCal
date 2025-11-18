@@ -112,6 +112,18 @@ struct DietaryPreferencesView: View {
             )
         }
         .background(Color(UIColor.systemBackground))
+        .onAppear {
+            // Restore custom dietary preferences when navigating back
+            let predefinedPreferences = Set(DietaryOptions.dietaryPreferences)
+            let customPreferences = state.selectedDietaryPreferences.filter { !predefinedPreferences.contains($0) }
+
+            // Add any custom preferences that aren't already in the local array
+            for customPref in customPreferences {
+                if !dietaryPreferences.contains(customPref) {
+                    dietaryPreferences.insert(customPref, at: 0)
+                }
+            }
+        }
     }
 }
 

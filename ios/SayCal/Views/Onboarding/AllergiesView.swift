@@ -119,6 +119,18 @@ struct AllergiesView: View {
             )
         }
         .background(Color(UIColor.systemBackground))
+        .onAppear {
+            // Restore custom allergies when navigating back
+            let predefinedAllergies = Set(DietaryOptions.commonAllergies)
+            let customAllergies = state.selectedAllergies.filter { !predefinedAllergies.contains($0) }
+
+            // Add any custom allergies that aren't already in the local array
+            for customAllergy in customAllergies {
+                if !allergies.contains(customAllergy) {
+                    allergies.insert(customAllergy, at: 0)
+                }
+            }
+        }
     }
 }
 
