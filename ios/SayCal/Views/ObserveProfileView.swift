@@ -41,6 +41,33 @@ struct ObserveProfileView: View {
                                     .fill(Color(UIColor.systemGray6))
                             )
 
+                            // Macro Split Display
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Macro Split")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(Color(UIColor.secondaryLabel))
+
+                                HStack(spacing: 12) {
+                                    MacroDisplayCard(
+                                        title: "Carbs",
+                                        percentage: profile.carbsPercent,
+                                        color: .blue
+                                    )
+
+                                    MacroDisplayCard(
+                                        title: "Fats",
+                                        percentage: profile.fatsPercent,
+                                        color: .orange
+                                    )
+
+                                    MacroDisplayCard(
+                                        title: "Protein",
+                                        percentage: profile.proteinPercent,
+                                        color: .green
+                                    )
+                                }
+                            }
+
                             // Goal and Activity Level context
                             ProfileInfoCard(label: "Goal", value: profile.goal.displayName)
                             ProfileInfoCard(label: "Activity Level", value: profile.activityLevel.displayName)
@@ -216,5 +243,29 @@ struct ProfilePillBadge: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color(UIColor.systemGray5), lineWidth: 1)
             )
+    }
+}
+
+struct MacroDisplayCard: View {
+    let title: String
+    let percentage: Int
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Text(title)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color(UIColor.secondaryLabel))
+
+            Text("\(percentage)%")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(color.opacity(0.1))
+        )
     }
 }

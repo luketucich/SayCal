@@ -27,6 +27,25 @@ struct EditProfileView: View {
     @State private var manualCalories: Int? = nil
     @State private var showCaloriePicker = false
 
+    // Manual macro overrides
+    @State private var manualCarbsPercent: Int? = nil
+    @State private var manualFatsPercent: Int? = nil
+    @State private var manualProteinPercent: Int? = nil
+    @State private var showMacroPicker = false
+    @State private var editingMacro: MacroType? = nil
+
+    enum MacroType {
+        case carbs, fats, protein
+
+        var displayName: String {
+            switch self {
+            case .carbs: return "Carbs"
+            case .fats: return "Fats"
+            case .protein: return "Protein"
+            }
+        }
+    }
+
     // Picker states
     @State private var showAgePicker = false
     @State private var showHeightPicker = false
@@ -35,6 +54,24 @@ struct EditProfileView: View {
     // Computed property for current calories (manual override or calculated)
     private var currentCalories: Int {
         manualCalories ?? calculateTargetCalories()
+    }
+
+    // Computed properties for current macros (manual override or calculated)
+    private var currentCarbsPercent: Int {
+        manualCarbsPercent ?? calculateMacroPercentages().carbs
+    }
+
+    private var currentFatsPercent: Int {
+        manualFatsPercent ?? calculateMacroPercentages().fats
+    }
+
+    private var currentProteinPercent: Int {
+        manualProteinPercent ?? calculateMacroPercentages().protein
+    }
+
+    // Check if any macro has been manually overridden
+    private var hasMacroOverride: Bool {
+        manualCarbsPercent != nil || manualFatsPercent != nil || manualProteinPercent != nil
     }
 
     var body: some View {
@@ -122,9 +159,92 @@ struct EditProfileView: View {
                                 ) {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         goal = goalOption
-                                        // Reset to auto-calculated calories when goal changes
+                                        // Reset to auto-calculated calories and macros when goal changes
                                         manualCalories = nil
+                                        manualCarbsPercent = nil
+                                        manualFatsPercent = nil
+                                        manualProteinPercent = nil
                                     }
+                                }
+                            }
+                        }
+                    }
+
+                    // Macro Split
+                    VStack(alignment: .leading, spacing: 12) {
+                        FormSectionHeader(title: "Macro Split")
+
+                        // Macro Percentages Display
+                        VStack(spacing: 12) {
+                            HStack(spacing: 12) {
+                                // Carbs
+                                MacroCard(
+                                    title: "Carbs",
+                                    percentage: currentCarbsPercent,
+                                    color: .blue,
+                                    onEdit: {
+                                        editingMacro = .carbs
+                                        showMacroPicker = true
+                                        HapticManager.shared.light()
+                                    }
+                                )
+
+                                // Fats
+                                MacroCard(
+                                    title: "Fats",
+                                    percentage: currentFatsPercent,
+                                    color: .orange,
+                                    onEdit: {
+                                        editingMacro = .fats
+                                        showMacroPicker = true
+                                        HapticManager.shared.light()
+                                    }
+                                )
+
+                                // Protein
+                                MacroCard(
+                                    title: "Protein",
+                                    percentage: currentProteinPercent,
+                                    color: .green,
+                                    onEdit: {
+                                        editingMacro = .protein
+                                        showMacroPicker = true
+                                        HapticManager.shared.light()
+                                    }
+                                )
+                            }
+
+                            // Reset button and info message
+                            HStack {
+                                if hasMacroOverride {
+                                    Button(action: {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            manualCarbsPercent = nil
+                                            manualFatsPercent = nil
+                                            manualProteinPercent = nil
+                                        }
+                                        HapticManager.shared.light()
+                                    }) {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "arrow.counterclockwise")
+                                                .font(.system(size: 12))
+                                            Text("Reset to recommended")
+                                                .font(.system(size: 13, weight: .medium))
+                                        }
+                                        .foregroundColor(.orange)
+                                    }
+                                    Spacer()
+                                } else {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "info.circle")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(Color(UIColor.tertiaryLabel))
+
+                                        Text("Recommended for \(goal.displayName)")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(Color(UIColor.secondaryLabel))
+                                    }
+                                    Spacer()
                                 }
                             }
                         }
@@ -353,6 +473,32 @@ struct EditProfileView: View {
                 )
             }
         }
+        .sheet(isPresented: $showMacroPicker) {
+            if let macro = editingMacro {
+                PickerSheet(
+                    title: "Select \(macro.displayName) %",
+                    selection: Binding(
+                        get: {
+                            switch macro {
+                            case .carbs: return manualCarbsPercent ?? calculateMacroPercentages().carbs
+                            case .fats: return manualFatsPercent ?? calculateMacroPercentages().fats
+                            case .protein: return manualProteinPercent ?? calculateMacroPercentages().protein
+                            }
+                        },
+                        set: { newValue in
+                            switch macro {
+                            case .carbs: manualCarbsPercent = newValue
+                            case .fats: manualFatsPercent = newValue
+                            case .protein: manualProteinPercent = newValue
+                            }
+                        }
+                    ),
+                    range: 10...70,
+                    suffix: "%",
+                    isPresented: $showMacroPicker
+                )
+            }
+        }
         .onAppear {
             loadProfileData()
         }
@@ -395,6 +541,18 @@ struct EditProfileView: View {
             manualCalories = profile.targetCalories
         }
 
+        // Check if macro percentages differ from calculated (indicating manual override)
+        let calculatedMacros = UserProfile.calculateMacroPercentages(for: profile.goal)
+        if profile.carbsPercent != calculatedMacros.carbs {
+            manualCarbsPercent = profile.carbsPercent
+        }
+        if profile.fatsPercent != calculatedMacros.fats {
+            manualFatsPercent = profile.fatsPercent
+        }
+        if profile.proteinPercent != calculatedMacros.protein {
+            manualProteinPercent = profile.proteinPercent
+        }
+
         // Calculate imperial values from metric for display (not stored)
         let (feet, inches) = heightCm.cmToFeetAndInches
         heightFeet = feet
@@ -435,6 +593,11 @@ struct EditProfileView: View {
         )
     }
 
+    /// Calculates recommended macro percentages based on the current goal.
+    private func calculateMacroPercentages() -> (carbs: Int, fats: Int, protein: Int) {
+        UserProfile.calculateMacroPercentages(for: goal)
+    }
+
     /// Saves the profile to the database via AuthManager.
     /// IMPORTANT: We always save metric values (heightCm, weightKg) to the database.
     /// Imperial values are never persisted - they're calculated on-the-fly for display.
@@ -447,7 +610,7 @@ struct EditProfileView: View {
         }
 
         // Create updated profile using authoritative metric values
-        // Use manual calories if set, otherwise calculate from profile stats
+        // Use manual calories/macros if set, otherwise calculate from profile stats
         let updatedProfile = UserProfile(
             userId: userId,
             unitsPreference: unitsPreference,
@@ -460,6 +623,9 @@ struct EditProfileView: View {
             allergies: selectedAllergies.isEmpty ? nil : Array(selectedAllergies),
             goal: goal,
             targetCalories: currentCalories,  // Use manual override or calculated
+            carbsPercent: currentCarbsPercent,  // Use manual override or calculated
+            fatsPercent: currentFatsPercent,  // Use manual override or calculated
+            proteinPercent: currentProteinPercent,  // Use manual override or calculated
             createdAt: authManager.cachedProfile?.createdAt,
             updatedAt: Date(),
             onboardingCompleted: true
@@ -474,5 +640,37 @@ struct EditProfileView: View {
             print("Failed to save profile: \(error)")
             isSaving = false
         }
+    }
+}
+
+// MARK: - Macro Card Component
+struct MacroCard: View {
+    let title: String
+    let percentage: Int
+    let color: Color
+    let onEdit: () -> Void
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(Color(UIColor.secondaryLabel))
+
+            Text("\(percentage)%")
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+
+            Button(action: onEdit) {
+                Image(systemName: "pencil.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(color)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(color.opacity(0.1))
+        )
     }
 }
