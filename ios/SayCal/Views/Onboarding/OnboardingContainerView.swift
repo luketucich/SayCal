@@ -81,9 +81,10 @@ class OnboardingState: ObservableObject {
         }
     }
 
-    /// Calculates target calories based on current user stats and selected goal
+    /// Calculates target calories based on current user stats and selected goal.
+    /// Uses the centralized calculation function with proper metric conversions.
     var targetCalories: Int {
-        // Convert weight to kg if needed
+        // Convert to metric if needed (database stores everything in metric)
         let weightKg: Double
         if unitsPreference == .imperial {
             weightKg = weightLbs.lbsToKg
@@ -91,7 +92,6 @@ class OnboardingState: ObservableObject {
             weightKg = self.weightKg
         }
 
-        // Convert height to cm if needed
         let heightCm: Int
         if unitsPreference == .imperial {
             heightCm = feetAndInchesToCm(feet: heightFeet, inches: heightInches)
@@ -99,23 +99,15 @@ class OnboardingState: ObservableObject {
             heightCm = self.heightCm
         }
 
-        // Calculate BMR using Mifflin-St Jeor Equation
-        let bmr: Double
-        if sex == .male {
-            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
-        } else {
-            bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
-        }
-
-        // Calculate TDEE (Total Daily Energy Expenditure)
-        let tdee = bmr * activityLevel.activityMultiplier
-
-        // Adjust based on selected goal
-        let targetCalories = Int(tdee) + goal.calorieAdjustment
-
-        // Ensure minimum safe calories
-        let minimumCalories = sex == .male ? 1500 : 1200
-        return max(targetCalories, minimumCalories)
+        // Use centralized calculation function
+        return UserProfile.calculateTargetCalories(
+            sex: sex,
+            age: age,
+            heightCm: heightCm,
+            weightKg: weightKg,
+            activityLevel: activityLevel,
+            goal: goal
+        )
     }
 }
 

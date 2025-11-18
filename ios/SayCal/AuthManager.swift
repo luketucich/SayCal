@@ -149,12 +149,14 @@ class AuthManager: ObservableObject {
         }
     }
     
-    /// Completes the onboarding process and creates a user profile in the database
+    /// Completes the onboarding process and creates a user profile in the database.
+    /// IMPORTANT: The database always stores height and weight in metric (cm, kg).
+    /// If the user's preference is imperial, we convert their input to metric before saving.
     /// - Parameter state: The onboarding state containing all user inputs
     func completeOnboarding(with state: OnboardingState) async {
         guard let userId = currentUser?.id else { return }
 
-        // Convert units to metric for database storage (database stores everything in metric)
+        // Convert to metric if needed (database stores everything in metric)
         let weightKg: Double
         if state.unitsPreference == .imperial {
             weightKg = state.weightLbs.lbsToKg
