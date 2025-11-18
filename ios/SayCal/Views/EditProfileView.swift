@@ -84,9 +84,9 @@ struct EditProfileView: View {
                 )
 
                 VStack(spacing: 24) {
-                    // Goal - Moved to top, shows calories first
+                    // Goals - Moved to top, shows calories first
                     VStack(alignment: .leading, spacing: 12) {
-                        FormSectionHeader(title: "Goal")
+                        FormSectionHeader(title: "Goals")
 
                         // Target Calories Display - Shows calories first
                         VStack(spacing: 12) {
@@ -149,31 +149,7 @@ struct EditProfileView: View {
                                     .fill(Color(UIColor.systemGray6))
                             )
                         }
-
-                        VStack(spacing: 12) {
-                            ForEach(Goal.allCases, id: \.self) { goalOption in
-                                SelectableCard(
-                                    title: goalOption.displayName,
-                                    subtitle: goalOption.calorieAdjustmentText,
-                                    isSelected: goal == goalOption
-                                ) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        goal = goalOption
-                                        // Reset to auto-calculated calories and macros when goal changes
-                                        manualCalories = nil
-                                        manualCarbsPercent = nil
-                                        manualFatsPercent = nil
-                                        manualProteinPercent = nil
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Macro Split
-                    VStack(alignment: .leading, spacing: 12) {
-                        FormSectionHeader(title: "Macro Split")
-
+                        
                         // Macro Percentages Display
                         VStack(spacing: 12) {
                             HStack(spacing: 12) {
@@ -245,6 +221,26 @@ struct EditProfileView: View {
                                             .foregroundColor(Color(UIColor.secondaryLabel))
                                     }
                                     Spacer()
+                                }
+                            }
+                        }
+
+
+                        VStack(spacing: 12) {
+                            ForEach(Goal.allCases, id: \.self) { goalOption in
+                                SelectableCard(
+                                    title: goalOption.displayName,
+                                    subtitle: goalOption.calorieAdjustmentText,
+                                    isSelected: goal == goalOption
+                                ) {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        goal = goalOption
+                                        // Reset to auto-calculated calories and macros when goal changes
+                                        manualCalories = nil
+                                        manualCarbsPercent = nil
+                                        manualFatsPercent = nil
+                                        manualProteinPercent = nil
+                                    }
                                 }
                             }
                         }

@@ -41,32 +41,26 @@ struct GoalsView: View {
                         )
 
                         // Macro Split Display
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Recommended Macro Split")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(Color(UIColor.secondaryLabel))
+                        HStack(spacing: 12) {
+                            let macros = UserProfile.calculateMacroPercentages(for: state.goal)
 
-                            HStack(spacing: 12) {
-                                let macros = UserProfile.calculateMacroPercentages(for: state.goal)
+                            OnboardingMacroCard(
+                                title: "Carbs",
+                                percentage: macros.carbs,
+                                color: .blue
+                            )
 
-                                OnboardingMacroCard(
-                                    title: "Carbs",
-                                    percentage: macros.carbs,
-                                    color: .blue
-                                )
+                            OnboardingMacroCard(
+                                title: "Fats",
+                                percentage: macros.fats,
+                                color: .orange
+                            )
 
-                                OnboardingMacroCard(
-                                    title: "Fats",
-                                    percentage: macros.fats,
-                                    color: .orange
-                                )
-
-                                OnboardingMacroCard(
-                                    title: "Protein",
-                                    percentage: macros.protein,
-                                    color: .green
-                                )
-                            }
+                            OnboardingMacroCard(
+                                title: "Protein",
+                                percentage: macros.protein,
+                                color: .green
+                            )
                         }
 
                         HStack {

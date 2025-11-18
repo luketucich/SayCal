@@ -42,30 +42,24 @@ struct ObserveProfileView: View {
                             )
 
                             // Macro Split Display
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Macro Split")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(Color(UIColor.secondaryLabel))
+                            HStack(spacing: 12) {
+                                MacroDisplayCard(
+                                    title: "Carbs",
+                                    percentage: profile.carbsPercent,
+                                    color: .blue
+                                )
 
-                                HStack(spacing: 12) {
-                                    MacroDisplayCard(
-                                        title: "Carbs",
-                                        percentage: profile.carbsPercent,
-                                        color: .blue
-                                    )
+                                MacroDisplayCard(
+                                    title: "Fats",
+                                    percentage: profile.fatsPercent,
+                                    color: .orange
+                                )
 
-                                    MacroDisplayCard(
-                                        title: "Fats",
-                                        percentage: profile.fatsPercent,
-                                        color: .orange
-                                    )
-
-                                    MacroDisplayCard(
-                                        title: "Protein",
-                                        percentage: profile.proteinPercent,
-                                        color: .green
-                                    )
-                                }
+                                MacroDisplayCard(
+                                    title: "Protein",
+                                    percentage: profile.proteinPercent,
+                                    color: .green
+                                )
                             }
 
                             // Goal and Activity Level context
