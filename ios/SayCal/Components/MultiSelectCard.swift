@@ -1,3 +1,5 @@
+// Multi-select card components with checkmark indicators
+
 import SwiftUI
 
 struct MultiSelectCard: View {
@@ -38,7 +40,7 @@ struct MultiSelectCard: View {
     }
 }
 
-// Grid-style multi-select pill (more compact for dietary preferences/allergies)
+// Compact multi-select pill for grid layouts
 struct MultiSelectPill: View {
     let title: String
     let isSelected: Bool

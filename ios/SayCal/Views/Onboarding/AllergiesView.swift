@@ -1,3 +1,5 @@
+// Onboarding step for specifying food allergies
+
 import SwiftUI
 
 // Final onboarding step: Track food allergies

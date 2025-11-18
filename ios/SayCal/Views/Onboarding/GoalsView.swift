@@ -1,3 +1,5 @@
+// Onboarding step for selecting fitness goals
+
 import SwiftUI
 
 // Onboarding step 4: Pick a fitness goal

@@ -1,3 +1,5 @@
+// Apple authentication button component
+
 import SwiftUI
 import AuthenticationServices
 import Supabase
@@ -44,7 +46,6 @@ struct AppleAuthButton: View {
                     credentials: .init(provider: .apple, idToken: idToken)
                 )
 
-                // Update user metadata (only on first sign-in)
                 if let fullName = credential.fullName {
                     let nameParts = [
                         fullName.givenName,

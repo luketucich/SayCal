@@ -1,3 +1,5 @@
+// Daily streak tracker component with day count and visual indicators
+
 import SwiftUI
 import UIKit
 

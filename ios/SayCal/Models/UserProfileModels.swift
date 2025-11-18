@@ -1,10 +1,8 @@
+// User profile data models and related enums
+
 import Foundation
 
-// MARK: - User Profile Data Models
-// This file contains pure data models representing user profile information.
-// No business logic or persistence should be added here.
-
-/// Main user profile model representing the user_profiles table in Supabase
+// User profile model for the user_profiles table
 struct UserProfile: Codable {
     let userId: UUID
     let unitsPreference: UnitsPreference
@@ -45,8 +43,6 @@ struct UserProfile: Codable {
     }
 }
 
-// MARK: - Units Preference
-
 enum UnitsPreference: String, Codable, CaseIterable {
     case metric = "metric"
     case imperial = "imperial"
@@ -58,8 +54,6 @@ enum UnitsPreference: String, Codable, CaseIterable {
         }
     }
 }
-
-// MARK: - Activity Level
 
 enum ActivityLevel: String, Codable, CaseIterable {
     case sedentary = "sedentary"
@@ -78,7 +72,6 @@ enum ActivityLevel: String, Codable, CaseIterable {
         }
     }
 
-    /// Multiplier for TDEE (Total Daily Energy Expenditure) calculation
     var activityMultiplier: Double {
         switch self {
         case .sedentary: return 1.2
@@ -89,8 +82,6 @@ enum ActivityLevel: String, Codable, CaseIterable {
         }
     }
 }
-
-// MARK: - Fitness Goal
 
 enum Goal: String, Codable, CaseIterable {
     case loseWeight = "lose_weight"
@@ -107,7 +98,6 @@ enum Goal: String, Codable, CaseIterable {
         }
     }
 
-    /// Calorie adjustment based on fitness goal
     var calorieAdjustment: Int {
         switch self {
         case .loseWeight: return -500  // 500 calorie deficit
@@ -117,7 +107,6 @@ enum Goal: String, Codable, CaseIterable {
         }
     }
 
-    /// Display text for calorie adjustment
     var calorieAdjustmentText: String {
         let adjustment = calorieAdjustment
         if adjustment > 0 {
@@ -129,8 +118,6 @@ enum Goal: String, Codable, CaseIterable {
         }
     }
 }
-
-// MARK: - Biological Sex
 
 enum Sex: String, Codable, CaseIterable {
     case male = "male"
@@ -144,9 +131,6 @@ enum Sex: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - Dietary Options
-
-/// Common dietary preferences and allergies for user selection
 struct DietaryOptions {
     static let dietaryPreferences = [
         "vegetarian",
@@ -174,45 +158,27 @@ struct DietaryOptions {
     ]
 }
 
-// MARK: - Unit Conversion Extensions
-// The app stores all user stats in metric (cm, kg) in the database.
-// Imperial conversions are ONLY for display purposes.
-// We use proper rounding to ensure conversions are deterministic and idempotent.
-
 extension Double {
-    /// Converts kilograms to pounds
     var kgToLbs: Double { self * 2.20462 }
-
-    /// Converts pounds to kilograms
     var lbsToKg: Double { self / 2.20462 }
-
-    /// Converts Double to Int using proper rounding
     var int: Int { Int(self) }
 }
 
 extension Int {
-    /// Converts centimeters to inches using proper rounding (not truncation).
-    /// This ensures that round-trip conversions (cm → inches → cm) are stable.
     var cmToInches: Int {
         (Double(self) / 2.54).rounded(.toNearestOrEven).int
     }
 
-    /// Converts inches to centimeters using proper rounding (not truncation).
-    /// This ensures that round-trip conversions (inches → cm → inches) are stable.
     var inchesToCm: Int {
         (Double(self) * 2.54).rounded(.toNearestOrEven).int
     }
 
-    /// Converts centimeters to feet and inches for display.
-    /// Uses proper rounding to prevent cumulative errors.
     var cmToFeetAndInches: (feet: Int, inches: Int) {
         let totalInches = self.cmToInches
         return (feet: totalInches / 12, inches: totalInches % 12)
     }
 }
 
-/// Converts feet and inches to centimeters using proper rounding.
-/// Always use this when converting user input from imperial to metric for storage.
 func feetAndInchesToCm(feet: Int, inches: Int) -> Int {
     let totalInches = (feet * 12) + inches
     return totalInches.inchesToCm

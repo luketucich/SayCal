@@ -1,3 +1,5 @@
+// Supabase client configuration and initialization
+
 import Foundation
 import Supabase
 

@@ -1,6 +1,8 @@
+// Radio button card component for unit system selection
+
 import SwiftUI
 
-// Radio button card for metric vs imperial selection
+// Card with radio button for metric or imperial selection
 struct UnitCard: View {
     let title: String
     let subtitle: String

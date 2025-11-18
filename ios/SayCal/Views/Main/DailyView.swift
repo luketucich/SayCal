@@ -1,3 +1,5 @@
+// Daily nutrition view displaying calorie tracking and macros
+
 import SwiftUI
 
 struct DailyView: View {

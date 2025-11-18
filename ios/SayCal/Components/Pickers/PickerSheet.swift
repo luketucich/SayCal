@@ -1,6 +1,8 @@
+// Generic wheel picker sheet component for numeric values
+
 import SwiftUI
 
-// Generic wheel picker for age, weight, height (cm), etc.
+// Reusable picker for age, height, and other numeric values
 struct PickerSheet: View {
     let title: String
     @Binding var selection: Int

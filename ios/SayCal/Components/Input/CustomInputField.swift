@@ -1,6 +1,8 @@
+// Custom text input field component with capsule styling
+
 import SwiftUI
 
-// Text field pill for adding custom preferences/allergies
+// Text field for custom user inputs
 struct CustomInputField: View {
     let placeholder: String
     @Binding var text: String

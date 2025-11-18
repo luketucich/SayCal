@@ -1,3 +1,5 @@
+// User profile view with settings and account information
+
 import SwiftUI
 
 struct ProfileView: View {

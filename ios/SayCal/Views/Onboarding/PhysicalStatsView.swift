@@ -1,3 +1,5 @@
+// Onboarding step for entering physical stats (age, height, weight)
+
 import SwiftUI
 
 // Onboarding step 2: Collect basic physical stats (sex, age, height, weight)

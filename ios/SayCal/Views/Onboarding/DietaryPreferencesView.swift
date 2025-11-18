@@ -1,3 +1,5 @@
+// Onboarding step for selecting dietary preferences
+
 import SwiftUI
 
 // Onboarding step 5: Let users pick dietary preferences (vegan, keto, etc.)

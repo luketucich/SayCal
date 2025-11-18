@@ -1,67 +1,48 @@
+// Onboarding container managing multi-step user setup flow
+
 import SwiftUI
 import Combine
 
-/// Navigation direction for onboarding transitions
+// Navigation direction for transitions
 enum NavigationDirection {
     case forward
     case backward
 }
 
-/// Manages the state for the entire onboarding flow
+// Manages state for the onboarding flow
 class OnboardingState: ObservableObject {
-    // Current step in the onboarding flow
     @Published var currentStep: Int = 0
-
-    // Navigation direction for animations
     @Published var navigationDirection: NavigationDirection = .forward
-
-    // User preferences
     @Published var unitsPreference: UnitsPreference = .metric
     @Published var sex: Sex = .male
-
-    // Physical stats
     @Published var age: Int = 25
     @Published var heightCm: Int = 170
     @Published var heightFeet: Int = 5
     @Published var heightInches: Int = 7
     @Published var weightKg: Double = 70.0
     @Published var weightLbs: Double = 154.0
-
-    // Activity and goals
     @Published var activityLevel: ActivityLevel = .moderatelyActive
     @Published var goal: Goal = .maintainWeight
-
-    // Dietary information
     @Published var selectedDietaryPreferences: Set<String> = []
     @Published var selectedAllergies: Set<String> = []
 
     let totalSteps = 6
-
-    /// Validates whether the user can proceed from the current step
     var canProceed: Bool {
         switch currentStep {
-        case 0: // Units preference - always can proceed
+        case 0:
             return true
-        case 1: // Physical stats - validate age and weight are reasonable
+        case 1:
             let ageValid = age >= 13 && age <= 120
             let weightValid = unitsPreference == .metric ?
                 (weightKg >= 20 && weightKg <= 500) :
                 (weightLbs >= 44 && weightLbs <= 1100)
             return ageValid && weightValid
-        case 2: // Activity level - always can proceed
-            return true
-        case 3: // Goals - always can proceed
-            return true
-        case 4: // Dietary preferences - optional, can always proceed
-            return true
-        case 5: // Allergies - optional, can always proceed
+        case 2, 3, 4, 5:
             return true
         default:
             return false
         }
     }
-
-    /// Advances to the next onboarding step
     func nextStep() {
         if currentStep < totalSteps - 1 {
             navigationDirection = .forward
@@ -70,8 +51,6 @@ class OnboardingState: ObservableObject {
             }
         }
     }
-
-    /// Returns to the previous onboarding step
     func previousStep() {
         if currentStep > 0 {
             navigationDirection = .backward
@@ -80,11 +59,7 @@ class OnboardingState: ObservableObject {
             }
         }
     }
-
-    /// Calculates target calories based on current user stats and selected goal.
-    /// Uses the centralized calculation function with proper metric conversions.
     var targetCalories: Int {
-        // Convert to metric if needed (database stores everything in metric)
         let weightKg: Double
         if unitsPreference == .imperial {
             weightKg = weightLbs.lbsToKg
@@ -99,7 +74,6 @@ class OnboardingState: ObservableObject {
             heightCm = self.heightCm
         }
 
-        // Use centralized calculation function from UserProfileManager
         return UserProfileManager.calculateTargetCalories(
             sex: sex,
             age: age,
@@ -111,7 +85,7 @@ class OnboardingState: ObservableObject {
     }
 }
 
-/// Main container view for the onboarding flow with Airbnb-style design
+// Main container for onboarding flow
 struct OnboardingContainerView: View {
     @StateObject private var state = OnboardingState()
     @Environment(\.dismiss) var dismiss
@@ -119,15 +93,13 @@ struct OnboardingContainerView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Clean progress indicator
                 ProgressBar(currentStep: state.currentStep, totalSteps: state.totalSteps)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
                 
                 Divider()
                     .overlay(Color(UIColor.systemGray5))
-                
-                // Content area
+
                 currentStepView
                     .transition(.asymmetric(
                         insertion: .move(edge: state.navigationDirection == .forward ? .trailing : .leading),
@@ -161,7 +133,7 @@ struct OnboardingContainerView: View {
     }
 }
 
-// Clean progress bar component
+// Progress bar component
 struct ProgressBar: View {
     let currentStep: Int
     let totalSteps: Int

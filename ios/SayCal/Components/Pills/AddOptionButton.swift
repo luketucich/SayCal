@@ -1,6 +1,8 @@
+// Add button component for custom options
+
 import SwiftUI
 
-// "+ Add" button for custom allergies, preferences, etc.
+// Add button with plus icon
 struct AddOptionButton: View {
     let action: () -> Void
 

@@ -1,3 +1,5 @@
+// Edit profile view for updating user information and preferences
+
 import SwiftUI
 import Auth
 

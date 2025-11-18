@@ -1,3 +1,5 @@
+// Form section header component with secondary label styling
+
 import SwiftUI
 
 struct FormSectionHeader: View {

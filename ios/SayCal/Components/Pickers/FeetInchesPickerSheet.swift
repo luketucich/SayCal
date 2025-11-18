@@ -1,6 +1,8 @@
+// Dual-column picker sheet for selecting height in feet and inches
+
 import SwiftUI
 
-// Two-column picker for imperial height (feet + inches)
+// Height picker for imperial measurements
 struct FeetInchesPickerSheet: View {
     let title: String
     @Binding var feet: Int

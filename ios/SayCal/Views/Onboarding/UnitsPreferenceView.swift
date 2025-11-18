@@ -1,3 +1,5 @@
+// Onboarding step for selecting unit preference (metric or imperial)
+
 import SwiftUI
 
 // Onboarding step 1: Metric vs Imperial
