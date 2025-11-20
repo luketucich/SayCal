@@ -2,7 +2,7 @@ import SwiftUI
 
 @main
 struct SayCalApp: App {
-    @StateObject private var userManager = UserManager()
+    @StateObject private var userManager = UserManager.shared
 
     var body: some Scene {
         WindowGroup {

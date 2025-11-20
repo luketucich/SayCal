@@ -2,42 +2,6 @@ import Foundation
 import Supabase
 import Combine
 
-/// UserManager is the SINGLE PUBLIC INTERFACE for all user-related operations.
-/// This includes authentication state AND profile management.
-///
-/// Architecture Pattern (Strict Enforcement):
-/// ┌─────────────────────────────────────────┐
-/// │ Views (All Views)                       │
-/// │   - Read: userManager.profile           │
-/// │   - Write: userManager.updateProfile()  │
-/// │   - Auth: userManager.isAuthenticated   │
-/// └─────────────────────────────────────────┘
-///                    ↓ ↑
-/// ┌─────────────────────────────────────────┐
-/// │ UserManager (SINGLE SOURCE OF TRUTH)    │
-/// │   - Manages auth state                  │
-/// │   - Manages profile data                │
-/// │   - Coordinates Supabase + UserDefaults │
-/// │   - NO other managers involved          │
-/// └─────────────────────────────────────────┘
-///                    ↓ ↑
-/// ┌─────────────────────────────────────────┐
-/// │ Data Persistence                        │
-/// │   - Supabase (source of truth)          │
-/// │   - UserDefaults (cache layer)          │
-/// └─────────────────────────────────────────┘
-///
-/// Data Access Patterns:
-/// 1. READ: Always read from userManager.profile (cached in UserDefaults)
-/// 2. WRITE: Always use userManager.updateProfile() (updates both DB + cache)
-/// 3. INITIAL LOAD: Check UserDefaults first, fetch from Supabase if needed
-///
-/// Database Fetch Policy:
-/// - First login: Fetch from database (no cache exists)
-/// - Cache hit: Use UserDefaults cache (fast app startup)
-/// - Cache miss/stale: Fetch from database
-/// - Manual refresh: Use refreshProfileFromServer()
-/// - Profile updates: Automatically sync to database and cache
 @MainActor
 class UserManager: ObservableObject {
     // MARK: - Published Properties

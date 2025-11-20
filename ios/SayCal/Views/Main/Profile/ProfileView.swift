@@ -93,7 +93,7 @@ struct ProfileView: View {
 #Preview {
     ProfileView()
         .environmentObject({
-            let manager = UserManager()
+            let manager = UserManager.shared
             // Note: Preview will work once a profile is loaded in UserManager
             return manager
         }())

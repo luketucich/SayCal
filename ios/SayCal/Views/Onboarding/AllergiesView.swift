@@ -135,5 +135,5 @@ struct AllergiesView: View {
 
 #Preview {
     AllergiesView(state: OnboardingState())
-        .environmentObject(UserManager())
+        .environmentObject(UserManager.shared)
 }
