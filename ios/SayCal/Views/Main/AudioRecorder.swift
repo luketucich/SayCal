@@ -11,7 +11,9 @@ struct TranscriptionResponse: Codable {
 // MARK: - Audio Recorder
 class AudioRecorder: NSObject, ObservableObject {
     @Published var isRecording = false
-    @Published var audioLevels: [CGFloat] = Array(repeating: 0.3, count: 30)
+    @Published var isTranscribing = false
+    @Published var transcriptionText: String = ""
+    @Published var currentAudioLevel: CGFloat = 1.0
     
     private var audioRecorder: AVAudioRecorder?
     private var timer: Timer?
@@ -26,7 +28,6 @@ class AudioRecorder: NSObject, ObservableObject {
     func setupAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            // Configure for recording with speaker output
             try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
             try audioSession.setActive(true)
         } catch {
@@ -45,22 +46,13 @@ class AudioRecorder: NSObject, ObservableObject {
         }
     }
     
-    // MARK: - Toggle Recording
-    func toggleRecording() {
-        if isRecording {
-            stopRecording()
-        } else {
-            startRecording()
-        }
-    }
-    
     // MARK: - Start Recording
     func startRecording() {
-        // Create temporary file for recording
+        HapticManager.shared.medium()
+        
         let tempDir = FileManager.default.temporaryDirectory
         recordingURL = tempDir.appendingPathComponent(UUID().uuidString + ".m4a")
         
-        // Audio settings
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 44100.0,
@@ -69,19 +61,18 @@ class AudioRecorder: NSObject, ObservableObject {
         ]
         
         do {
-            // Initialize and start recorder
             audioRecorder = try AVAudioRecorder(url: recordingURL!, settings: settings)
             audioRecorder?.isMeteringEnabled = true
             audioRecorder?.record()
             
             isRecording = true
             
-            // Start monitoring audio levels for visualizer
+            // Monitor audio levels
             timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-                self?.updateAudioLevels()
+                self?.updateAudioLevel()
             }
             
-            print("🎙️ Recording started at: \(recordingURL!)")
+            print("🎙️ Recording started")
         } catch {
             print("❌ Failed to start recording: \(error)")
         }
@@ -89,19 +80,18 @@ class AudioRecorder: NSObject, ObservableObject {
     
     // MARK: - Stop Recording
     func stopRecording() {
+        HapticManager.shared.medium()
+        
         audioRecorder?.stop()
         timer?.invalidate()
         timer = nil
         
         isRecording = false
-        
-        // Reset audio levels to default
-        DispatchQueue.main.async {
-            self.audioLevels = Array(repeating: 0.3, count: 30)
-        }
+        currentAudioLevel = 1.0
         
         if let url = recordingURL {
-            print("💾 Recording stopped, preparing to upload")
+            print("💾 Recording stopped, transcribing...")
+            isTranscribing = true
             Task {
                 await uploadAudioToSupabase(url)
             }
@@ -111,13 +101,9 @@ class AudioRecorder: NSObject, ObservableObject {
     // MARK: - Upload Audio to Supabase
     private func uploadAudioToSupabase(_ fileURL: URL) async {
         do {
-            // Read audio file data
             let audioData = try Data(contentsOf: fileURL)
-            
-            // Convert to base64 for JSON transmission
             let base64Audio = audioData.base64EncodedString()
             
-            // Prepare request body
             let requestBody: [String: Any] = [
                 "audio": base64Audio,
                 "format": "m4a",
@@ -126,86 +112,56 @@ class AudioRecorder: NSObject, ObservableObject {
             
             let jsonData = try JSONSerialization.data(withJSONObject: requestBody)
             
-            // Call Supabase edge function with typed response
             let response: TranscriptionResponse = try await SupabaseManager.client.functions.invoke(
                 "transcribe",
                 options: FunctionInvokeOptions(body: jsonData)
             )
             
-            print("✅ Audio uploaded successfully")
-            print("📝 Transcription: \(response.text)")
+            DispatchQueue.main.async {
+                self.isTranscribing = false
+                self.transcriptionText = response.text
+                HapticManager.shared.success()
+            }
             
-            // Clean up temporary file
+            print("✅ Transcription: \(response.text)")
             try? FileManager.default.removeItem(at: fileURL)
             
+        } catch let error as FunctionsError {
+            print("❌ Functions Error: \(error)")
+            if case .httpError(let code, let data) = error {
+                print("HTTP Code: \(code)")
+                if let errorString = String(data: data, encoding: .utf8) {
+                    print("Error body: \(errorString)")
+                }
+            }
+            DispatchQueue.main.async {
+                self.isTranscribing = false
+                self.transcriptionText = "Failed to transcribe"
+                HapticManager.shared.error()
+            }
         } catch {
             print("❌ Failed to upload audio: \(error)")
+            DispatchQueue.main.async {
+                self.isTranscribing = false
+                self.transcriptionText = "Failed to transcribe"
+                HapticManager.shared.error()
+            }
         }
     }
     
-    // MARK: - Update Audio Levels
-    private func updateAudioLevels() {
+    // MARK: - Update Audio Level
+    private func updateAudioLevel() {
         guard let recorder = audioRecorder else { return }
         
         recorder.updateMeters()
-        
-        // Get current audio power in decibels (-160 dB to 0 dB)
         let averagePower = recorder.averagePower(forChannel: 0)
         
-        // Normalize to 0.0-1.0 range
-        let normalized = max(0.0, (averagePower + 60) / 60) // Adjusted range for better visualization
+        // Normalize to 0.85-1.35 range for more obvious pulsing
+        let normalized = max(0.0, (averagePower + 60) / 60)
+        let scale = 0.85 + (CGFloat(normalized) * 0.5)
         
-        // Update visualizer bars with variation for dynamic effect
         DispatchQueue.main.async {
-            for i in 0..<self.audioLevels.count {
-                let variation = CGFloat.random(in: -0.15...0.15)
-                self.audioLevels[i] = max(0.2, min(1.0, CGFloat(normalized) + variation))
-            }
+            self.currentAudioLevel = scale
         }
-    }
-}
-
-// MARK: - Recording Expanded View
-struct RecordingExpandedView: View {
-    @ObservedObject var audioRecorder: AudioRecorder
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            // Audio visualizer bars
-            HStack(alignment: .center, spacing: 3) {
-                ForEach(0..<30, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.blue)
-                        .frame(width: 3, height: audioRecorder.audioLevels[index] * 40)
-                        .animation(.easeInOut(duration: 0.1), value: audioRecorder.audioLevels[index])
-                }
-            }
-            .frame(height: 50)
-            
-            // Prompt text
-            Text("What did you eat?")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(.white)
-            
-            // Stop button
-            Button(action: {
-                audioRecorder.toggleRecording()
-            }) {
-                Image(systemName: "stop.circle.fill")
-                    .font(.system(size: 28))
-                    .foregroundStyle(.white)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(
-            // Liquid glass container
-            RoundedRectangle(cornerRadius: 28)
-                .fill(.blue.gradient)
-                .shadow(color: .blue.opacity(0.3), radius: 12, y: 6)
-        )
-        .padding(.trailing, 20)
-        .padding(.bottom, 8)
     }
 }

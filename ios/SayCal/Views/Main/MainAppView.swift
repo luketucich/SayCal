@@ -19,49 +19,29 @@ struct MainAppView: View {
                 }
         }
         .tint(.primary)
+        .overlay(alignment: .top) {
+            // Transcription text display
+            if !audioRecorder.transcriptionText.isEmpty {
+                Text(audioRecorder.transcriptionText)
+                    .font(.body)
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(12)
+                    .padding()
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HStack {
                 Spacer()
-                
-                if audioRecorder.isRecording {
-                    RecordingExpandedView(audioRecorder: audioRecorder)
-                } else {
-                    Button(action: {
-                        audioRecorder.toggleRecording()
-                    }) {
-                        Image(systemName: "mic.fill")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 56, height: 56)
-                    }
-                    .applyGlassEffect()
+                RecordingButton(audioRecorder: audioRecorder)
                     .padding(.trailing, 20)
                     .padding(.bottom, 8)
-                    .transition(.scale.combined(with: .opacity))
-                }
             }
-            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: audioRecorder.isRecording)
             .background(.clear)
         }
         .onAppear {
             audioRecorder.requestPermission()
-        }
-    }
-}
-
-// Helper: Glass Effect with iOS version fallback
-extension View {
-    @ViewBuilder
-    func applyGlassEffect() -> some View {
-        if #available(iOS 26.0, *) {
-            self.glassEffect(.clear.tint(.blue))
-        } else {
-            self
-                .background(
-                    Circle()
-                        .fill(.blue.gradient)
-                        .shadow(color: .blue.opacity(0.3), radius: 12, y: 6)
-                )
         }
     }
 }
