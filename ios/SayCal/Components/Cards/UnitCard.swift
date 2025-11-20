@@ -11,33 +11,37 @@ struct UnitCard: View {
             HapticManager.shared.light()
             action()
         } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: DS.Spacing.medium) {
+                VStack(alignment: .leading, spacing: DS.Spacing.xxSmall) {
                     Text(title)
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DS.Typography.headline(weight: .semibold))
+                        .foregroundColor(DS.Colors.label)
 
                     Text(subtitle)
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(DS.Typography.subheadline())
+                        .foregroundColor(DS.Colors.secondaryLabel)
                 }
 
                 Spacer()
 
                 Circle()
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: isSelected ? 2 : 1.5)
-                    .frame(width: 20, height: 20)
+                    .stroke(isSelected ? DS.Colors.label : DS.Colors.separator, lineWidth: isSelected ? 2 : 1.5)
+                    .frame(width: DS.Spacing.large, height: DS.Spacing.large)
                     .overlay(
                         Circle()
-                            .fill(Color(UIColor.label))
-                            .frame(width: 8, height: 8)
+                            .fill(DS.Colors.label)
+                            .frame(width: DS.Spacing.xSmall, height: DS.Spacing.xSmall)
                             .opacity(isSelected ? 1 : 0)
                     )
             }
-            .padding(16)
+            .padding(DS.Spacing.medium)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: DS.CornerRadius.large)
+                    .fill(DS.Colors.background)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.CornerRadius.large)
+                            .stroke(isSelected ? DS.Colors.label : DS.Colors.separator, lineWidth: isSelected ? 2 : 1)
+                    )
             )
         }
         .buttonStyle(.plain)
@@ -45,7 +49,7 @@ struct UnitCard: View {
 }
 
 #Preview {
-    VStack(spacing: 12) {
+    VStack(spacing: DS.Spacing.small) {
         UnitCard(
             title: "Metric",
             subtitle: "Kilograms • Centimeters",
@@ -58,6 +62,6 @@ struct UnitCard: View {
             isSelected: false
         ) {}
     }
-    .padding()
-    .background(Color(UIColor.systemBackground))
+    .padding(DS.Spacing.large)
+    .background(DS.Colors.groupedBackground)
 }

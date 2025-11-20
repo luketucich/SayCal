@@ -23,26 +23,26 @@ struct SelectableCard: View {
             HapticManager.shared.light()
             action()
         } label: {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DS.Spacing.xxSmall) {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(DS.Typography.callout(weight: .medium))
+                    .foregroundColor(DS.Colors.label)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(DS.Typography.footnote())
+                        .foregroundColor(DS.Colors.secondaryLabel)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, DS.Spacing.medium)
+            .padding(.vertical, DS.Spacing.small)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(UIColor.systemBackground))
+                RoundedRectangle(cornerRadius: DS.CornerRadius.large)
+                    .fill(DS.Colors.background)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                        RoundedRectangle(cornerRadius: DS.CornerRadius.large)
+                            .stroke(isSelected ? DS.Colors.label : DS.Colors.separator, lineWidth: isSelected ? 2 : 1)
                     )
             )
         }
@@ -61,16 +61,16 @@ struct SelectablePill: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(Color(UIColor.label))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+                .font(DS.Typography.subheadline(weight: isSelected ? .semibold : .regular))
+                .foregroundColor(DS.Colors.label)
+                .padding(.horizontal, DS.Spacing.large)
+                .padding(.vertical, DS.Spacing.xSmall)
                 .background(
                     Capsule()
-                        .fill(Color(UIColor.systemBackground))
+                        .fill(DS.Colors.background)
                         .overlay(
                             Capsule()
-                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                                .stroke(isSelected ? DS.Colors.label : DS.Colors.separator, lineWidth: isSelected ? 2 : 1)
                         )
                 )
         }
@@ -81,7 +81,7 @@ struct SelectablePill: View {
 struct TabSelector: View {
     let options: [String]
     @Binding var selectedOption: String
-    
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(options, id: \.self) { option in
@@ -90,16 +90,16 @@ struct TabSelector: View {
                     selectedOption = option
                 } label: {
                     Text(option)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DS.Typography.callout(weight: .medium))
+                        .foregroundColor(DS.Colors.label)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, DS.Spacing.xSmall)
                         .background(
                             VStack(spacing: 0) {
                                 Spacer()
                                 if selectedOption == option {
                                     Rectangle()
-                                        .fill(Color(UIColor.label))
+                                        .fill(DS.Colors.label)
                                         .frame(height: 2)
                                 } else {
                                     Rectangle()
@@ -112,12 +112,12 @@ struct TabSelector: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, DS.Spacing.large)
     }
 }
 
 #Preview {
-    VStack(spacing: 16) {
+    VStack(spacing: DS.Spacing.medium) {
         SelectableCard(
             title: "Lose Weight",
             subtitle: "500 calorie deficit",
@@ -129,18 +129,18 @@ struct TabSelector: View {
             subtitle: "No calorie adjustment",
             isSelected: false
         ) {}
-        
-        HStack(spacing: 8) {
+
+        HStack(spacing: DS.Spacing.xSmall) {
             SelectablePill(title: "Weekend", isSelected: false) {}
             SelectablePill(title: "Week", isSelected: true) {}
             SelectablePill(title: "Month", isSelected: false) {}
         }
-        
+
         TabSelector(
             options: ["Metric", "Imperial"],
             selectedOption: .constant("Metric")
         )
     }
-    .padding()
-    .background(Color(UIColor.systemGray6))
+    .padding(DS.Spacing.large)
+    .background(DS.Colors.groupedBackground)
 }

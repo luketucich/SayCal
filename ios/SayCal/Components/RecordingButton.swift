@@ -2,7 +2,7 @@ import SwiftUI
 
 struct RecordingButton: View {
     @ObservedObject var audioRecorder: AudioRecorder
-    
+
     var body: some View {
         Button(action: {}) {
             if audioRecorder.isProcessing {
@@ -21,21 +21,13 @@ struct RecordingButton: View {
             Group {
                 if #available(iOS 26.0, *) {
                     Circle()
-                        .fill(.blue.gradient)
+                        .fill(DS.Colors.accent.gradient)
                         .glassEffect()
-                        .shadow(
-                            color: (audioRecorder.isRecording ? Color.blue : Color.gray).opacity(0.3),
-                            radius: audioRecorder.isRecording ? 20 : 12,
-                            y: 6
-                        )
+                        .shadowLarge()
                 } else {
                     Circle()
-                        .fill(Color.blue)
-                        .shadow(
-                            color: (audioRecorder.isRecording ? Color.blue : Color.gray).opacity(0.3),
-                            radius: audioRecorder.isRecording ? 20 : 12,
-                            y: 6
-                        )
+                        .fill(DS.Colors.accent)
+                        .shadowLarge()
                 }
             }
         )
@@ -56,14 +48,14 @@ struct RecordingButton: View {
                 }
         )
     }
-    
+
     // Dynamic button size - larger when recording
     private var buttonSize: CGFloat {
-        audioRecorder.isRecording ? 80 : 56
+        audioRecorder.isRecording ? 80 : DS.Layout.buttonHeightLarge
     }
-    
+
     // Dynamic icon size
     private var iconSize: CGFloat {
-        audioRecorder.isRecording ? 28 : 20
+        audioRecorder.isRecording ? 28 : DS.Spacing.large
     }
 }

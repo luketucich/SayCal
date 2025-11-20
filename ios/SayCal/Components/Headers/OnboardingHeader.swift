@@ -5,16 +5,16 @@ struct OnboardingHeader: View {
     let subtitle: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: DS.Spacing.xSmall) {
             Text(title)
-                .font(.system(size: 26, weight: .semibold))
-                .foregroundColor(Color(UIColor.label))
+                .font(DS.Typography.title2(weight: .bold))
+                .foregroundColor(DS.Colors.label)
 
             Text(subtitle)
-                .font(.system(size: 15))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DS.Typography.subheadline())
+                .foregroundColor(DS.Colors.secondaryLabel)
         }
-        .padding(.top, 24)
+        .padding(.top, DS.Spacing.xLarge)
     }
 }
 
@@ -23,6 +23,6 @@ struct OnboardingHeader: View {
         title: "Sample Title",
         subtitle: "This is a sample subtitle for the onboarding screen"
     )
-    .padding()
-    .background(Color(UIColor.systemBackground))
+    .padding(DS.Spacing.large)
+    .background(DS.Colors.background)
 }

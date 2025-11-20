@@ -6,22 +6,26 @@ struct FormPickerButton: View {
 
     var body: some View {
         Button(action: action) {
-            HStack {
+            HStack(spacing: DS.Spacing.medium) {
                 Text(label)
-                    .font(.system(size: 16))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(DS.Typography.callout())
+                    .foregroundColor(DS.Colors.label)
 
                 Spacer()
 
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 14))
-                    .foregroundColor(Color(UIColor.tertiaryLabel))
+                    .font(DS.Typography.footnote())
+                    .foregroundColor(DS.Colors.tertiaryLabel)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, DS.Spacing.medium)
+            .padding(.vertical, DS.Spacing.small)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+                RoundedRectangle(cornerRadius: DS.CornerRadius.large)
+                    .fill(DS.Colors.background)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.CornerRadius.large)
+                            .stroke(DS.Colors.separator, lineWidth: 1)
+                    )
             )
         }
     }

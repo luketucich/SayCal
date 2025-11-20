@@ -24,7 +24,7 @@ struct WelcomeView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                VStack(spacing: 16) {
+                VStack(spacing: DS.Spacing.medium) {
                     AppleAuthButton()
 
                     GoogleAuthButton()
@@ -34,13 +34,13 @@ struct WelcomeView: View {
                         showEmailAuth = true
                     } label: {
                         Text("Use email instead")
-                            .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .font(DS.Typography.headline(weight: .regular))
+                            .foregroundColor(DS.Colors.label)
                     }
-                    .padding(.top, 4)
+                    .padding(.top, DS.Spacing.xxSmall)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                .padding(.horizontal, DS.Spacing.xLarge)
+                .padding(.bottom, DS.Spacing.xxxLarge)
             }
         }
         .sheet(isPresented: $showEmailAuth) {

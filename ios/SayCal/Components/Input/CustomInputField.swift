@@ -6,20 +6,19 @@ struct CustomInputField: View {
     @FocusState.Binding var isFocused: Bool
     let onSubmit: () -> Void
 
-
     var body: some View {
         TextField(placeholder, text: $text)
-            .font(.system(size: 14))
-            .foregroundColor(Color(UIColor.label))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .font(DS.Typography.footnote())
+            .foregroundColor(DS.Colors.label)
+            .padding(.horizontal, DS.Spacing.small)
+            .padding(.vertical, DS.Spacing.xSmall)
             .frame(maxWidth: 160)
             .background(
                 Capsule()
-                    .fill(Color(UIColor.systemBackground))
+                    .fill(DS.Colors.background)
                     .overlay(
                         Capsule()
-                            .stroke(Color(UIColor.label), lineWidth: 1.5)
+                            .stroke(DS.Colors.label, lineWidth: 1.5)
                     )
             )
             .focused($isFocused)
@@ -39,8 +38,8 @@ struct CustomInputField: View {
                 isFocused: $isFocused,
                 onSubmit: {}
             )
-            .padding()
-            .background(Color(UIColor.systemBackground))
+            .padding(DS.Spacing.large)
+            .background(DS.Colors.background)
         }
     }
 

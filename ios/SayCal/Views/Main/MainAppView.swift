@@ -5,32 +5,33 @@ import Combine
 struct MainAppView: View {
     @EnvironmentObject var userManager: UserManager
     @StateObject private var audioRecorder = AudioRecorder()
-    
+
     var body: some View {
         TabView {
             DailyView()
                 .tabItem {
                     Image(systemName: "chart.pie.fill")
                 }
-            
+
             ProfileView()
                 .tabItem {
                     Image(systemName: "person.fill")
                 }
         }
-        .tint(.primary)
+        .tint(DS.Colors.label)
         .overlay(alignment: .top) {
             // Transcription text display with scroll view
             if !audioRecorder.displayText.isEmpty {
                 ScrollView {
                     Text(audioRecorder.displayText)
-                        .font(.body)
-                        .padding()
+                        .font(DS.Typography.body())
+                        .foregroundColor(DS.Colors.label)
+                        .padding(DS.Spacing.medium)
                 }
                 .frame(maxHeight: 300)
-                .background(.ultraThinMaterial)
-                .cornerRadius(12)
-                .padding()
+                .background(DS.Materials.ultraThin)
+                .cornerRadius(DS.CornerRadius.large)
+                .padding(DS.Spacing.medium)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
@@ -38,8 +39,8 @@ struct MainAppView: View {
             HStack {
                 Spacer()
                 RecordingButton(audioRecorder: audioRecorder)
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 8)
+                    .padding(.trailing, DS.Spacing.large)
+                    .padding(.bottom, DS.Spacing.xSmall)
             }
             .background(.clear)
         }

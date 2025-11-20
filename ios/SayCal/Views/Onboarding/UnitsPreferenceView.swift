@@ -6,13 +6,13 @@ struct UnitsPreferenceView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: DS.Spacing.xxLarge) {
                     OnboardingHeader(
                         title: "Choose your units",
                         subtitle: "Select your preferred measurement system"
                     )
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: DS.Spacing.small) {
                         UnitCard(
                             title: "Metric",
                             subtitle: "Kilograms • Centimeters",
@@ -22,7 +22,7 @@ struct UnitsPreferenceView: View {
                                 state.unitsPreference = .metric
                             }
                         }
-                        
+
                         UnitCard(
                             title: "Imperial",
                             subtitle: "Pounds • Feet & Inches",
@@ -33,10 +33,10 @@ struct UnitsPreferenceView: View {
                             }
                         }
                     }
-                    
+
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, DS.Layout.screenPadding)
             }
 
             OnboardingBottomBar(
@@ -44,7 +44,7 @@ struct UnitsPreferenceView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(DS.Colors.background)
     }
 }
 

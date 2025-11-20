@@ -41,25 +41,25 @@ struct TogglePill: View {
 
     @ViewBuilder
     private var capsuleContent: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: DS.Spacing.xxSmall) {
             if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(Color(UIColor.systemBackground))
+                    .font(DS.Typography.caption2(weight: .semibold))
+                    .foregroundColor(DS.Colors.background)
             }
 
             Text(title)
-                .font(.system(size: 14, weight: .regular))
-                .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color(UIColor.label))
+                .font(DS.Typography.footnote(weight: .regular))
+                .foregroundColor(isSelected ? DS.Colors.background : DS.Colors.label)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, DS.Spacing.small)
+        .padding(.vertical, DS.Spacing.xSmall)
         .background(
             Capsule()
-                .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
+                .fill(isSelected ? DS.Colors.label : DS.Colors.background)
                 .overlay(
                     Capsule()
-                        .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                        .stroke(isSelected ? DS.Colors.label : DS.Colors.separator, lineWidth: isSelected ? 1.5 : 1)
                 )
         )
     }
@@ -67,33 +67,33 @@ struct TogglePill: View {
     @ViewBuilder
     private var roundedContent: some View {
         Text(title)
-            .font(.system(size: 16, weight: .medium))
-            .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color(UIColor.label))
+            .font(DS.Typography.callout(weight: .medium))
+            .foregroundColor(isSelected ? DS.Colors.background : DS.Colors.label)
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: DS.Layout.buttonHeightSmall)
             .background(
-                RoundedRectangle(cornerRadius: 22)
-                    .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
+                RoundedRectangle(cornerRadius: DS.CornerRadius.large)
+                    .fill(isSelected ? DS.Colors.label : DS.Colors.background)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: DS.CornerRadius.large)
+                            .stroke(isSelected ? DS.Colors.label : DS.Colors.separator, lineWidth: 1)
                     )
             )
     }
 }
 
 #Preview {
-    VStack(spacing: 24) {
-        HStack(spacing: 8) {
+    VStack(spacing: DS.Spacing.xLarge) {
+        HStack(spacing: DS.Spacing.xSmall) {
             TogglePill(title: "Vegan", isSelected: true) {}
             TogglePill(title: "Gluten-free", isSelected: false) {}
         }
 
-        HStack(spacing: 12) {
+        HStack(spacing: DS.Spacing.small) {
             TogglePill(title: "Male", isSelected: true, style: .rounded) {}
             TogglePill(title: "Female", isSelected: false, style: .rounded) {}
         }
     }
-    .padding()
-    .background(Color(UIColor.systemBackground))
+    .padding(DS.Spacing.large)
+    .background(DS.Colors.background)
 }
