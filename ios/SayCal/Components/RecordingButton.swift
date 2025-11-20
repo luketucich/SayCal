@@ -5,7 +5,7 @@ struct RecordingButton: View {
     
     var body: some View {
         Button(action: {}) {
-            if audioRecorder.isTranscribing {
+            if audioRecorder.isProcessing {
                 ProgressView()
                     .tint(.white)
                     .frame(width: buttonSize, height: buttonSize)
@@ -16,15 +16,28 @@ struct RecordingButton: View {
                     .frame(width: buttonSize, height: buttonSize)
             }
         }
-        .disabled(audioRecorder.isTranscribing)
+        .disabled(audioRecorder.isProcessing)
         .background(
-            Circle()
-                .fill(Color.blue)
-                .shadow(
-                    color: (audioRecorder.isRecording ? Color.blue : Color.gray).opacity(0.3),
-                    radius: audioRecorder.isRecording ? 20 : 12,
-                    y: 6
-                )
+            Group {
+                if #available(iOS 26.0, *) {
+                    Circle()
+                        .fill(.blue.gradient)
+                        .glassEffect()
+                        .shadow(
+                            color: (audioRecorder.isRecording ? Color.blue : Color.gray).opacity(0.3),
+                            radius: audioRecorder.isRecording ? 20 : 12,
+                            y: 6
+                        )
+                } else {
+                    Circle()
+                        .fill(Color.blue)
+                        .shadow(
+                            color: (audioRecorder.isRecording ? Color.blue : Color.gray).opacity(0.3),
+                            radius: audioRecorder.isRecording ? 20 : 12,
+                            y: 6
+                        )
+                }
+            }
         )
         .scaleEffect(audioRecorder.isRecording ? audioRecorder.currentAudioLevel : 1.0)
         .animation(.easeInOut(duration: 0.1), value: audioRecorder.currentAudioLevel)
@@ -32,7 +45,7 @@ struct RecordingButton: View {
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
-                    if !audioRecorder.isRecording && !audioRecorder.isTranscribing {
+                    if !audioRecorder.isRecording && !audioRecorder.isProcessing {
                         audioRecorder.startRecording()
                     }
                 }

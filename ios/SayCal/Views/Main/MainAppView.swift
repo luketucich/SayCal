@@ -20,15 +20,18 @@ struct MainAppView: View {
         }
         .tint(.primary)
         .overlay(alignment: .top) {
-            // Transcription text display
-            if !audioRecorder.transcriptionText.isEmpty {
-                Text(audioRecorder.transcriptionText)
-                    .font(.body)
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(12)
-                    .padding()
-                    .transition(.move(edge: .top).combined(with: .opacity))
+            // Transcription text display with scroll view
+            if !audioRecorder.displayText.isEmpty {
+                ScrollView {
+                    Text(audioRecorder.displayText)
+                        .font(.body)
+                        .padding()
+                }
+                .frame(maxHeight: 300)
+                .background(.ultraThinMaterial)
+                .cornerRadius(12)
+                .padding()
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
