@@ -112,7 +112,11 @@ struct AllergiesView: View {
                 onBack: { state.previousStep() },
                 onNext: {
                     Task {
-                        await userManager.completeOnboarding(with: state)
+                        do {
+                            try await userManager.completeOnboarding(with: state)
+                        } catch {
+                            print("❌ Failed to complete onboarding: \(error.localizedDescription)")
+                        }
                     }
                 }
             )

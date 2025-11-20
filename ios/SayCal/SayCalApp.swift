@@ -11,7 +11,7 @@ struct SayCalApp: App {
                     LoadingView()
 
                 } else if userManager.isAuthenticated {
-                    if userManager.onboardingCompleted {
+                    if userManager.profile?.onboardingCompleted == true {
                         MainAppView()
 
                     } else {
