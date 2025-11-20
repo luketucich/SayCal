@@ -16,5 +16,8 @@
     
     <key>GIDServerClientID</key>
     <string>903193712878-sttafkc4ca93ldnl4cgftp3qofrqp7os.apps.googleusercontent.com</string>
+    
+    <key>NSMicrophoneUsageDescription</key>
+    <string>We need microphone access to record your meal entries</string>
 </dict>
 </plist>

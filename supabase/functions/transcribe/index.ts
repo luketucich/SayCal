@@ -3,6 +3,14 @@ Deno.serve(async (req) => {
     return new Response("Method not allowed", { status: 405 });
   }
 
+  // Parse the incoming request body
+  const { audio, format, timestamp } = await req.json();
+
+  // Decode the base64 audio data
+  const originalAudio = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0));
+
+  // TODO: Send originalAudio to OpenAI Whisper
+
   const result = { text: "Transcribed meal: dummy description" };
 
   return new Response(

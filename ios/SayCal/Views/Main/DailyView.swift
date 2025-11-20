@@ -7,15 +7,8 @@ struct DailyView: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
-                DailyStreakTracker()
-                    .padding()
-
-                Spacer()
-
-                chart.frame(width: 200, height: 200)
-                    .padding(.bottom, 450)
-            }
+            chart.frame(width: 250, height: 250)
+            Spacer()
         }
     }
 }

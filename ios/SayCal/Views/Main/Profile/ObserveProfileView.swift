@@ -140,7 +140,12 @@ struct ObserveProfileView: View {
                     Button(action: {
                         HapticManager.shared.medium()
                         Task {
-                            await userManager.signOut()
+                            do {
+                                try await userManager.signOut()
+                            } catch {
+                                // TODO: Add proper pop up later
+                                print("Sign out failed: \(error)")
+                            }
                         }
                     }) {
                         HStack {
