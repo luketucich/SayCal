@@ -50,7 +50,6 @@ struct SelectableCard: View {
     }
 }
 
-// Compact pill-style selectable card
 struct SelectablePill: View {
     let title: String
     let isSelected: Bool
@@ -79,7 +78,6 @@ struct SelectablePill: View {
     }
 }
 
-// Tab selector with underline indicator
 struct TabSelector: View {
     let options: [String]
     @Binding var selectedOption: String

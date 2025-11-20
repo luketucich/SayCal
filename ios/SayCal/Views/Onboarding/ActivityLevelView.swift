@@ -1,6 +1,5 @@
 import SwiftUI
 
-// Used to calculate TDEE (daily calorie burn)
 struct ActivityLevelView: View {
     @ObservedObject var state: OnboardingState
 
@@ -8,13 +7,11 @@ struct ActivityLevelView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Header section
                     OnboardingHeader(
                         title: "Activity level",
                         subtitle: "How active are you on a typical day?"
                     )
 
-                    // Activity level selection
                     VStack(spacing: 12) {
                         ForEach(ActivityLevel.allCases, id: \.self) { level in
                             SelectableCard(
@@ -33,7 +30,6 @@ struct ActivityLevelView: View {
                 .padding(.horizontal, 20)
             }
 
-            // Bottom button area
             OnboardingBottomBar(
                 onBack: { state.previousStep() },
                 onNext: { state.nextStep() }

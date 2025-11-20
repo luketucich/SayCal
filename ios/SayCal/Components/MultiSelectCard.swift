@@ -38,7 +38,6 @@ struct MultiSelectCard: View {
     }
 }
 
-// Compact multi-select pill for grid layouts
 struct MultiSelectPill: View {
     let title: String
     let isSelected: Bool
@@ -77,7 +76,6 @@ struct MultiSelectPill: View {
 
 #Preview {
     VStack(spacing: 12) {
-        // Card style
         VStack(spacing: 8) {
             MultiSelectCard(
                 title: "Vegetarian",
@@ -94,10 +92,9 @@ struct MultiSelectPill: View {
                 isSelected: false
             ) {}
         }
-        
+
         Divider().padding(.vertical)
-        
-        // Pill style in grid
+
         LazyVGrid(columns: [
             GridItem(.flexible()),
             GridItem(.flexible())

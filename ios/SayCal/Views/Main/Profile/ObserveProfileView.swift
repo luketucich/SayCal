@@ -166,8 +166,6 @@ struct ObserveProfileView: View {
     }
 }
 
-// MARK: - Reusable Components
-
 struct ProfileSection<Content: View>: View {
     let title: String
     let content: Content

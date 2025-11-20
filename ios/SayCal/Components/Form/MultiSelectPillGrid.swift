@@ -98,7 +98,6 @@ struct MultiSelectPillGrid: View {
         let predefinedItems = Set(items)
         let customItems = selectedItems.filter { !predefinedItems.contains($0) }
 
-        // Add any custom items that aren't already in the display array
         for customItem in customItems {
             if !displayItems.contains(customItem) {
                 displayItems.insert(customItem, at: 0)

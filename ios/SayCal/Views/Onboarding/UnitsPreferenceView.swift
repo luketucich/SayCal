@@ -7,13 +7,11 @@ struct UnitsPreferenceView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Header
                     OnboardingHeader(
                         title: "Choose your units",
                         subtitle: "Select your preferred measurement system"
                     )
-                    
-                    // Selection cards
+
                     VStack(spacing: 12) {
                         UnitCard(
                             title: "Metric",
@@ -40,8 +38,7 @@ struct UnitsPreferenceView: View {
                 }
                 .padding(.horizontal, 20)
             }
-            
-            // Bottom button area
+
             OnboardingBottomBar(
                 showBackButton: false,
                 onNext: { state.nextStep() }

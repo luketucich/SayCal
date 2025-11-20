@@ -1,18 +1,11 @@
-// User profile view with settings and account information
-
 import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject var userManager: UserManager
 
-    // Editing state
     @State private var isEditing = false
-
-    // Loading state
     @State private var isSaving = false
     @State private var showSaveSuccess = false
-
-    // Save callback that EditProfileView will provide
     @State private var saveAction: (() async -> Void)?
 
     var body: some View {
@@ -40,7 +33,7 @@ struct ProfileView: View {
                         showSaveSuccess: $showSaveSuccess,
                         saveAction: $saveAction
                     )
-                    .id(profile.userId) // Force refresh when profile changes
+                    .id(profile.userId)
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
@@ -94,7 +87,6 @@ struct ProfileView: View {
     ProfileView()
         .environmentObject({
             let manager = UserManager.shared
-            // Note: Preview will work once a profile is loaded in UserManager
             return manager
         }())
 }
