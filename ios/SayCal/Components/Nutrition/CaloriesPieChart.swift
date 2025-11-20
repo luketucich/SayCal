@@ -3,20 +3,35 @@ import Charts
 
 struct CaloriesPieChart: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
-
-    var proteinPercent: Double = 0.30
-    var carbsPercent: Double = 0.40
-    var fatsPercent: Double = 0.30
+    @EnvironmentObject var authManager: AuthManager
 
     var proteinColor: Color = .blue
     var carbsColor: Color = .green
     var fatsColor: Color = .orange
-
     var remainingCalories: Int = 1847
-    var totalCalories: Int = 2400
+
     @State private var tiltX: Double = 0
     @State private var tiltY: Double = 0
     @State private var isDragging: Bool = true
+    
+    private var proteinPercent: Double {
+        guard let profile = authManager.cachedProfile else { return 0.30 }
+        return Double(profile.proteinPercent) / 100.0
+    }
+    
+    private var carbsPercent: Double {
+        guard let profile = authManager.cachedProfile else { return 0.40 }
+        return Double(profile.carbsPercent) / 100.0
+    }
+    
+    private var fatsPercent: Double {
+        guard let profile = authManager.cachedProfile else { return 0.30 }
+        return Double(profile.fatsPercent) / 100.0
+    }
+    
+    private var totalCalories: Int {
+        authManager.cachedProfile?.targetCalories ?? 2400
+    }
     
     private var macroData: [(name: String, value: Double, color: Color)] {
         [
@@ -262,11 +277,7 @@ struct CaloriesPieChart: View {
 
 #Preview {
     CaloriesPieChart(
-        proteinPercent: 0.30,
-        carbsPercent: 0.40,
-        fatsPercent: 0.30,
-        remainingCalories: 1847,
-        totalCalories: 2400
+        remainingCalories: 1847
     )
     .frame(width: 300, height: 300)
     .padding()
