@@ -41,7 +41,7 @@ struct GoalsView: View {
 
                         // Macro Split Display
                         HStack(spacing: 12) {
-                            let macros = UserProfileManager.calculateMacroPercentages(for: state.goal)
+                            let macros = UserManager.calculateMacroPercentages(for: state.goal)
 
                             OnboardingMacroCard(
                                 title: "Carbs",

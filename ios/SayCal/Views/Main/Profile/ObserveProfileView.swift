@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ObserveProfileView: View {
-    @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var userManager: UserManager
     let profile: UserProfile
 
     var body: some View {
@@ -140,7 +140,7 @@ struct ObserveProfileView: View {
                     Button(action: {
                         HapticManager.shared.medium()
                         Task {
-                            await authManager.signOut()
+                            await userManager.signOut()
                         }
                     }) {
                         HStack {

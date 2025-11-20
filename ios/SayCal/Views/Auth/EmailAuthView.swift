@@ -4,7 +4,7 @@ import Supabase
 struct EmailAuthView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var authManager: AuthManager
+    @EnvironmentObject private var userManager: UserManager
 
     @State private var email = ""
     @State private var code = ""
@@ -105,5 +105,5 @@ struct EmailAuthView: View {
 
 #Preview {
     EmailAuthView()
-        .environmentObject(AuthManager())
+        .environmentObject(UserManager())
 }

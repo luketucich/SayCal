@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MainAppView: View {
-    @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var userManager: UserManager
 
     var body: some View {
         TabView {
@@ -26,9 +26,8 @@ struct MainAppView: View {
 #Preview {
     MainAppView()
         .environmentObject({
-            let manager = AuthManager()
-            // Note: onboardingCompleted is now a computed property
-            // Preview will work once a profile is loaded in UserProfileManager
+            let manager = UserManager()
+            // Note: Preview will work once a profile is loaded in UserManager
             return manager
         }())
 }

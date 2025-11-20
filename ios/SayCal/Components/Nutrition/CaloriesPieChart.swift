@@ -3,7 +3,7 @@ import Charts
 
 struct CaloriesPieChart: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
-    @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var userManager: UserManager
 
     var proteinColor: Color = .blue
     var carbsColor: Color = .green
@@ -15,22 +15,22 @@ struct CaloriesPieChart: View {
     @State private var isDragging: Bool = true
     
     private var proteinPercent: Double {
-        guard let profile = authManager.cachedProfile else { return 0.30 }
+        guard let profile = userManager.profile else { return 0.30 }
         return Double(profile.proteinPercent) / 100.0
     }
-    
+
     private var carbsPercent: Double {
-        guard let profile = authManager.cachedProfile else { return 0.40 }
+        guard let profile = userManager.profile else { return 0.40 }
         return Double(profile.carbsPercent) / 100.0
     }
-    
+
     private var fatsPercent: Double {
-        guard let profile = authManager.cachedProfile else { return 0.30 }
+        guard let profile = userManager.profile else { return 0.30 }
         return Double(profile.fatsPercent) / 100.0
     }
-    
+
     private var totalCalories: Int {
-        authManager.cachedProfile?.targetCalories ?? 2400
+        userManager.profile?.targetCalories ?? 2400
     }
     
     private var macroData: [(name: String, value: Double, color: Color)] {

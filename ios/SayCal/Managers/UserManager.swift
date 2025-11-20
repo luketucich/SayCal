@@ -2,34 +2,61 @@ import Foundation
 import Supabase
 import Combine
 
-/// INTERNAL MANAGER - Do not access directly from views.
-/// All profile operations should go through AuthManager.
+/// UserManager is the SINGLE PUBLIC INTERFACE for all user-related operations.
+/// This includes authentication state AND profile management.
 ///
-/// Responsibilities:
-/// - Database CRUD operations for user profiles (internal methods)
-/// - UserDefaults caching for offline access
-/// - Profile calculations (calories, macros) - public static methods
+/// Architecture Pattern (Strict Enforcement):
+/// ┌─────────────────────────────────────────┐
+/// │ Views (All Views)                       │
+/// │   - Read: userManager.profile           │
+/// │   - Write: userManager.updateProfile()  │
+/// │   - Auth: userManager.isAuthenticated   │
+/// └─────────────────────────────────────────┘
+///                    ↓ ↑
+/// ┌─────────────────────────────────────────┐
+/// │ UserManager (SINGLE SOURCE OF TRUTH)    │
+/// │   - Manages auth state                  │
+/// │   - Manages profile data                │
+/// │   - Coordinates Supabase + UserDefaults │
+/// │   - NO other managers involved          │
+/// └─────────────────────────────────────────┘
+///                    ↓ ↑
+/// ┌─────────────────────────────────────────┐
+/// │ Data Persistence                        │
+/// │   - Supabase (source of truth)          │
+/// │   - UserDefaults (cache layer)          │
+/// └─────────────────────────────────────────┘
 ///
-/// Access Pattern:
-/// ❌ Views → UserProfileManager.shared (FORBIDDEN)
-/// ✅ Views → AuthManager → UserProfileManager (CORRECT)
+/// Data Access Patterns:
+/// 1. READ: Always read from userManager.profile (cached in UserDefaults)
+/// 2. WRITE: Always use userManager.updateProfile() (updates both DB + cache)
+/// 3. INITIAL LOAD: Check UserDefaults first, fetch from Supabase if needed
 ///
-/// Method Visibility:
-/// - loadProfile(), createProfile(), updateProfile() - INTERNAL ONLY
-/// - calculateTargetCalories(), calculateMacroPercentages() - PUBLIC (static utilities)
-///
-/// This manager is responsible for all profile-related business logic and data operations,
-/// but should only be accessed by AuthManager, not directly by views.
+/// Database Fetch Policy:
+/// - First login: Fetch from database (no cache exists)
+/// - Cache hit: Use UserDefaults cache (fast app startup)
+/// - Cache miss/stale: Fetch from database
+/// - Manual refresh: Use refreshProfileFromServer()
+/// - Profile updates: Automatically sync to database and cache
 @MainActor
-class UserProfileManager: ObservableObject {
+class UserManager: ObservableObject {
     // MARK: - Published Properties
 
-    @Published var currentProfile: UserProfile?
+    @Published var isAuthenticated = false
+    @Published private var _isLoading = true
+    @Published private var profileCheckComplete = false
+    @Published var currentUser: User?
+    @Published var profile: UserProfile?
     @Published var onboardingCompleted: Bool = false
+
+    var isLoading: Bool {
+        _isLoading || !profileCheckComplete
+    }
 
     // MARK: - Private Properties
 
     private let client = SupabaseManager.client
+    private var authStateTask: Task<Void, Never>?
 
     // UserDefaults keys
     private let onboardingCompletedKey = "onboardingCompleted"
@@ -37,14 +64,16 @@ class UserProfileManager: ObservableObject {
 
     // MARK: - Singleton
 
-    static let shared = UserProfileManager()
+    static let shared = UserManager()
 
     // MARK: - Initialization
 
     private init() {
         // Load cached onboarding status and profile from UserDefaults
         onboardingCompleted = UserDefaults.standard.bool(forKey: onboardingCompletedKey)
-        currentProfile = loadProfileFromUserDefaults()
+        profile = loadProfileFromUserDefaults()
+
+        setupAuthListener()
     }
 
     // MARK: - Date Decoder
@@ -77,10 +106,53 @@ class UserProfileManager: ObservableObject {
         return decoder
     }()
 
-    // MARK: - Profile Database Operations
+    // MARK: - Auth State Listener
 
-    // INTERNAL: Should only be called by AuthManager
-    internal func loadProfile(for userId: UUID) async -> UserProfile? {
+    private func setupAuthListener() {
+        authStateTask = Task {
+            for await state in client.auth.authStateChanges {
+                // Reset profile check flag at the start of each auth state change
+                self.profileCheckComplete = false
+
+                self.isAuthenticated = state.session != nil
+                self.currentUser = state.session?.user
+
+                if let session = state.session {
+                    print("User authenticated: \(session.user.id)")
+                    // Load the user profile from the database
+                    await loadUserProfile()
+                } else {
+                    print("User not authenticated")
+                    // Clear profile data when user logs out
+                    clearCache()
+                }
+
+                // Mark profile check as complete after handling auth state
+                self.profileCheckComplete = true
+                self._isLoading = false
+            }
+        }
+    }
+
+    // MARK: - Profile Loading (from Database)
+
+    // Check cache first, only fetch from database if cache is missing or stale
+    private func loadUserProfile() async {
+        guard let userId = currentUser?.id else { return }
+
+        // First check if we have a valid cached profile
+        if let cached = profile, cached.userId == userId {
+            // Cache is valid, no need to fetch from database
+            print("✅ Using cached profile for user: \(userId)")
+            return
+        }
+
+        // Only fetch from database if cache is missing or stale
+        print("📥 Fetching profile from database for user: \(userId)")
+        _ = await loadProfile(for: userId)
+    }
+
+    func loadProfile(for userId: UUID) async -> UserProfile? {
         do {
             let response = try await client
                 .from("user_profiles")
@@ -93,7 +165,7 @@ class UserProfileManager: ObservableObject {
             let profile = try dateDecoder.decode(UserProfile.self, from: response.data)
 
             // Update local state and cache
-            self.currentProfile = profile
+            self.profile = profile
             self.onboardingCompleted = profile.onboardingCompleted
 
             // Save to UserDefaults
@@ -107,7 +179,7 @@ class UserProfileManager: ObservableObject {
             print("❌ Failed to load profile: \(error)")
 
             // If there's no profile, user needs onboarding
-            self.currentProfile = nil
+            self.profile = nil
             self.onboardingCompleted = false
             UserDefaults.standard.set(false, forKey: onboardingCompletedKey)
             UserDefaults.standard.removeObject(forKey: userProfileKey)
@@ -116,8 +188,25 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    // INTERNAL: Should only be called by AuthManager
-    internal func createProfile(
+    func refreshProfileFromServer() async {
+        guard let userId = currentUser?.id else { return }
+        print("🔄 Explicitly refreshing profile from server for user: \(userId)")
+        _ = await loadProfile(for: userId)
+    }
+
+    // MARK: - Profile Reading (from UserDefaults Cache)
+
+    func getProfile() -> UserProfile? {
+        return profile
+    }
+
+    func getCachedProfile() -> UserProfile? {
+        return profile
+    }
+
+    // MARK: - Profile Writing (to Supabase + UserDefaults)
+
+    func createProfile(
         userId: UUID,
         unitsPreference: UnitsPreference,
         sex: Sex,
@@ -161,7 +250,7 @@ class UserProfileManager: ObservableObject {
                 .execute()
 
             // Update local state and cache
-            self.currentProfile = newProfile
+            self.profile = newProfile
             self.onboardingCompleted = true
 
             // Save to UserDefaults
@@ -175,8 +264,11 @@ class UserProfileManager: ObservableObject {
         }
     }
 
-    // INTERNAL: Should only be called by AuthManager
-    internal func updateProfile(userId: UUID, updatedProfile: UserProfile) async throws {
+    func updateProfile(_ updatedProfile: UserProfile) async throws {
+        guard let userId = currentUser?.id else {
+            throw NSError(domain: "UserManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+        }
+
         // Encodable payload to satisfy Supabase update(_:).
         // Arrays are always provided (empty when the user cleared them).
         struct UserProfileUpdatePayload: Encodable {
@@ -222,13 +314,68 @@ class UserProfileManager: ObservableObject {
                 .execute()
 
             // Update local state and cache
-            self.currentProfile = updatedProfile
+            self.profile = updatedProfile
             saveProfileToUserDefaults(updatedProfile)
 
             print("✅ Profile updated successfully!")
         } catch {
             print("❌ Failed to update profile: \(error)")
             throw error
+        }
+    }
+
+    // MARK: - Onboarding
+
+    // Database stores height/weight in metric - convert from imperial if needed
+    func completeOnboarding(with state: OnboardingState) async {
+        guard let userId = currentUser?.id else { return }
+
+        // Convert to metric if needed (database stores everything in metric)
+        let weightKg: Double
+        if state.unitsPreference == .imperial {
+            weightKg = state.weightLbs.lbsToKg
+        } else {
+            weightKg = state.weightKg
+        }
+
+        let heightCm: Int
+        if state.unitsPreference == .imperial {
+            heightCm = feetAndInchesToCm(feet: state.heightFeet, inches: state.heightInches)
+        } else {
+            heightCm = state.heightCm
+        }
+
+        // Calculate target calories and macro percentages
+        let targetCalories = UserManager.calculateTargetCalories(
+            sex: state.sex,
+            age: state.age,
+            heightCm: heightCm,
+            weightKg: weightKg,
+            activityLevel: state.activityLevel,
+            goal: state.goal
+        )
+        let macros = UserManager.calculateMacroPercentages(for: state.goal)
+
+        // Create the profile
+        do {
+            try await createProfile(
+                userId: userId,
+                unitsPreference: state.unitsPreference,
+                sex: state.sex,
+                age: state.age,
+                heightCm: heightCm,
+                weightKg: weightKg,
+                activityLevel: state.activityLevel,
+                goal: state.goal,
+                dietaryPreferences: state.selectedDietaryPreferences.isEmpty ? nil : Array(state.selectedDietaryPreferences),
+                allergies: state.selectedAllergies.isEmpty ? nil : Array(state.selectedAllergies),
+                targetCalories: targetCalories,
+                carbsPercent: macros.carbs,
+                fatsPercent: macros.fats,
+                proteinPercent: macros.protein
+            )
+        } catch {
+            print("❌ Failed to complete onboarding: \(error)")
         }
     }
 
@@ -262,14 +409,27 @@ class UserProfileManager: ObservableObject {
     }
 
     func clearCache() {
-        currentProfile = nil
+        profile = nil
         onboardingCompleted = false
         UserDefaults.standard.set(false, forKey: onboardingCompletedKey)
         UserDefaults.standard.removeObject(forKey: userProfileKey)
         print("✅ Profile cache cleared")
     }
 
-    // MARK: - Profile Calculations
+    // MARK: - Sign Out
+
+    func signOut() async {
+        do {
+            try await client.auth.signOut()
+            // Clear profile cache
+            clearCache()
+            print("✅ Sign out successful")
+        } catch {
+            print("❌ Sign out failed: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Calculation Utilities (Static)
 
     // Centralized calorie calculation using Mifflin-St Jeor Equation
     static func calculateTargetCalories(
@@ -319,7 +479,7 @@ class UserProfileManager: ObservableObject {
     // MARK: - Convenience Methods
 
     func calculateTargetCalories(for profile: UserProfile) -> Int {
-        UserProfileManager.calculateTargetCalories(
+        UserManager.calculateTargetCalories(
             sex: profile.sex,
             age: profile.age,
             heightCm: profile.heightCm,
@@ -330,6 +490,11 @@ class UserProfileManager: ObservableObject {
     }
 
     func calculateMacroPercentages(for profile: UserProfile) -> (carbs: Int, fats: Int, protein: Int) {
-        UserProfileManager.calculateMacroPercentages(for: profile.goal)
+        UserManager.calculateMacroPercentages(for: profile.goal)
+    }
+
+    deinit {
+        // Cancel auth state listener when UserManager is deallocated
+        authStateTask?.cancel()
     }
 }

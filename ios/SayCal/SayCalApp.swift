@@ -2,27 +2,27 @@ import SwiftUI
 
 @main
 struct SayCalApp: App {
-    @StateObject private var authManager = AuthManager()
-    
+    @StateObject private var userManager = UserManager()
+
     var body: some Scene {
         WindowGroup {
             Group {
-                if authManager.isLoading {
+                if userManager.isLoading {
                     LoadingView()
-                    
-                } else if authManager.isAuthenticated {
-                    if authManager.onboardingCompleted {
+
+                } else if userManager.isAuthenticated {
+                    if userManager.onboardingCompleted {
                         MainAppView()
-                        
+
                     } else {
                         OnboardingContainerView()
                     }
-                    
+
                 } else {
                     WelcomeView()
                 }
             }
-            .environmentObject(authManager)
+            .environmentObject(userManager)
         }
     }
 }

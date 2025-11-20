@@ -72,7 +72,7 @@ class OnboardingState: ObservableObject {
             heightCm = self.heightCm
         }
 
-        return UserProfileManager.calculateTargetCalories(
+        return UserManager.calculateTargetCalories(
             sex: sex,
             age: age,
             heightCm: heightCm,
