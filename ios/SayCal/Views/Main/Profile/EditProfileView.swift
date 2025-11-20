@@ -8,8 +8,7 @@ struct EditProfileView: View {
     @Binding var showSaveSuccess: Bool
     @Binding var saveAction: (() async -> Void)?
 
-    // IMPORTANT: heightCm and weightKg are authoritative (stored in database)
-    // Imperial values are display-only
+    // Metric values are authoritative (stored in DB), imperial is display-only
     @State private var unitsPreference: UnitsPreference = .metric
     @State private var sex: Sex = .male
     @State private var age: Int = 25
@@ -136,8 +135,7 @@ struct EditProfileView: View {
                                     .fill(Color(UIColor.systemGray6))
                             )
                         }
-                        
-                        // Macro Percentages Display
+
                         VStack(spacing: 12) {
                             HStack(spacing: 12) {
                                 MacroCard(
@@ -218,7 +216,6 @@ struct EditProfileView: View {
                                 ) {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         goal = goalOption
-                                        // Reset to auto-calculated calories and macros when goal changes
                                         manualCalories = nil
                                         manualCarbsPercent = nil
                                         manualFatsPercent = nil
@@ -380,7 +377,6 @@ struct EditProfileView: View {
                         get: { heightCm },
                         set: { newValue in
                             heightCm = newValue
-                            // Sync imperial values
                             let (feet, inches) = newValue.cmToFeetAndInches
                             heightFeet = feet
                             heightInches = inches
@@ -397,7 +393,6 @@ struct EditProfileView: View {
                         get: { heightFeet },
                         set: { newFeet in
                             heightFeet = newFeet
-                            // Sync metric value
                             heightCm = feetAndInchesToCm(feet: newFeet, inches: heightInches)
                         }
                     ),
@@ -405,7 +400,6 @@ struct EditProfileView: View {
                         get: { heightInches },
                         set: { newInches in
                             heightInches = newInches
-                            // Sync metric value
                             heightCm = feetAndInchesToCm(feet: heightFeet, inches: newInches)
                         }
                     ),
@@ -421,7 +415,6 @@ struct EditProfileView: View {
                         get: { weightKg },
                         set: { newValue in
                             weightKg = newValue
-                            // Sync imperial value
                             weightLbs = newValue.kgToLbs
                         }
                     ),
@@ -434,7 +427,6 @@ struct EditProfileView: View {
                         get: { Int(weightLbs) },
                         set: { newValue in
                             weightLbs = Double(newValue)
-                            // Sync metric value
                             weightKg = Double(newValue).lbsToKg
                         }
                     ),
@@ -478,9 +470,6 @@ struct EditProfileView: View {
         }
     }
 
-    // MARK: - Helper Functions
-
-    // Metric values are authoritative, imperial calculated for display only
     private func loadProfileData() {
         guard let profile = userManager.profile else { return }
 
@@ -523,7 +512,6 @@ struct EditProfileView: View {
         weightLbs = weightKg.kgToLbs
     }
 
-    // Always convert from metric to imperial, recalculate metric from imperial edits
     private func syncUnits() {
         if unitsPreference == .imperial {
             let (feet, inches) = heightCm.cmToFeetAndInches
@@ -551,7 +539,6 @@ struct EditProfileView: View {
         UserManager.calculateMacroPercentages(for: goal)
     }
 
-    // Always save metric values - imperial never persisted
     func saveProfile() async {
         isSaving = true
 
@@ -592,7 +579,6 @@ struct EditProfileView: View {
     }
 }
 
-// MARK: - Macro Card Component
 struct MacroCard: View {
     let title: String
     let percentage: Int

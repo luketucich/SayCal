@@ -48,7 +48,6 @@ struct PrimaryButton: View {
     }
 }
 
-// Outlined secondary button
 struct SecondaryButton: View {
     let title: String
     let action: () -> Void
@@ -71,7 +70,6 @@ struct SecondaryButton: View {
     }
 }
 
-// Text button with underline
 struct TextButton: View {
     let title: String
     let action: () -> Void

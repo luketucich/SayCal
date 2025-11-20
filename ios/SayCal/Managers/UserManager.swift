@@ -4,7 +4,6 @@ import Combine
 
 // MARK: - Custom Errors
 
-/// Errors that can occur during UserManager operations
 enum UserManagerError: LocalizedError {
     case noAuthenticatedUser
     case profileNotFound
@@ -27,16 +26,6 @@ enum UserManagerError: LocalizedError {
 
 // MARK: - UserManager
 
-/// Manages user authentication state and profile data.
-///
-/// UserManager is a singleton that handles:
-/// - Authentication state tracking via Supabase
-/// - User profile CRUD operations
-/// - Local caching via UserDefaults
-/// - Onboarding flow completion
-///
-/// All database operations sync with local cache automatically.
-/// Profile data is always stored in metric units in the database.
 @MainActor
 class UserManager: ObservableObject {
 
@@ -51,16 +40,9 @@ class UserManager: ObservableObject {
 
     // MARK: - Published Properties
 
-    /// Whether a user is currently authenticated
     @Published private(set) var isAuthenticated: Bool = false
-
-    /// Whether the manager is currently loading data
     @Published private(set) var isLoading: Bool = true
-
-    /// The currently authenticated user
     @Published private(set) var currentUser: User?
-
-    /// The current user's profile (nil if not loaded or no profile exists)
     @Published private(set) var profile: UserProfile?
 
     // MARK: - Private Properties
@@ -78,7 +60,7 @@ class UserManager: ObservableObject {
 
     // MARK: - Date Decoder
 
-    /// Custom JSON decoder configured for Supabase date formats
+    // Custom decoder for Supabase date formats
     private lazy var decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom { decoder in
@@ -109,7 +91,6 @@ class UserManager: ObservableObject {
 
     // MARK: - Initialization
 
-    /// Loads cached profile and onboarding status from UserDefaults
     private func loadCachedData() {
         profile = loadFromCache()
         print("📦 Loaded cached data on init")
@@ -117,9 +98,6 @@ class UserManager: ObservableObject {
 
     // MARK: - Public API - Authentication
 
-    /// Signs out the current user and clears all local data
-    ///
-    /// - Throws: Supabase auth errors if sign out fails
     func signOut() async throws {
         do {
             try await client.auth.signOut()
@@ -133,33 +111,6 @@ class UserManager: ObservableObject {
 
     // MARK: - Public API - Profile Management
 
-    /// Creates a new user profile in the database and caches it locally.
-    ///
-    /// This method handles the complete profile creation flow:
-    /// 1. Validates authenticated user exists
-    /// 2. Creates profile object with provided data
-    /// 3. Inserts profile into Supabase
-    /// 4. Fetches back to get server-generated timestamps
-    /// 5. Updates local cache
-    ///
-    /// - Parameters:
-    ///   - userId: The authenticated user's ID
-    ///   - unitsPreference: User's preferred measurement system
-    ///   - sex: User's biological sex for calorie calculations
-    ///   - age: User's age in years (13-120)
-    ///   - heightCm: User's height in centimeters (always stored in metric)
-    ///   - weightKg: User's weight in kilograms (always stored in metric)
-    ///   - activityLevel: User's typical activity level
-    ///   - goal: User's fitness goal (affects calorie target)
-    ///   - dietaryPreferences: Optional array of dietary preferences
-    ///   - allergies: Optional array of food allergies
-    ///   - targetCalories: Calculated target daily calories
-    ///   - carbsPercent: Percentage of calories from carbs
-    ///   - fatsPercent: Percentage of calories from fats
-    ///   - proteinPercent: Percentage of calories from protein
-    ///
-    /// - Throws: `UserManagerError.noAuthenticatedUser` if no user is signed in
-    ///           `UserManagerError.databaseError` if database operation fails
     func createProfile(
         userId: UUID,
         unitsPreference: UnitsPreference,
@@ -221,19 +172,6 @@ class UserManager: ObservableObject {
         }
     }
 
-    /// Updates an existing user profile in the database.
-    ///
-    /// This method:
-    /// 1. Validates authenticated user exists
-    /// 2. Creates update payload from profile
-    /// 3. Updates database
-    /// 4. Fetches back to get updated timestamps
-    /// 5. Updates local cache
-    ///
-    /// - Parameter profile: The updated profile data
-    ///
-    /// - Throws: `UserManagerError.noAuthenticatedUser` if no user is signed in
-    ///           `UserManagerError.databaseError` if database operation fails
     func updateProfile(_ profile: UserProfile) async throws {
         guard let userId = currentUser?.id else {
             throw UserManagerError.noAuthenticatedUser
@@ -296,13 +234,6 @@ class UserManager: ObservableObject {
         }
     }
 
-    /// Refreshes the user profile from the database.
-    ///
-    /// Forces a fresh fetch from the database, bypassing cache.
-    /// Useful when you need to ensure you have the latest data.
-    ///
-    /// - Throws: `UserManagerError.noAuthenticatedUser` if no user is signed in
-    ///           `UserManagerError.databaseError` if database operation fails
     func refreshProfile() async throws {
         guard currentUser != nil else {
             throw UserManagerError.noAuthenticatedUser
@@ -314,16 +245,6 @@ class UserManager: ObservableObject {
 
     // MARK: - Public API - Onboarding
 
-    /// Completes the onboarding flow by creating a user profile.
-    ///
-    /// This method:
-    /// 1. Converts units to metric if needed (database stores everything in metric)
-    /// 2. Calculates target calories and macros
-    /// 3. Creates the profile
-    ///
-    /// - Parameter state: The onboarding state containing user input
-    ///
-    /// - Throws: `UserManagerError` if profile creation fails
     func completeOnboarding(with state: OnboardingState) async throws {
         guard let userId = currentUser?.id else {
             throw UserManagerError.noAuthenticatedUser
@@ -376,23 +297,7 @@ class UserManager: ObservableObject {
 
     // MARK: - Static Utilities
 
-    /// Calculates target daily calories using the Mifflin-St Jeor equation.
-    ///
-    /// The calculation:
-    /// 1. Calculates BMR (Basal Metabolic Rate) based on sex, age, height, and weight
-    /// 2. Multiplies by activity level to get TDEE (Total Daily Energy Expenditure)
-    /// 3. Adjusts based on goal (deficit for weight loss, surplus for gain)
-    /// 4. Ensures minimum safe calorie levels (1200 for females, 1500 for males)
-    ///
-    /// - Parameters:
-    ///   - sex: Biological sex (affects BMR calculation)
-    ///   - age: Age in years
-    ///   - heightCm: Height in centimeters
-    ///   - weightKg: Weight in kilograms
-    ///   - activityLevel: Activity level (affects TDEE multiplier)
-    ///   - goal: Fitness goal (affects calorie adjustment)
-    ///
-    /// - Returns: Target daily calories (integer)
+    // Calculates target calories using Mifflin-St Jeor equation
     static func calculateTargetCalories(
         sex: Sex,
         age: Int,
@@ -420,11 +325,6 @@ class UserManager: ObservableObject {
         return max(targetCalories, minimumCalories)
     }
 
-    /// Calculates recommended macro percentages based on fitness goal.
-    ///
-    /// - Parameter goal: The user's fitness goal
-    ///
-    /// - Returns: A tuple of (carbs, fats, protein) percentages that sum to 100
     static func calculateMacroPercentages(for goal: Goal) -> (carbs: Int, fats: Int, protein: Int) {
         switch goal {
         case .loseWeight:
@@ -444,12 +344,6 @@ class UserManager: ObservableObject {
 
     // MARK: - Private - Auth State Management
 
-    /// Sets up the authentication state listener.
-    ///
-    /// This listener:
-    /// - Updates isAuthenticated and currentUser when auth state changes
-    /// - Loads profile when user signs in
-    /// - Clears cache when user signs out
     private func setupAuthListener() {
         authStateTask = Task {
             for await state in client.auth.authStateChanges {
@@ -470,11 +364,6 @@ class UserManager: ObservableObject {
         }
     }
 
-    /// Loads user profile when authentication state changes.
-    ///
-    /// Strategy:
-    /// - If cached profile exists and matches current user, use it
-    /// - Otherwise, fetch from database
     private func loadUserProfileOnAuth() async {
         guard let userId = currentUser?.id else { return }
 
@@ -495,15 +384,6 @@ class UserManager: ObservableObject {
 
     // MARK: - Private - Database Operations
 
-    /// Fetches the user profile from the database and updates local state and cache.
-    ///
-    /// This is the single source of truth for profile data.
-    /// All create/update operations should call this after modifying the database
-    /// to ensure local state matches server state (especially timestamps).
-    ///
-    /// - Throws: `UserManagerError.noAuthenticatedUser` if no user is signed in
-    ///           `UserManagerError.profileNotFound` if profile doesn't exist
-    ///           `UserManagerError.databaseError` for other database errors
     private func fetchProfileFromDatabase() async throws {
         guard let userId = currentUser?.id else {
             throw UserManagerError.noAuthenticatedUser
@@ -538,7 +418,6 @@ class UserManager: ObservableObject {
 
     // MARK: - Private - Cache Management
 
-    /// Saves profile to UserDefaults cache
     private func saveToCache(_ profile: UserProfile) {
         do {
             let encoder = JSONEncoder()
@@ -550,7 +429,6 @@ class UserManager: ObservableObject {
         }
     }
 
-    /// Loads profile from UserDefaults cache
     private func loadFromCache() -> UserProfile? {
         guard let data = UserDefaults.standard.data(forKey: CacheKey.profile) else {
             return nil
@@ -567,7 +445,6 @@ class UserManager: ObservableObject {
         }
     }
 
-    /// Clears all cached data
     private func clearCache() {
         profile = nil
         UserDefaults.standard.removeObject(forKey: CacheKey.profile)

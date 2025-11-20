@@ -1,13 +1,11 @@
 import SwiftUI
 import Combine
 
-// Navigation direction for transitions
 enum NavigationDirection {
     case forward
     case backward
 }
 
-// Manages state for the onboarding flow
 class OnboardingState: ObservableObject {
     @Published var currentStep: Int = 0
     @Published var navigationDirection: NavigationDirection = .forward
@@ -83,7 +81,6 @@ class OnboardingState: ObservableObject {
     }
 }
 
-// Main container for onboarding flow
 struct OnboardingContainerView: View {
     @StateObject private var state = OnboardingState()
     @Environment(\.dismiss) var dismiss
@@ -131,7 +128,6 @@ struct OnboardingContainerView: View {
     }
 }
 
-// Progress bar component
 struct ProgressBar: View {
     let currentStep: Int
     let totalSteps: Int

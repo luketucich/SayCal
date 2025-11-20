@@ -27,7 +27,6 @@ struct SayCalApp: App {
     }
 }
 
-// Simple loading view
 struct LoadingView: View {
     var body: some View {
         ZStack {

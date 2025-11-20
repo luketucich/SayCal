@@ -1,6 +1,5 @@
 import SwiftUI
 
-// Adjusts daily calorie targets (+ for gain, - for loss)
 struct GoalsView: View {
     @ObservedObject var state: OnboardingState
 
@@ -8,13 +7,11 @@ struct GoalsView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Header section
                     OnboardingHeader(
                         title: "Your goal",
                         subtitle: "What are you trying to achieve?"
                     )
 
-                    // Target Calories Display
                     VStack(spacing: 12) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
@@ -39,7 +36,6 @@ struct GoalsView: View {
                                 .fill(Color(UIColor.systemGray6))
                         )
 
-                        // Macro Split Display
                         HStack(spacing: 12) {
                             let macros = UserManager.calculateMacroPercentages(for: state.goal)
 
@@ -73,7 +69,6 @@ struct GoalsView: View {
                         }
                     }
 
-                    // Goal selection
                     VStack(spacing: 12) {
                         ForEach(Goal.allCases, id: \.self) { goal in
                             SelectableCard(
@@ -93,7 +88,6 @@ struct GoalsView: View {
                 .padding(.horizontal, 20)
             }
 
-            // Bottom button area
             OnboardingBottomBar(
                 onBack: { state.previousStep() },
                 onNext: { state.nextStep() }
@@ -103,7 +97,6 @@ struct GoalsView: View {
     }
 }
 
-// MARK: - Onboarding Macro Card Component
 struct OnboardingMacroCard: View {
     let title: String
     let percentage: Int

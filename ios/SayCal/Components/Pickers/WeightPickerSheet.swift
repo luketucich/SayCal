@@ -1,6 +1,5 @@
 import SwiftUI
 
-// Weight picker with 0.5 kg increments
 struct WeightPickerSheet: View {
     let title: String
     @Binding var weightKg: Double

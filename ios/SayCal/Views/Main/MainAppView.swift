@@ -27,7 +27,6 @@ struct MainAppView: View {
     MainAppView()
         .environmentObject({
             let manager = UserManager.shared
-            // Note: Preview will work once a profile is loaded in UserManager
             return manager
         }())
 }

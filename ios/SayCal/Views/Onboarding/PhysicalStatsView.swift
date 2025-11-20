@@ -10,15 +10,12 @@ struct PhysicalStatsView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Header
                     OnboardingHeader(
                         title: "Your physical stats",
                         subtitle: "We'll use this to calculate your caloric needs"
                     )
-                    
-                    // Stats input sections
+
                     VStack(spacing: 20) {
-                        // Sex selection
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Sex")
                                 .font(.system(size: 14, weight: .medium))
@@ -46,8 +43,7 @@ struct PhysicalStatsView: View {
                                 }
                             }
                         }
-                        
-                        // Age selector
+
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Age")
                                 .font(.system(size: 14, weight: .medium))
@@ -76,8 +72,7 @@ struct PhysicalStatsView: View {
                                 )
                             }
                         }
-                        
-                        // Height selector
+
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Height")
                                 .font(.system(size: 14, weight: .medium))
@@ -112,8 +107,7 @@ struct PhysicalStatsView: View {
                                 )
                             }
                         }
-                        
-                        // Weight selector
+
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Weight")
                                 .font(.system(size: 14, weight: .medium))
@@ -154,8 +148,7 @@ struct PhysicalStatsView: View {
                 }
                 .padding(.horizontal, 20)
             }
-            
-            // Bottom button area
+
             OnboardingBottomBar(
                 isNextEnabled: state.canProceed,
                 onBack: { state.previousStep() },

@@ -11,13 +11,11 @@ struct DietaryPreferencesView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Header
                     OnboardingHeader(
                         title: "Dietary preferences",
                         subtitle: "Select any that apply (optional)"
                     )
 
-                    // Skip option
                     if state.selectedDietaryPreferences.isEmpty {
                         InfoCallout(message: "You can skip this step and update preferences later")
                             .transition(.asymmetric(
@@ -26,7 +24,6 @@ struct DietaryPreferencesView: View {
                             ))
                     }
 
-                    // Preference grid with pills
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
@@ -87,8 +84,7 @@ struct DietaryPreferencesView: View {
                                 removal: .scale(scale: 0.8).combined(with: .opacity)
                             ))
                         }
-                        
-                        // Add button
+
                         AddOptionButton {
                             withAnimation(.snappy(duration: 0.3)) {
                                 isAddingPreference = true
@@ -101,8 +97,7 @@ struct DietaryPreferencesView: View {
                 }
                 .padding(.horizontal, 20)
             }
-            
-            // Bottom button area
+
             OnboardingBottomBar(
                 nextButtonText: state.selectedDietaryPreferences.isEmpty ? "Skip" : "Next",
                 hideWhenFocused: isTextFieldFocused || isAddingPreference,
@@ -112,11 +107,9 @@ struct DietaryPreferencesView: View {
         }
         .background(Color(UIColor.systemBackground))
         .onAppear {
-            // Restore custom dietary preferences when navigating back
             let predefinedPreferences = Set(DietaryOptions.dietaryPreferences)
             let customPreferences = state.selectedDietaryPreferences.filter { !predefinedPreferences.contains($0) }
 
-            // Add any custom preferences that aren't already in the local array
             for customPref in customPreferences {
                 if !dietaryPreferences.contains(customPref) {
                     dietaryPreferences.insert(customPref, at: 0)
