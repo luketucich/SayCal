@@ -6,24 +6,24 @@ struct CustomInputField: View {
     @FocusState.Binding var isFocused: Bool
     let onSubmit: () -> Void
 
-
     var body: some View {
         TextField(placeholder, text: $text)
-            .font(.system(size: 14))
-            .foregroundColor(Color(UIColor.label))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .font(DSTypography.labelMedium)
+            .foregroundColor(Color.textPrimary)
+            .padding(.horizontal, DSSpacing.sm)
+            .padding(.vertical, DSSpacing.xs)
             .frame(maxWidth: 160)
             .background(
                 Capsule()
-                    .fill(Color(UIColor.systemBackground))
+                    .fill(Color.cardBackground)
                     .overlay(
                         Capsule()
-                            .stroke(Color(UIColor.label), lineWidth: 1.5)
+                            .stroke(isFocused ? Color.primaryBlue : Color.borderPrimary, lineWidth: isFocused ? DSBorder.thick : DSBorder.medium)
                     )
             )
             .focused($isFocused)
             .onSubmit(onSubmit)
+            .animation(DSAnimation.quick, value: isFocused)
     }
 }
 

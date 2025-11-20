@@ -11,7 +11,7 @@ struct AllergiesView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: DSSpacing.xxl) {
                     OnboardingHeader(
                         title: "Food allergies",
                         subtitle: "Select any allergies you have (optional)"
@@ -28,7 +28,7 @@ struct AllergiesView: View {
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: 10) {
+                    ], spacing: DSSpacing.xs) {
 
                         if isAddingAllergy {
                             CustomInputField(
@@ -39,7 +39,7 @@ struct AllergiesView: View {
                                 let trimmed = newAllergy.trimmingCharacters(in: .whitespaces)
 
                                 guard !trimmed.isEmpty else {
-                                    withAnimation(.snappy(duration: 0.25)) {
+                                    withAnimation(DSAnimation.snappy) {
                                         isAddingAllergy = false
                                         newAllergy = ""
                                     }
@@ -47,14 +47,14 @@ struct AllergiesView: View {
                                 }
 
                                 guard !allergies.contains(where: { $0.lowercased() == trimmed.lowercased() }) else {
-                                    withAnimation(.snappy(duration: 0.25)) {
+                                    withAnimation(DSAnimation.snappy) {
                                         isAddingAllergy = false
                                         newAllergy = ""
                                     }
                                     return
                                 }
 
-                                withAnimation(.snappy(duration: 0.3)) {
+                                withAnimation(DSAnimation.standard) {
                                     allergies.insert(trimmed, at: 0)
                                     state.selectedAllergies.insert(trimmed)
                                     isAddingAllergy = false
@@ -72,7 +72,7 @@ struct AllergiesView: View {
                                 title: allergy.replacingOccurrences(of: "_", with: " ").capitalized,
                                 isSelected: state.selectedAllergies.contains(allergy)
                             ) {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                withAnimation(DSAnimation.spring) {
                                     if state.selectedAllergies.contains(allergy) {
                                         state.selectedAllergies.remove(allergy)
                                     } else {
@@ -87,7 +87,7 @@ struct AllergiesView: View {
                         }
 
                         AddOptionButton {
-                            withAnimation(.snappy(duration: 0.3)) {
+                            withAnimation(DSAnimation.standard) {
                                 isAddingAllergy = true
                                 isTextFieldFocused = true
                             }
@@ -96,7 +96,7 @@ struct AllergiesView: View {
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, DSSpacing.lg)
             }
 
             OnboardingBottomBar(
@@ -115,7 +115,7 @@ struct AllergiesView: View {
                 }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color.backgroundPrimary)
         .onAppear {
             let predefinedAllergies = Set(DietaryOptions.commonAllergies)
             let customAllergies = state.selectedAllergies.filter { !predefinedAllergies.contains($0) }

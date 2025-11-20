@@ -5,8 +5,8 @@ struct CaloriesPieChart: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @EnvironmentObject var userManager: UserManager
 
-    var proteinColor: Color = .blue
-    var carbsColor: Color = .green
+    var proteinColor: Color = .primaryBlue
+    var carbsColor: Color = .primaryGreen
     var fatsColor: Color = .orange
     var remainingCalories: Int = 1847
 
@@ -46,7 +46,7 @@ struct CaloriesPieChart: View {
             ZStack {
                 // Outer container circle
                 Circle()
-                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+                    .stroke(Color.borderPrimary.opacity(0.5), lineWidth: DSBorder.medium)
                 
                 // Macro segments
                 macroSegments(size: size)
@@ -98,9 +98,9 @@ struct CaloriesPieChart: View {
     private func innerRing(size: CGFloat) -> some View {
         Circle()
             .stroke(
-                Color.primary.opacity(0.1),
+                Color.borderPrimary.opacity(0.5),
                 style: StrokeStyle(
-                    lineWidth: 1,
+                    lineWidth: DSBorder.medium,
                     lineCap: .round
                 )
             )
@@ -112,15 +112,15 @@ struct CaloriesPieChart: View {
         VStack(spacing: size * 0.02) {
             Text("\(remainingCalories)")
                 .font(.system(size: size * 0.18, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.primary)
-            
+                .foregroundStyle(Color.textPrimary)
+
             Text("calories left")
                 .font(.system(size: size * 0.055, weight: .medium))
-                .foregroundStyle(Color.primary.opacity(0.6))
-            
+                .foregroundStyle(Color.textSecondary)
+
             Text("of \(totalCalories)")
                 .font(.system(size: size * 0.045, weight: .medium))
-                .foregroundStyle(Color.primary.opacity(0.4))
+                .foregroundStyle(Color.textTertiary)
         }
     }
     
@@ -139,21 +139,21 @@ struct CaloriesPieChart: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(macro.name)
                             .font(.system(size: size * 0.04, weight: .medium))
-                            .foregroundStyle(Color.primary)
-                        
+                            .foregroundStyle(Color.textPrimary)
+
                         Text("\(Int(macro.value * 100))%")
                             .font(.system(size: size * 0.035, weight: .regular))
-                            .foregroundStyle(Color.primary.opacity(0.6))
+                            .foregroundStyle(Color.textSecondary)
                     }
                 }
                 .padding(.horizontal, size * 0.025)
                 .padding(.vertical, size * 0.02)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(colorScheme == .dark ? Color.black : Color.white)
+                    RoundedRectangle(cornerRadius: DSRadius.sm)
+                        .fill(Color.cardBackground)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: DSRadius.sm)
+                                .stroke(Color.borderPrimary.opacity(0.5), lineWidth: DSBorder.medium)
                         )
                 )
                 .offset(

@@ -21,8 +21,8 @@ struct ProfileView: View {
                                     isEditing = true
                                 } label: {
                                     Text("Edit")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(UIColor.label))
+                                        .font(DSTypography.labelLarge)
+                                        .foregroundColor(Color.textPrimary)
                                 }
                             }
                         }
@@ -37,14 +37,14 @@ struct ProfileView: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
-                            HStack(spacing: 16) {
+                            HStack(spacing: DSSpacing.md) {
                                 Button {
                                     HapticManager.shared.light()
                                     isEditing = false
                                 } label: {
                                     Text("Cancel")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(UIColor.secondaryLabel))
+                                        .font(DSTypography.labelLarge)
+                                        .foregroundColor(Color.textSecondary)
                                 }
 
                                 Button {
@@ -55,11 +55,11 @@ struct ProfileView: View {
                                 } label: {
                                     if isSaving {
                                         ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: Color(UIColor.label)))
+                                            .progressViewStyle(CircularProgressViewStyle(tint: Color.textPrimary))
                                     } else {
                                         Text("Save")
-                                            .font(.system(size: 16, weight: .semibold))
-                                            .foregroundColor(Color(UIColor.label))
+                                            .font(DSTypography.headingSmall)
+                                            .foregroundColor(Color.textPrimary)
                                     }
                                 }
                                 .disabled(isSaving)

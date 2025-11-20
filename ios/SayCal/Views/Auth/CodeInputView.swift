@@ -11,23 +11,23 @@ struct CodeInputView: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: DSSpacing.xl) {
             OnboardingHeader(
                 title: "Enter verification code",
                 subtitle: "We sent a 6-digit code to \(email)"
             )
 
-            VStack(spacing: 16) {
-                HStack(spacing: 12) {
+            VStack(spacing: DSSpacing.md) {
+                HStack(spacing: DSSpacing.sm) {
                     ForEach(0..<6, id: \.self) { index in
                         ZStack {
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(code.count == index ? Color(UIColor.label) : Color.primary.opacity(0.3), lineWidth: 1)
-                                .frame(width: 48, height: 56)
+                            RoundedRectangle(cornerRadius: DSRadius.sm)
+                                .stroke(code.count == index ? Color.textPrimary : Color.borderPrimary, lineWidth: DSBorder.medium)
+                                .frame(width: DSSize.inputMedium, height: DSSize.inputLarge)
 
                             if index < code.count {
                                 Text(String(code[code.index(code.startIndex, offsetBy: index)]))
-                                    .font(.system(size: 24, weight: .semibold))
+                                    .font(DSTypography.titleMedium)
                             }
                         }
                     }
@@ -61,8 +61,8 @@ struct CodeInputView: View {
 
                 if let errorMessage {
                     Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.caption)
+                        .foregroundColor(Color.statusError)
+                        .font(DSTypography.captionLarge)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
@@ -82,12 +82,12 @@ struct CodeInputView: View {
                     }
                 }
                 .disabled(isLoading)
-                .padding(.top, 8)
+                .padding(.top, DSSpacing.xs)
             }
 
             Spacer()
         }
-        .padding(24)
+        .padding(DSSpacing.xl)
     }
 }
 

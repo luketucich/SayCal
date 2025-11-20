@@ -25,12 +25,12 @@ struct MainAppView: View {
                 ScrollView {
                     Text(audioRecorder.displayText)
                         .font(.body)
-                        .padding()
+                        .padding(DSSpacing.md)
                 }
                 .frame(maxHeight: 300)
                 .background(.ultraThinMaterial)
-                .cornerRadius(12)
-                .padding()
+                .cornerRadius(DSRadius.md)
+                .padding(DSSpacing.md)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
@@ -38,8 +38,8 @@ struct MainAppView: View {
             HStack {
                 Spacer()
                 RecordingButton(audioRecorder: audioRecorder)
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 8)
+                    .padding(.trailing, DSSpacing.lg)
+                    .padding(.bottom, DSSpacing.xs)
             }
             .background(.clear)
         }

@@ -25,32 +25,41 @@ struct PrimaryButton: View {
         } label: {
             if isLoading {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: Color(UIColor.systemBackground)))
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color.buttonPrimaryText))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 48)
+                    .frame(height: DSSize.buttonLarge)
             } else {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(isEnabled ? Color(UIColor.systemBackground) : Color(UIColor.systemGray3))
+                    .font(DSTypography.buttonLarge)
+                    .foregroundColor(Color.buttonPrimaryText)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 48)
+                    .frame(height: DSSize.buttonLarge)
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isEnabled ? Color(UIColor.label) : Color.clear)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(isEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: 1)
-                )
+            RoundedRectangle(cornerRadius: DSRadius.md)
+                .fill(isEnabled ? Color.buttonPrimary : Color.textTertiary)
         )
+        .opacity(isEnabled ? 1.0 : 0.6)
         .disabled(!isEnabled || isLoading)
+        .animation(DSAnimation.quick, value: isEnabled)
     }
 }
 
 struct SecondaryButton: View {
     let title: String
+    let isEnabled: Bool
     let action: () -> Void
+
+    init(
+        title: String,
+        isEnabled: Bool = true,
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.isEnabled = isEnabled
+        self.action = action
+    }
 
     var body: some View {
         Button {
@@ -58,21 +67,37 @@ struct SecondaryButton: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(Color(UIColor.label))
+                .font(DSTypography.buttonLarge)
+                .foregroundColor(Color.textPrimary)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .frame(height: DSSize.buttonLarge)
         }
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color(UIColor.separator), lineWidth: 1)
+        .background(Color.buttonSecondary)
+        .overlay(
+            RoundedRectangle(cornerRadius: DSRadius.md)
+                .stroke(Color.buttonSecondaryBorder, lineWidth: DSBorder.medium)
         )
+        .cornerRadius(DSRadius.md)
+        .opacity(isEnabled ? 1.0 : 0.6)
+        .disabled(!isEnabled)
+        .animation(DSAnimation.quick, value: isEnabled)
     }
 }
 
 struct TextButton: View {
     let title: String
+    let isEnabled: Bool
     let action: () -> Void
+
+    init(
+        title: String,
+        isEnabled: Bool = true,
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.isEnabled = isEnabled
+        self.action = action
+    }
 
     var body: some View {
         Button {
@@ -80,10 +105,12 @@ struct TextButton: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: .regular))
-                .foregroundColor(Color(UIColor.label))
+                .font(DSTypography.bodyMedium)
+                .foregroundColor(Color.textPrimary)
                 .underline()
         }
+        .opacity(isEnabled ? 1.0 : 0.6)
+        .disabled(!isEnabled)
     }
 }
 

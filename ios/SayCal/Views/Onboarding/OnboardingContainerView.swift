@@ -89,11 +89,11 @@ struct OnboardingContainerView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 ProgressBar(currentStep: state.currentStep, totalSteps: state.totalSteps)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                
+                    .padding(.horizontal, DSSpacing.lg)
+                    .padding(.vertical, DSSpacing.sm)
+
                 Divider()
-                    .overlay(Color(UIColor.systemGray5))
+                    .overlay(Color.borderSecondary)
 
                 currentStepView
                     .transition(.asymmetric(
@@ -102,7 +102,7 @@ struct OnboardingContainerView: View {
                     ))
                     .id(state.currentStep)
             }
-            .background(Color(UIColor.systemBackground))
+            .background(Color.backgroundPrimary)
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -136,21 +136,21 @@ struct ProgressBar: View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 // Background track
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color(UIColor.systemGray5))
-                    .frame(height: 2)
-                
+                RoundedRectangle(cornerRadius: DSSpacing.xxxs)
+                    .fill(Color.backgroundTertiary)
+                    .frame(height: DSSpacing.xxxs)
+
                 // Progress fill
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color(UIColor.label))
+                RoundedRectangle(cornerRadius: DSSpacing.xxxs)
+                    .fill(Color.textPrimary)
                     .frame(
                         width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps),
-                        height: 2
+                        height: DSSpacing.xxxs
                     )
-                    .animation(.easeInOut(duration: 0.3), value: currentStep)
+                    .animation(DSAnimation.standard, value: currentStep)
             }
         }
-        .frame(height: 2)
+        .frame(height: DSSpacing.xxxs)
     }
 }
 

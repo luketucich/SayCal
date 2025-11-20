@@ -10,7 +10,7 @@ struct DietaryPreferencesView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: DSSpacing.xxl) {
                     OnboardingHeader(
                         title: "Dietary preferences",
                         subtitle: "Select any that apply (optional)"
@@ -27,7 +27,7 @@ struct DietaryPreferencesView: View {
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: 10) {
+                    ], spacing: DSSpacing.xs) {
                         
                         if isAddingPreference {
                             CustomInputField(
@@ -38,7 +38,7 @@ struct DietaryPreferencesView: View {
                                 let trimmed = newPreference.trimmingCharacters(in: .whitespaces)
 
                                 guard !trimmed.isEmpty else {
-                                    withAnimation(.snappy(duration: 0.25)) {
+                                    withAnimation(DSAnimation.snappy) {
                                         isAddingPreference = false
                                         newPreference = ""
                                     }
@@ -46,14 +46,14 @@ struct DietaryPreferencesView: View {
                                 }
 
                                 guard !dietaryPreferences.contains(where: { $0.lowercased() == trimmed.lowercased() }) else {
-                                    withAnimation(.snappy(duration: 0.25)) {
+                                    withAnimation(DSAnimation.snappy) {
                                         isAddingPreference = false
                                         newPreference = ""
                                     }
                                     return
                                 }
 
-                                withAnimation(.snappy(duration: 0.3)) {
+                                withAnimation(DSAnimation.standard) {
                                     dietaryPreferences.insert(trimmed, at: 0)
                                     state.selectedDietaryPreferences.insert(trimmed)
                                     isAddingPreference = false
@@ -71,7 +71,7 @@ struct DietaryPreferencesView: View {
                                 title: preference.replacingOccurrences(of: "_", with: " ").capitalized,
                                 isSelected: state.selectedDietaryPreferences.contains(preference)
                             ) {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                withAnimation(DSAnimation.spring) {
                                     if state.selectedDietaryPreferences.contains(preference) {
                                         state.selectedDietaryPreferences.remove(preference)
                                     } else {
@@ -86,7 +86,7 @@ struct DietaryPreferencesView: View {
                         }
 
                         AddOptionButton {
-                            withAnimation(.snappy(duration: 0.3)) {
+                            withAnimation(DSAnimation.standard) {
                                 isAddingPreference = true
                                 isTextFieldFocused = true
                             }
@@ -95,7 +95,7 @@ struct DietaryPreferencesView: View {
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, DSSpacing.lg)
             }
 
             OnboardingBottomBar(
@@ -105,7 +105,7 @@ struct DietaryPreferencesView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color.backgroundPrimary)
         .onAppear {
             let predefinedPreferences = Set(DietaryOptions.dietaryPreferences)
             let customPreferences = state.selectedDietaryPreferences.filter { !predefinedPreferences.contains($0) }

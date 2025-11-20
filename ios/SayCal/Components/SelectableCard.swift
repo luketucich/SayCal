@@ -23,30 +23,31 @@ struct SelectableCard: View {
             HapticManager.shared.light()
             action()
         } label: {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(DSTypography.headingMedium)
+                    .foregroundColor(Color.textPrimary)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(DSTypography.captionLarge)
+                        .foregroundColor(Color.textSecondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, DSSpacing.md)
+            .padding(.vertical, DSSpacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(UIColor.systemBackground))
+                RoundedRectangle(cornerRadius: DSRadius.md)
+                    .fill(Color.cardBackground)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                        RoundedRectangle(cornerRadius: DSRadius.md)
+                            .stroke(isSelected ? Color.primaryBlue : Color.borderPrimary, lineWidth: isSelected ? DSBorder.thick : DSBorder.medium)
                     )
             )
         }
         .buttonStyle(.plain)
+        .animation(DSAnimation.quick, value: isSelected)
     }
 }
 
@@ -61,50 +62,53 @@ struct SelectablePill: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(Color(UIColor.label))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+                .font(isSelected ? DSTypography.labelLarge : DSTypography.bodyMedium)
+                .foregroundColor(Color.textPrimary)
+                .padding(.horizontal, DSSpacing.lg)
+                .padding(.vertical, DSSpacing.xs)
                 .background(
                     Capsule()
-                        .fill(Color(UIColor.systemBackground))
+                        .fill(Color.cardBackground)
                         .overlay(
                             Capsule()
-                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                                .stroke(isSelected ? Color.primaryBlue : Color.borderPrimary, lineWidth: isSelected ? DSBorder.thick : DSBorder.medium)
                         )
                 )
         }
         .buttonStyle(.plain)
+        .animation(DSAnimation.quick, value: isSelected)
     }
 }
 
 struct TabSelector: View {
     let options: [String]
     @Binding var selectedOption: String
-    
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(options, id: \.self) { option in
                 Button {
                     HapticManager.shared.selection()
-                    selectedOption = option
+                    withAnimation(DSAnimation.quick) {
+                        selectedOption = option
+                    }
                 } label: {
                     Text(option)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DSTypography.headingMedium)
+                        .foregroundColor(selectedOption == option ? Color.textPrimary : Color.textSecondary)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, DSSpacing.xs)
                         .background(
                             VStack(spacing: 0) {
                                 Spacer()
                                 if selectedOption == option {
                                     Rectangle()
-                                        .fill(Color(UIColor.label))
-                                        .frame(height: 2)
+                                        .fill(Color.primaryBlue)
+                                        .frame(height: DSBorder.extraThick)
                                 } else {
                                     Rectangle()
                                         .fill(Color.clear)
-                                        .frame(height: 2)
+                                        .frame(height: DSBorder.extraThick)
                                 }
                             }
                         )
@@ -112,7 +116,7 @@ struct TabSelector: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, DSSpacing.md)
     }
 }
 

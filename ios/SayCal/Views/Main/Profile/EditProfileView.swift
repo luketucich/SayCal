@@ -67,38 +67,38 @@ struct EditProfileView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: DSSpacing.xxl) {
                 OnboardingHeader(
                     title: "Edit Profile",
                     subtitle: "Update your information"
                 )
 
-                VStack(spacing: 24) {
-                    VStack(alignment: .leading, spacing: 12) {
+                VStack(spacing: DSSpacing.xl) {
+                    VStack(alignment: .leading, spacing: DSSpacing.sm) {
                         FormSectionHeader(title: "Goals")
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: DSSpacing.sm) {
                             HStack {
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                                     Text("Your Target Calories")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(Color(UIColor.secondaryLabel))
+                                        .font(DSTypography.bodyMedium)
+                                        .foregroundColor(Color.textSecondary)
 
                                     Text("\(currentCalories)")
-                                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                                        .foregroundColor(Color(UIColor.label))
+                                        .font(DSTypography.displayMedium)
+                                        .foregroundColor(Color.textPrimary)
 
                                     Text(manualCalories != nil ? "manual override" : "calories per day")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(manualCalories != nil ? Color.orange : Color(UIColor.tertiaryLabel))
+                                        .font(DSTypography.bodySmall)
+                                        .foregroundColor(manualCalories != nil ? Color.orange : Color.textTertiary)
                                 }
 
                                 Spacer()
 
-                                HStack(spacing: 12) {
+                                HStack(spacing: DSSpacing.sm) {
                                     if manualCalories != nil {
                                         Button(action: {
-                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                            withAnimation(DSAnimation.quick) {
                                                 manualCalories = nil
                                             }
                                             HapticManager.shared.light()
@@ -129,15 +129,15 @@ struct EditProfileView: View {
                                     }
                                 }
                             }
-                            .padding(20)
+                            .padding(DSSpacing.lg)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(UIColor.systemGray6))
+                                RoundedRectangle(cornerRadius: DSRadius.md)
+                                    .fill(Color.backgroundTertiary)
                             )
                         }
 
-                        VStack(spacing: 12) {
-                            HStack(spacing: 12) {
+                        VStack(spacing: DSSpacing.sm) {
+                            HStack(spacing: DSSpacing.sm) {
                                 MacroCard(
                                     title: "Carbs",
                                     percentage: currentCarbsPercent,
@@ -175,7 +175,7 @@ struct EditProfileView: View {
                             HStack {
                                 if hasMacroOverride {
                                     Button(action: {
-                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                        withAnimation(DSAnimation.quick) {
                                             manualCarbsPercent = nil
                                             manualFatsPercent = nil
                                             manualProteinPercent = nil
@@ -207,14 +207,14 @@ struct EditProfileView: View {
                         }
 
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: DSSpacing.sm) {
                             ForEach(Goal.allCases, id: \.self) { goalOption in
                                 SelectableCard(
                                     title: goalOption.displayName,
                                     subtitle: goalOption.calorieAdjustmentText,
                                     isSelected: goal == goalOption
                                 ) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                    withAnimation(DSAnimation.quick) {
                                         goal = goalOption
                                         manualCalories = nil
                                         manualCarbsPercent = nil
@@ -226,16 +226,16 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: DSSpacing.sm) {
                         FormSectionHeader(title: "Activity Level")
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: DSSpacing.sm) {
                             ForEach(ActivityLevel.allCases, id: \.self) { level in
                                 SelectableCard(
                                     title: level.displayName,
                                     isSelected: activityLevel == level
                                 ) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                    withAnimation(DSAnimation.quick) {
                                         activityLevel = level
                                     }
                                 }
@@ -243,16 +243,16 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: DSSpacing.xs) {
                         FormSectionHeader(title: "Units")
 
-                        HStack(spacing: 12) {
+                        HStack(spacing: DSSpacing.sm) {
                             TogglePill(
                                 title: "Metric",
                                 isSelected: unitsPreference == .metric,
                                 style: .rounded
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation(DSAnimation.quick) {
                                     unitsPreference = .metric
                                     syncUnits()
                                 }
@@ -263,7 +263,7 @@ struct EditProfileView: View {
                                 isSelected: unitsPreference == .imperial,
                                 style: .rounded
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation(DSAnimation.quick) {
                                     unitsPreference = .imperial
                                     syncUnits()
                                 }
@@ -271,16 +271,16 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: DSSpacing.xs) {
                         FormSectionHeader(title: "Sex")
 
-                        HStack(spacing: 12) {
+                        HStack(spacing: DSSpacing.sm) {
                             TogglePill(
                                 title: "Male",
                                 isSelected: sex == .male,
                                 style: .rounded
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation(DSAnimation.quick) {
                                     sex = .male
                                 }
                             }
@@ -290,14 +290,14 @@ struct EditProfileView: View {
                                 isSelected: sex == .female,
                                 style: .rounded
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation(DSAnimation.quick) {
                                     sex = .female
                                 }
                             }
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: DSSpacing.xs) {
                         FormSectionHeader(title: "Age")
 
                         FormPickerButton(label: "\(age) years") {
@@ -306,7 +306,7 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: DSSpacing.xs) {
                         FormSectionHeader(title: "Height")
 
                         FormPickerButton(
@@ -317,7 +317,7 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: DSSpacing.xs) {
                         FormSectionHeader(title: "Weight")
 
                         FormPickerButton(
@@ -343,9 +343,9 @@ struct EditProfileView: View {
 
                 Spacer(minLength: 100)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, DSSpacing.lg)
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color.backgroundPrimary)
         .sheet(isPresented: $showCaloriePicker) {
             PickerSheet(
                 title: "Select Calorie Goal",
@@ -586,25 +586,25 @@ struct MacroCard: View {
     let onEdit: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: DSSpacing.xs) {
             Text(title)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DSTypography.labelMedium)
+                .foregroundColor(Color.textSecondary)
 
             Text("\(percentage)%")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(DSTypography.titleMedium)
                 .foregroundColor(color)
 
             Button(action: onEdit) {
                 Image(systemName: "pencil.circle.fill")
-                    .font(.system(size: 20))
+                    .font(DSTypography.headingLarge)
                     .foregroundColor(color)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
+        .padding(.vertical, DSSpacing.md)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: DSRadius.md)
                 .fill(color.opacity(0.1))
         )
     }

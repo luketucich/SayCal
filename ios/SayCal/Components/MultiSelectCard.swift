@@ -12,29 +12,30 @@ struct MultiSelectCard: View {
         } label: {
             HStack {
                 Text(title)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(DSTypography.bodyMedium)
+                    .foregroundColor(Color.textPrimary)
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DSTypography.labelMedium)
+                        .foregroundColor(Color.primaryBlue)
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .padding(.horizontal, DSSpacing.sm)
+            .padding(.vertical, DSSpacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(UIColor.systemBackground))
+                RoundedRectangle(cornerRadius: DSRadius.md)
+                    .fill(Color.cardBackground)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                        RoundedRectangle(cornerRadius: DSRadius.md)
+                            .stroke(isSelected ? Color.primaryBlue : Color.borderPrimary, lineWidth: isSelected ? DSBorder.thick : DSBorder.medium)
                     )
             )
         }
         .buttonStyle(.plain)
+        .animation(DSAnimation.quick, value: isSelected)
     }
 }
 
@@ -48,29 +49,30 @@ struct MultiSelectPill: View {
             HapticManager.shared.light()
             action()
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: DSSpacing.xxs) {
                 Text(title)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(DSTypography.labelMedium)
+                    .foregroundColor(Color.textPrimary)
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DSTypography.labelMedium)
+                        .foregroundColor(Color.primaryBlue)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, DSSpacing.sm)
+            .padding(.vertical, DSSpacing.xs)
             .background(
                 Capsule()
-                    .fill(Color(UIColor.systemBackground))
+                    .fill(Color.cardBackground)
                     .overlay(
                         Capsule()
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                            .stroke(isSelected ? Color.primaryBlue : Color.borderPrimary, lineWidth: isSelected ? DSBorder.thick : DSBorder.medium)
                     )
             )
         }
         .buttonStyle(.plain)
+        .animation(DSAnimation.quick, value: isSelected)
     }
 }
 

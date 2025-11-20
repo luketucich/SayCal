@@ -37,29 +37,30 @@ struct TogglePill: View {
             }
         }
         .buttonStyle(.plain)
+        .animation(DSAnimation.quick, value: isSelected)
     }
 
     @ViewBuilder
     private var capsuleContent: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: DSSpacing.xxs) {
             if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(Color(UIColor.systemBackground))
+                    .font(DSTypography.labelSmall)
+                    .foregroundColor(Color.buttonPrimaryText)
             }
 
             Text(title)
-                .font(.system(size: 14, weight: .regular))
-                .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color(UIColor.label))
+                .font(DSTypography.labelMedium)
+                .foregroundColor(isSelected ? Color.buttonPrimaryText : Color.textPrimary)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, DSSpacing.sm)
+        .padding(.vertical, DSSpacing.xs)
         .background(
             Capsule()
-                .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
+                .fill(isSelected ? Color.buttonPrimary : Color.cardBackground)
                 .overlay(
                     Capsule()
-                        .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                        .stroke(isSelected ? Color.buttonPrimary : Color.borderPrimary, lineWidth: isSelected ? DSBorder.medium : DSBorder.medium)
                 )
         )
     }
@@ -67,16 +68,16 @@ struct TogglePill: View {
     @ViewBuilder
     private var roundedContent: some View {
         Text(title)
-            .font(.system(size: 16, weight: .medium))
-            .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color(UIColor.label))
+            .font(DSTypography.headingMedium)
+            .foregroundColor(isSelected ? Color.buttonPrimaryText : Color.textPrimary)
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: DSSize.buttonSmall)
             .background(
-                RoundedRectangle(cornerRadius: 22)
-                    .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
+                RoundedRectangle(cornerRadius: DSRadius.full)
+                    .fill(isSelected ? Color.buttonPrimary : Color.cardBackground)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: DSRadius.full)
+                            .stroke(isSelected ? Color.buttonPrimary : Color.borderPrimary, lineWidth: DSBorder.medium)
                     )
             )
     }

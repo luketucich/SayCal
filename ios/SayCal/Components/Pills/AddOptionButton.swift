@@ -8,21 +8,21 @@ struct AddOptionButton: View {
             HapticManager.shared.light()
             action()
         } label: {
-            HStack(spacing: 4) {
+            HStack(spacing: DSSpacing.xxs) {
                 Image(systemName: "plus")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(DSTypography.labelSmall)
                 Text("Add")
-                    .font(.system(size: 14))
+                    .font(DSTypography.labelMedium)
             }
-            .foregroundColor(Color(UIColor.secondaryLabel))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .foregroundColor(Color.textSecondary)
+            .padding(.horizontal, DSSpacing.sm)
+            .padding(.vertical, DSSpacing.xs)
             .background(
                 Capsule()
-                    .stroke(Color(UIColor.systemGray4), lineWidth: 1)
+                    .stroke(Color.borderPrimary, lineWidth: DSBorder.medium)
                     .background(
                         Capsule()
-                            .fill(Color(UIColor.systemGray6))
+                            .fill(Color.backgroundTertiary)
                     )
             )
         }

@@ -31,7 +31,7 @@ struct OnboardingBottomBar: View {
         if !hideWhenFocused {
             VStack(spacing: 0) {
                 Divider()
-                    .overlay(Color(UIColor.systemGray5))
+                    .overlay(Color.borderPrimary)
 
                 HStack {
                     if showBackButton {
@@ -40,8 +40,8 @@ struct OnboardingBottomBar: View {
                             onBack()
                         } label: {
                             Text("Back")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color(UIColor.label))
+                                .font(DSTypography.headingMedium)
+                                .foregroundColor(Color.textPrimary)
                                 .underline()
                         }
                     }
@@ -52,25 +52,26 @@ struct OnboardingBottomBar: View {
                         HapticManager.shared.medium()
                         onNext()
                     } label: {
-                        HStack(spacing: 4) {
+                        HStack(spacing: DSSpacing.xxs) {
                             Text(nextButtonText)
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(DSTypography.buttonLarge)
                             Image(systemName: nextButtonIcon)
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(DSTypography.buttonMedium)
                         }
-                        .foregroundColor(isNextEnabled ? Color(UIColor.systemBackground) : Color(UIColor.secondaryLabel))
-                        .padding(.horizontal, 24)
-                        .frame(height: 48)
+                        .foregroundColor(Color.buttonPrimaryText)
+                        .padding(.horizontal, DSSpacing.xl)
+                        .frame(height: DSSize.buttonMedium)
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(isNextEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4))
+                            RoundedRectangle(cornerRadius: DSRadius.sm)
+                                .fill(isNextEnabled ? Color.buttonPrimary : Color.textTertiary)
                         )
                     }
                     .disabled(!isNextEnabled)
+                    .opacity(isNextEnabled ? 1.0 : 0.6)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(Color(UIColor.systemBackground))
+                .padding(.horizontal, DSSpacing.lg)
+                .padding(.vertical, DSSpacing.md)
+                .background(Color.backgroundPrimary)
             }
         }
     }

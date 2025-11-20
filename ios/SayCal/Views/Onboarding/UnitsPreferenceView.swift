@@ -6,29 +6,29 @@ struct UnitsPreferenceView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: DSSpacing.xxl) {
                     OnboardingHeader(
                         title: "Choose your units",
                         subtitle: "Select your preferred measurement system"
                     )
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: DSSpacing.sm) {
                         UnitCard(
                             title: "Metric",
                             subtitle: "Kilograms • Centimeters",
                             isSelected: state.unitsPreference == .metric
                         ) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
+                            withAnimation(DSAnimation.quick) {
                                 state.unitsPreference = .metric
                             }
                         }
-                        
+
                         UnitCard(
                             title: "Imperial",
                             subtitle: "Pounds • Feet & Inches",
                             isSelected: state.unitsPreference == .imperial
                         ) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
+                            withAnimation(DSAnimation.quick) {
                                 state.unitsPreference = .imperial
                             }
                         }
@@ -36,7 +36,7 @@ struct UnitsPreferenceView: View {
                     
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, DSSpacing.lg)
             }
 
             OnboardingBottomBar(
@@ -44,7 +44,7 @@ struct UnitsPreferenceView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color.backgroundPrimary)
     }
 }
 

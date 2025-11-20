@@ -12,35 +12,40 @@ struct UnitCard: View {
             action()
         } label: {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                     Text(title)
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DSTypography.headingMedium)
+                        .foregroundColor(Color.textPrimary)
 
                     Text(subtitle)
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(DSTypography.bodySmall)
+                        .foregroundColor(Color.textSecondary)
                 }
 
                 Spacer()
 
                 Circle()
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: isSelected ? 2 : 1.5)
-                    .frame(width: 20, height: 20)
+                    .stroke(isSelected ? Color.primaryBlue : Color.borderPrimary, lineWidth: isSelected ? DSBorder.thick : DSBorder.medium)
+                    .frame(width: DSSpacing.lg, height: DSSpacing.lg)
                     .overlay(
                         Circle()
-                            .fill(Color(UIColor.label))
-                            .frame(width: 8, height: 8)
+                            .fill(Color.primaryBlue)
+                            .frame(width: DSSpacing.xs, height: DSSpacing.xs)
                             .opacity(isSelected ? 1 : 0)
                     )
             }
-            .padding(16)
+            .padding(DSSpacing.md)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: DSRadius.md)
+                    .fill(Color.cardBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DSRadius.md)
+                            .stroke(isSelected ? Color.primaryBlue : Color.borderPrimary, lineWidth: isSelected ? DSBorder.thick : DSBorder.medium)
+                    )
             )
         }
         .buttonStyle(.plain)
+        .animation(DSAnimation.quick, value: isSelected)
     }
 }
 

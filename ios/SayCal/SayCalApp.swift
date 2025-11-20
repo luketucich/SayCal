@@ -30,13 +30,13 @@ struct SayCalApp: App {
 struct LoadingView: View {
     var body: some View {
         ZStack {
-            Color(.systemBackground)
+            Color.backgroundPrimary
                 .ignoresSafeArea()
-            
-            VStack(spacing: 16) {
+
+            VStack(spacing: DSSpacing.md) {
                 ProgressView()
                     .scaleEffect(1.5)
-                
+
                 Text("Loading...")
                     .font(.subheadline)
                     .foregroundColor(.secondary)

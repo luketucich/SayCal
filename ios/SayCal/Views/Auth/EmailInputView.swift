@@ -8,30 +8,30 @@ struct EmailInputView: View {
     var onContinue: () async -> Void
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: DSSpacing.xl) {
             OnboardingHeader(
                 title: "Enter your email",
                 subtitle: "We'll send you a verification code"
             )
 
-            VStack(spacing: 16) {
+            VStack(spacing: DSSpacing.md) {
                 TextField("Email address", text: $email)
                     .textContentType(.emailAddress)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
-                    .font(.system(size: 17))
-                    .padding()
-                    .frame(height: 52)
+                    .font(DSTypography.bodyLarge)
+                    .padding(DSSpacing.md)
+                    .frame(height: DSSize.inputMedium)
                     .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: DSRadius.sm)
+                            .stroke(Color.borderPrimary, lineWidth: DSBorder.medium)
                     )
 
                 if let errorMessage {
                     Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.caption)
+                        .foregroundColor(Color.statusError)
+                        .font(DSTypography.captionLarge)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
@@ -48,7 +48,7 @@ struct EmailInputView: View {
 
             Spacer()
         }
-        .padding(24)
+        .padding(DSSpacing.xl)
     }
 }
 

@@ -6,37 +6,37 @@ struct GoalsView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: DSSpacing.xxl) {
                     OnboardingHeader(
                         title: "Your goal",
                         subtitle: "What are you trying to achieve?"
                     )
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: DSSpacing.sm) {
                         HStack {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                                 Text("Your Target Calories")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(Color(UIColor.secondaryLabel))
+                                    .font(DSTypography.bodyMedium)
+                                    .foregroundColor(Color.textSecondary)
 
                                 Text("\(state.targetCalories)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(UIColor.label))
+                                    .font(DSTypography.displayMedium)
+                                    .foregroundColor(Color.textPrimary)
 
                                 Text("calories per day")
-                                    .font(.system(size: 13))
-                                    .foregroundColor(Color(UIColor.tertiaryLabel))
+                                    .font(DSTypography.bodySmall)
+                                    .foregroundColor(Color.textTertiary)
                             }
 
                             Spacer()
                         }
-                        .padding(20)
+                        .padding(DSSpacing.lg)
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(UIColor.systemGray6))
+                            RoundedRectangle(cornerRadius: DSRadius.md)
+                                .fill(Color.backgroundTertiary)
                         )
 
-                        HStack(spacing: 12) {
+                        HStack(spacing: DSSpacing.sm) {
                             let macros = UserManager.calculateMacroPercentages(for: state.goal)
 
                             OnboardingMacroCard(
@@ -60,23 +60,23 @@ struct GoalsView: View {
 
                         HStack {
                             Image(systemName: "info.circle")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color(UIColor.tertiaryLabel))
+                                .font(DSTypography.labelMedium)
+                                .foregroundColor(Color.textTertiary)
 
                             Text("You can edit your target calories and macros anytime in your profile")
-                                .font(.system(size: 13))
-                                .foregroundColor(Color(UIColor.secondaryLabel))
+                                .font(DSTypography.bodySmall)
+                                .foregroundColor(Color.textSecondary)
                         }
                     }
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: DSSpacing.sm) {
                         ForEach(Goal.allCases, id: \.self) { goal in
                             SelectableCard(
                                 title: goal.displayName,
                                 subtitle: goal.calorieAdjustmentText,
                                 isSelected: state.goal == goal
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation(DSAnimation.quick) {
                                     state.goal = goal
                                 }
                             }
@@ -85,7 +85,7 @@ struct GoalsView: View {
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, DSSpacing.lg)
             }
 
             OnboardingBottomBar(
@@ -93,7 +93,7 @@ struct GoalsView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color.backgroundPrimary)
     }
 }
 
@@ -103,19 +103,19 @@ struct OnboardingMacroCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: DSSpacing.xxs) {
             Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DSTypography.labelSmall)
+                .foregroundColor(Color.textSecondary)
 
             Text("\(percentage)%")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(DSTypography.headingLarge)
                 .foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .padding(.vertical, DSSpacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: DSRadius.md)
                 .fill(color.opacity(0.1))
         )
     }

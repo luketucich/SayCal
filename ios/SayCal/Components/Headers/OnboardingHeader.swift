@@ -5,16 +5,16 @@ struct OnboardingHeader: View {
     let subtitle: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: DSSpacing.xs) {
             Text(title)
-                .font(.system(size: 26, weight: .semibold))
-                .foregroundColor(Color(UIColor.label))
+                .font(DSTypography.titleLarge)
+                .foregroundColor(Color.textPrimary)
 
             Text(subtitle)
-                .font(.system(size: 15))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DSTypography.bodyMedium)
+                .foregroundColor(Color.textSecondary)
         }
-        .padding(.top, 24)
+        .padding(.top, DSSpacing.xl)
     }
 }
 
