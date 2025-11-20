@@ -3,7 +3,7 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var userManager: UserManager
 
     // Editing state
     @State private var isEditing = false
@@ -17,7 +17,7 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            if let profile = authManager.cachedProfile {
+            if let profile = userManager.profile {
                 if !isEditing {
                     ObserveProfileView(profile: profile)
                         .navigationBarTitleDisplayMode(.inline)
@@ -93,9 +93,8 @@ struct ProfileView: View {
 #Preview {
     ProfileView()
         .environmentObject({
-            let manager = AuthManager()
-            // Note: onboardingCompleted is now a computed property
-            // Preview will work once a profile is loaded in UserProfileManager
+            let manager = UserManager()
+            // Note: Preview will work once a profile is loaded in UserManager
             return manager
         }())
 }

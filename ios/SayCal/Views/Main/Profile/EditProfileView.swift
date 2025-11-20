@@ -2,7 +2,7 @@ import SwiftUI
 import Auth
 
 struct EditProfileView: View {
-    @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var userManager: UserManager
     @Binding var isEditing: Bool
     @Binding var isSaving: Bool
     @Binding var showSaveSuccess: Bool
@@ -482,7 +482,7 @@ struct EditProfileView: View {
 
     // Metric values are authoritative, imperial calculated for display only
     private func loadProfileData() {
-        guard let profile = authManager.cachedProfile else { return }
+        guard let profile = userManager.profile else { return }
 
         unitsPreference = profile.unitsPreference
         sex = profile.sex
@@ -494,7 +494,7 @@ struct EditProfileView: View {
         selectedDietaryPreferences = Set(profile.dietaryPreferences ?? [])
         selectedAllergies = Set(profile.allergies ?? [])
 
-        let calculatedCalories = UserProfileManager.calculateTargetCalories(
+        let calculatedCalories = UserManager.calculateTargetCalories(
             sex: profile.sex,
             age: profile.age,
             heightCm: profile.heightCm,
@@ -506,7 +506,7 @@ struct EditProfileView: View {
             manualCalories = profile.targetCalories
         }
 
-        let calculatedMacros = UserProfileManager.calculateMacroPercentages(for: profile.goal)
+        let calculatedMacros = UserManager.calculateMacroPercentages(for: profile.goal)
         if profile.carbsPercent != calculatedMacros.carbs {
             manualCarbsPercent = profile.carbsPercent
         }
@@ -537,7 +537,7 @@ struct EditProfileView: View {
     }
 
     private func calculateTargetCalories() -> Int {
-        UserProfileManager.calculateTargetCalories(
+        UserManager.calculateTargetCalories(
             sex: sex,
             age: age,
             heightCm: heightCm,
@@ -548,14 +548,14 @@ struct EditProfileView: View {
     }
 
     private func calculateMacroPercentages() -> (carbs: Int, fats: Int, protein: Int) {
-        UserProfileManager.calculateMacroPercentages(for: goal)
+        UserManager.calculateMacroPercentages(for: goal)
     }
 
     // Always save metric values - imperial never persisted
     func saveProfile() async {
         isSaving = true
 
-        guard let userId = authManager.currentUser?.id else {
+        guard let userId = userManager.currentUser?.id else {
             isSaving = false
             return
         }
@@ -575,13 +575,13 @@ struct EditProfileView: View {
             carbsPercent: currentCarbsPercent,
             fatsPercent: currentFatsPercent,
             proteinPercent: currentProteinPercent,
-            createdAt: authManager.cachedProfile?.createdAt,
+            createdAt: userManager.profile?.createdAt,
             updatedAt: Date(),
             onboardingCompleted: true
         )
 
         do {
-            try await authManager.updateProfile(updatedProfile)
+            try await userManager.updateProfile(updatedProfile)
             isSaving = false
             isEditing = false
             showSaveSuccess = true

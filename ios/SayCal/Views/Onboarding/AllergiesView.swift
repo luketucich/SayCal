@@ -3,7 +3,7 @@ import SwiftUI
 // Pressing "Complete Setup" creates the user profile
 struct AllergiesView: View {
     @ObservedObject var state: OnboardingState
-    @EnvironmentObject var auth: AuthManager
+    @EnvironmentObject var userManager: UserManager
     @FocusState private var isTextFieldFocused: Bool
     @State var allergies: [String] = DietaryOptions.commonAllergies
     @State var isAddingAllergy: Bool = false
@@ -112,7 +112,7 @@ struct AllergiesView: View {
                 onBack: { state.previousStep() },
                 onNext: {
                     Task {
-                        await auth.completeOnboarding(with: state)
+                        await userManager.completeOnboarding(with: state)
                     }
                 }
             )
@@ -135,5 +135,5 @@ struct AllergiesView: View {
 
 #Preview {
     AllergiesView(state: OnboardingState())
-        .environmentObject(AuthManager())
+        .environmentObject(UserManager())
 }
