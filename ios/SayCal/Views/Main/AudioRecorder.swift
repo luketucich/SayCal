@@ -1,7 +1,12 @@
 import SwiftUI
 import AVFoundation
-import Supabase
 import Combine
+import Supabase
+
+// MARK: - Transcription Response
+struct TranscriptionResponse: Codable {
+    let text: String
+}
 
 // MARK: - Audio Recorder
 class AudioRecorder: NSObject, ObservableObject {
@@ -121,20 +126,14 @@ class AudioRecorder: NSObject, ObservableObject {
             
             let jsonData = try JSONSerialization.data(withJSONObject: requestBody)
             
-            // Call Supabase edge function
-            let response: Data = try await SupabaseManager.client.functions.invoke(
+            // Call Supabase edge function with typed response
+            let response: TranscriptionResponse = try await SupabaseManager.client.functions.invoke(
                 "transcribe",
-                options: FunctionInvokeOptions(
-                    body: jsonData
-                )
+                options: FunctionInvokeOptions(body: jsonData)
             )
             
             print("✅ Audio uploaded successfully")
-            
-            // Parse response
-            if let json = try? JSONSerialization.jsonObject(with: response) as? [String: Any] {
-                print("📝 Transcription: \(json["text"] ?? "N/A")")
-            }
+            print("📝 Transcription: \(response.text)")
             
             // Clean up temporary file
             try? FileManager.default.removeItem(at: fileURL)

@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
 
   // TODO: Send originalAudio to OpenAI Whisper
 
-  const result = { text: "Transcribed meal: dummy description" };
+  const result = { text: "Testing testing, originalAudio" };
 
   return new Response(
     JSON.stringify(result),

@@ -7,31 +7,25 @@ struct MainAppView: View {
     @StateObject private var audioRecorder = AudioRecorder()
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Tab bar with Daily and Profile tabs
-            TabView {
-                DailyView()
-                    .tabItem {
-                        Image(systemName: "chart.pie.fill")
-                    }
-                
-                ProfileView()
-                    .tabItem {
-                        Image(systemName: "person.fill")
-                    }
-            }
-            .tint(.primary) // Keep icon colors consistent
+        TabView {
+            DailyView()
+                .tabItem {
+                    Image(systemName: "chart.pie.fill")
+                }
             
-            // Floating microphone button with liquid glass design
+            ProfileView()
+                .tabItem {
+                    Image(systemName: "person.fill")
+                }
+        }
+        .tint(.primary)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             HStack {
                 Spacer()
                 
                 if audioRecorder.isRecording {
-                    // Expanded recording view with audio visualizer
                     RecordingExpandedView(audioRecorder: audioRecorder)
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
                 } else {
-                    // Collapsed microphone button
                     Button(action: {
                         audioRecorder.toggleRecording()
                     }) {
@@ -39,22 +33,35 @@ struct MainAppView: View {
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
                             .frame(width: 56, height: 56)
-                            .background(
-                                // Liquid glass effect
-                                Circle()
-                                    .fill(.blue.gradient)
-                                    .shadow(color: .blue.opacity(0.3), radius: 12, y: 6)
-                            )
                     }
+                    .applyGlassEffect()
                     .padding(.trailing, 20)
                     .padding(.bottom, 8)
                     .transition(.scale.combined(with: .opacity))
                 }
             }
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: audioRecorder.isRecording)
+            .background(.clear)
         }
         .onAppear {
             audioRecorder.requestPermission()
+        }
+    }
+}
+
+// Helper: Glass Effect with iOS version fallback
+extension View {
+    @ViewBuilder
+    func applyGlassEffect() -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.clear.tint(.blue))
+        } else {
+            self
+                .background(
+                    Circle()
+                        .fill(.blue.gradient)
+                        .shadow(color: .blue.opacity(0.3), radius: 12, y: 6)
+                )
         }
     }
 }
