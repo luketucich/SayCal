@@ -3,12 +3,14 @@ import AVFoundation
 import Combine
 import Supabase
 
-// MARK: - Transcription Response
+// MARK: - Models
+
 struct TranscriptionResponse: Codable {
     let text: String
 }
 
 // MARK: - Processing State
+
 enum ProcessingState {
     case idle
     case recording
@@ -17,28 +19,35 @@ enum ProcessingState {
     case streamingNutrition(transcription: String, partialInfo: String)
     case completed(nutritionInfo: String)
     case error(message: String)
-    
+
     var isProcessing: Bool {
         switch self {
-        case .idle, .completed, .error:
-            return false
-        case .recording, .transcribing, .calculatingNutrition, .streamingNutrition:
-            return true
+        case .idle, .completed, .error: return false
+        case .recording, .transcribing, .calculatingNutrition, .streamingNutrition: return true
         }
+    }
+
+    var isRecording: Bool {
+        if case .recording = self { return true }
+        return false
     }
 }
 
 // MARK: - Audio Recorder
+
 class AudioRecorder: NSObject, ObservableObject {
+    // MARK: - Published Properties
     @Published var state: ProcessingState = .idle
     @Published var currentAudioLevel: CGFloat = 1.0
-    
+
+    // MARK: - Private Properties
     private var audioRecorder: AVAudioRecorder?
-    private var timer: Timer?
+    private var audioLevelTimer: Timer?
     private var recordingURL: URL?
-    private var channelTask: Task<Void, Never>?
-    
-    // Computed property for display text
+    private var realtimeChannel: Task<Void, Never>?
+
+    // MARK: - Computed Properties
+
     var displayText: String {
         switch state {
         case .idle:
@@ -49,311 +58,274 @@ class AudioRecorder: NSObject, ObservableObject {
             return "Transcribing..."
         case .calculatingNutrition(let transcription):
             return "Calculating:\n\(transcription)"
-        case .streamingNutrition(let transcription, let partialInfo):
-            return partialInfo.isEmpty ? "Calculating:\n\(transcription)" : partialInfo
+        case .streamingNutrition(_, let partialInfo):
+            return partialInfo
         case .completed(let nutritionInfo):
             return nutritionInfo
         case .error(let message):
             return "Error: \(message)"
         }
     }
-    
-    // Helper computed properties
+
     var isRecording: Bool {
-        if case .recording = state { return true }
-        return false
+        state.isRecording
     }
-    
+
     var isProcessing: Bool {
         state.isProcessing
     }
-    
+
+    // MARK: - Initialization
+
     override init() {
         super.init()
         setupAudioSession()
     }
     
     // MARK: - Audio Session Setup
-    func setupAudioSession() {
+
+    private func setupAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
             try audioSession.setActive(true)
         } catch {
-            print("❌ Failed to set up audio session: \(error)")
+            print("Failed to setup audio session: \(error)")
         }
     }
-    
-    // MARK: - Permission Request
+
     func requestPermission() {
-        AVAudioApplication.requestRecordPermission { granted in
-            if granted {
-                print("✅ Microphone access granted")
-            } else {
-                print("❌ Microphone access denied")
-            }
-        }
+        AVAudioApplication.requestRecordPermission { _ in }
     }
     
-    // MARK: - Start Recording
+    // MARK: - Recording Control
+
     func startRecording() {
         HapticManager.shared.medium()
         state = .recording
-        
+
         let tempDir = FileManager.default.temporaryDirectory
         recordingURL = tempDir.appendingPathComponent(UUID().uuidString + ".m4a")
-        
+
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 44100.0,
             AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
-        
+
         do {
             audioRecorder = try AVAudioRecorder(url: recordingURL!, settings: settings)
             audioRecorder?.isMeteringEnabled = true
             audioRecorder?.record()
-            
-            timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+
+            audioLevelTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
                 self?.updateAudioLevel()
             }
-            
-            print("🎙️ Recording started")
         } catch {
-            print("❌ Failed to start recording: \(error)")
             state = .error(message: "Failed to start recording")
         }
     }
-    
-    // MARK: - Stop Recording
+
     func stopRecording() {
         HapticManager.shared.medium()
-        
+
         audioRecorder?.stop()
-        timer?.invalidate()
-        timer = nil
+        audioLevelTimer?.invalidate()
+        audioLevelTimer = nil
         currentAudioLevel = 1.0
-        
-        if let url = recordingURL {
-            print("💾 Recording stopped, transcribing...")
-            state = .transcribing
-            Task {
-                await uploadAudioToSupabase(url)
-            }
+
+        guard let url = recordingURL else { return }
+        state = .transcribing
+
+        Task {
+            await transcribeAndAnalyze(audioURL: url)
         }
     }
     
-    // MARK: - Upload Audio to Supabase
-    private func uploadAudioToSupabase(_ fileURL: URL) async {
+    // MARK: - Transcription & Analysis
+
+    private func transcribeAndAnalyze(audioURL: URL) async {
         do {
-            let audioData = try Data(contentsOf: fileURL)
+            // Transcribe audio
+            let audioData = try Data(contentsOf: audioURL)
             let base64Audio = audioData.base64EncodedString()
-            
+
             let requestBody: [String: Any] = [
                 "audio": base64Audio,
                 "format": "m4a",
                 "timestamp": ISO8601DateFormatter().string(from: Date())
             ]
-            
+
             let jsonData = try JSONSerialization.data(withJSONObject: requestBody)
-            
             let response: TranscriptionResponse = try await SupabaseManager.client.functions.invoke(
                 "transcribe",
                 options: FunctionInvokeOptions(body: jsonData)
             )
-            
+
             let transcription = response.text
-            
+
             DispatchQueue.main.async {
                 self.state = .calculatingNutrition(transcription: transcription)
                 HapticManager.shared.success()
             }
-            
-            print("✅ Transcription: \(transcription)")
-            try? FileManager.default.removeItem(at: fileURL)
-            
-            // Calculate nutrition with Realtime streaming
-            await calculateNutritionWithRealtime(transcription: transcription)
-            
-        } catch let error as FunctionsError {
-            print("❌ Functions Error: \(error)")
-            if case .httpError(let code, let data) = error {
-                print("HTTP Code: \(code)")
-                if let errorString = String(data: data, encoding: .utf8) {
-                    print("Error body: \(errorString)")
-                }
-            }
-            DispatchQueue.main.async {
-                self.state = .error(message: "Failed to transcribe")
-                HapticManager.shared.error()
-            }
+
+            // Cleanup audio file
+            try? FileManager.default.removeItem(at: audioURL)
+
+            // Calculate nutrition with realtime streaming
+            await calculateNutrition(for: transcription)
+
         } catch {
-            print("❌ Failed to upload audio: \(error)")
             DispatchQueue.main.async {
-                self.state = .error(message: "Failed to transcribe")
+                self.state = .error(message: "Transcription failed")
                 HapticManager.shared.error()
             }
         }
     }
     
-    // MARK: - Update Audio Level
+    // MARK: - Audio Level Monitoring
+
     private func updateAudioLevel() {
         guard let recorder = audioRecorder else { return }
-        
+
         recorder.updateMeters()
         let averagePower = recorder.averagePower(forChannel: 0)
         let normalized = max(0.0, (averagePower + 60) / 60)
         let scale = 0.85 + (CGFloat(normalized) * 0.5)
-        
+
         DispatchQueue.main.async {
             self.currentAudioLevel = scale
         }
     }
-    
-    // MARK: - Calculate Nutrition with Realtime
-    private func calculateNutritionWithRealtime(transcription: String) async {
-        let trimmedText = transcription.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Validation
-        guard !trimmedText.isEmpty, trimmedText.count >= 5 else {
-            print("⚠️ Transcription too short")
+
+    // MARK: - Nutrition Calculation
+
+    private func calculateNutrition(for transcription: String) async {
+        let text = transcription.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Validate transcription
+        guard validateTranscription(text) else { return }
+
+        // Create realtime channel
+        let channelId = "nutrition-\(UUID().uuidString)"
+        await setupRealtimeChannel(channelId: channelId, transcription: text)
+
+        // Call edge function to start nutrition calculation
+        await invokeNutritionCalculation(channelId: channelId, transcription: text)
+    }
+
+    private func validateTranscription(_ text: String) -> Bool {
+        guard !text.isEmpty, text.count >= 5 else {
             DispatchQueue.main.async {
                 self.state = .error(message: "Transcription too short")
             }
-            return
+            return false
         }
-        
+
         let invalidPhrases = ["you", "um", "uh", "hmm", "ah", "okay", "ok", "test"]
-        if invalidPhrases.contains(trimmedText.lowercased()) {
-            print("⚠️ Invalid transcription")
+        if invalidPhrases.contains(text.lowercased()) {
             DispatchQueue.main.async {
                 self.state = .error(message: "Invalid transcription")
             }
-            return
+            return false
         }
-        
-        guard trimmedText.split(separator: " ").count >= 2 else {
-            print("⚠️ Needs more words")
+
+        guard text.split(separator: " ").count >= 2 else {
             DispatchQueue.main.async {
-                self.state = .error(message: "Transcription needs more words")
+                self.state = .error(message: "Needs more words")
             }
-            return
+            return false
         }
-        
-        // Create unique channel ID
-        let channelId = "nutrition-\(UUID().uuidString)"
-        print("📡 Created channel: \(channelId)")
-        
-        // Create Realtime channel - THIS IS THE CORRECT API
+
+        return true
+    }
+
+    // MARK: - Realtime Channel Setup
+
+    private func setupRealtimeChannel(channelId: String, transcription: String) async {
         let channel = SupabaseManager.client.channel(channelId)
-        
-        // Get broadcast streams for our events
+
         let deltaStream = channel.broadcastStream(event: "nutrition_delta")
         let completeStream = channel.broadcastStream(event: "nutrition_complete")
-        
-        // Subscribe to the channel
+
+        // Subscribe to channel
         do {
             try await channel.subscribeWithError()
-            print("✅ Subscribed to channel: \(channelId)")
         } catch {
-            print("❌ Failed to subscribe: \(error)")
             DispatchQueue.main.async {
-                self.state = .error(message: "Failed to subscribe to updates")
+                self.state = .error(message: "Failed to connect")
+                HapticManager.shared.error()
             }
             return
         }
-        
-        // Listen for delta messages
-        channelTask = Task {
-            print("👂 Listening for nutrition_delta...")
+
+        // Track when streaming starts for haptic feedback
+        var hasStartedStreaming = false
+
+        // Listen for streaming deltas
+        realtimeChannel = Task {
             for await message in deltaStream {
-                print("📥 Delta message: \(message)")
-                
-                // Debug: Check what we get from message["payload"]
-                if let payloadAny = message["payload"] {
-                    print("🔍 payload type: \(type(of: payloadAny))")
-                    print("🔍 payload value: \(payloadAny)")
-                    
-                    // Try to get the object
-                    if let payload = payloadAny.objectValue {
-                        print("✅ Got payload object: \(payload)")
-                        
-                        if let fullText = payload["fullText"]?.stringValue {
-                            print("✅ Got fullText: \(fullText.prefix(50))...")
-                            DispatchQueue.main.async {
-                                self.state = .streamingNutrition(
-                                    transcription: trimmedText,
-                                    partialInfo: fullText
-                                )
-                            }
-                            print("📝 Updated UI with \(fullText.count) characters")
-                        } else {
-                            print("❌ Could not extract fullText from payload")
+                if let payload = message["payload"]?.objectValue,
+                   let fullText = payload["fullText"]?.stringValue {
+                    DispatchQueue.main.async {
+                        // Trigger haptic on first stream delta
+                        if !hasStartedStreaming {
+                            hasStartedStreaming = true
+                            HapticManager.shared.light()
                         }
-                    } else {
-                        print("❌ Could not get objectValue from payload")
+
+                        self.state = .streamingNutrition(
+                            transcription: transcription,
+                            partialInfo: fullText
+                        )
                     }
-                } else {
-                    print("❌ No payload in message")
                 }
             }
         }
-        
+
         // Listen for completion
         Task {
-            print("👂 Listening for nutrition_complete...")
             for await message in completeStream {
-                print("📥 Complete message: \(message)")
-                
-                // The actual data is inside message["payload"]
                 if let payload = message["payload"]?.objectValue,
                    let fullText = payload["fullText"]?.stringValue {
                     DispatchQueue.main.async {
                         self.state = .completed(nutritionInfo: fullText)
                         HapticManager.shared.success()
                     }
-                    print("✅ Nutrition complete!")
-                    
+
                     // Cleanup
                     await channel.unsubscribe()
-                    self.channelTask?.cancel()
-                    self.channelTask = nil
+                    self.realtimeChannel?.cancel()
+                    self.realtimeChannel = nil
                 }
             }
         }
-        
-        // Call edge function with channel ID
+    }
+
+    private func invokeNutritionCalculation(channelId: String, transcription: String) async {
         do {
-            print("🧮 Calling edge function...")
-            
             let requestBody: [String: Any] = [
                 "transcribed_meal": transcription,
                 "channel_id": channelId
             ]
-            
+
             let jsonData = try JSONSerialization.data(withJSONObject: requestBody)
-            
+
             struct EdgeResponse: Codable {
                 let success: Bool
                 let message: String?
             }
-            
+
             let _: EdgeResponse = try await SupabaseManager.client.functions.invoke(
                 "calculate-calories",
                 options: FunctionInvokeOptions(body: jsonData)
             )
-            
-            print("✅ Edge function started")
-            
         } catch {
-            print("❌ Edge function error: \(error)")
             DispatchQueue.main.async {
-                self.state = .error(message: "Failed to calculate nutrition")
+                self.state = .error(message: "Calculation failed")
                 HapticManager.shared.error()
             }
-            await channel.unsubscribe()
-            channelTask?.cancel()
         }
     }
 }

@@ -1,41 +1,66 @@
-Deno.serve(async (req) => {
+// Constants
+const OPENAI_API_URL = "https://api.openai.com/v1/responses";
+const OPENAI_MODEL = "gpt-4.1-mini";
+const MAX_OUTPUT_TOKENS = 800;
+const TEMPERATURE = 0.1;
+
+// Helper function to broadcast to Realtime channel
+async function broadcastToChannel(
+  channelId: string,
+  event: string,
+  payload: any
+): Promise<void> {
   try {
-    console.log("📥 Incoming request:", req.method);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || "sb_publishable_3jmhHH_JX4KQcT-2i8MpzQ_XtTS9mWC";
 
-    if (req.method !== "POST") {
-      console.log("❌ Wrong method:", req.method);
-      return new Response("Method not allowed", { status: 405 });
+    const response = await fetch(`${supabaseUrl}/realtime/v1/api/broadcast`, {
+      method: "POST",
+      headers: {
+        "apikey": supabaseKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: [{
+          topic: channelId,
+          event: event,
+          payload: payload,
+        }],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Broadcast failed:", await response.text());
     }
+  } catch (error) {
+    console.error("Broadcast error:", error);
+  }
+}
 
-    const { transcribed_meal, channel_id } = await req.json();
-    console.log("🍽 Transcribed meal:", transcribed_meal);
-    console.log("📡 Channel ID:", channel_id);
-
-    // -------- OpenAI payload with streaming --------
-    const payload = {
-      model: "gpt-4.1-mini",
-      temperature: 0.1,
-      max_output_tokens: 800,
-      stream: true,
-      tools: [
-        { type: "web_search" },
-      ],
-      tool_choice: "auto",
-      input: [
-        {
-          role: "system",
-          content:
-            "You are a nutrition analysis engine for a calorie tracking app. " +
-            "You MUST respond ONLY with the final nutrition analysis as plain text " +
-            "in the exact format requested. Do not output JSON. Do not explain your reasoning. " +
-            "Use up-to-date nutrition label data when possible. " +
-            "ALWAYS respect serving sizes and user-described quantities by scaling calories and macros " +
-            "up or down based on the amount eaten.",
-        },
-        {
-          role: "user",
-          content: `
-Analyze this meal: "${transcribed_meal}"
+// Build OpenAI request payload
+function buildNutritionPrompt(meal: string) {
+  return {
+    model: OPENAI_MODEL,
+    temperature: TEMPERATURE,
+    max_output_tokens: MAX_OUTPUT_TOKENS,
+    stream: true,
+    tools: [{ type: "web_search" }],
+    tool_choice: "auto",
+    input: [
+      {
+        role: "system",
+        content:
+          "You are a nutrition analysis engine for a calorie tracking app. " +
+          "You MUST respond ONLY with the final nutrition analysis as plain text " +
+          "in the exact format requested. Do not output JSON. Do not explain your reasoning. " +
+          "Use up-to-date nutrition label data when possible. " +
+          "ALWAYS respect serving sizes and user-described quantities by scaling calories and macros " +
+          "up or down based on the amount eaten.",
+      },
+      {
+        role: "user",
+        content: `
+Analyze this meal: "${meal}"
 
 Your goal is to ALWAYS return a best-effort nutrition estimate.
 
@@ -43,7 +68,7 @@ Your goal is to ALWAYS return a best-effort nutrition estimate.
 SERVING SIZE & QUANTITY (CRITICAL, FOLLOW EXACTLY)
 
 1. Find label-based data:
-   - When the meal mentions a brand or product name (Aldi, Ben & Jerry's, Ice Cream for Bears, Costco, Trader Joe's, etc.), 
+   - When the meal mentions a brand or product name (Aldi, Ben & Jerry's, Ice Cream for Bears, Costco, Trader Joe's, etc.),
      perform at least one web search to find that product's nutrition label or the closest precise match.
    - Prefer sources in this order:
      a) Official brand or retailer sites (e.g. aldi.us, benjerry.com, costco.com, traderjoes.com, etc.)
@@ -99,8 +124,8 @@ SERVING SIZE & QUANTITY (CRITICAL, FOLLOW EXACTLY)
 ====================
 BRAND / NAME CORRECTION
 
-- If the transcription slightly mis-spells a brand or product name 
-  (e.g. "Ice Cream for Bears Chock-ternal"), use web search and context to infer the correct official name 
+- If the transcription slightly mis-spells a brand or product name
+  (e.g. "Ice Cream for Bears Chock-ternal"), use web search and context to infer the correct official name
   (e.g. "Ice Cream for Bears Chocturnal").
 - In your FINAL output, always use the corrected / official product name in the Description and Breakdown.
 
@@ -154,68 +179,63 @@ Breakdown:
   Micros:
 
 Only in the rare case where the text clearly does NOT describe any food and you cannot infer any meal at all, output exactly:
-"Could not parse meal: ${transcribed_meal}"
+"Could not parse meal: ${meal}"
 `,
-        },
-      ],
-    };
+      },
+    ],
+  };
+}
 
-    console.log("📤 Sending streaming request to OpenAI");
+Deno.serve(async (req) => {
+  try {
+    // Validate request method
+    if (req.method !== "POST") {
+      return new Response(
+        JSON.stringify({ error: "Method not allowed" }),
+        { status: 405, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
-    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
+    // Parse request body
+    const { transcribed_meal, channel_id } = await req.json();
+
+    if (!transcribed_meal || !channel_id) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Build and send OpenAI request
+    const payload = buildNutritionPrompt(transcribed_meal);
+
+    const apiKey = Deno.env.get("OPEN_AI_TRANSCRIBE_API_KEY");
+    if (!apiKey) {
+      throw new Error("Missing OpenAI API key");
+    }
+
+    const openaiResponse = await fetch(OPENAI_API_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${Deno.env.get("OPEN_AI_TRANSCRIBE_API_KEY")}`,
+        "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     });
 
-    console.log("📡 OpenAI HTTP status:", openaiResponse.status);
-
     if (!openaiResponse.ok) {
-      const err = await openaiResponse.text();
-      console.log("❌ OpenAI error:", err);
-      return new Response(JSON.stringify({ error: err }), {
-        status: openaiResponse.status,
-        headers: { "Content-Type": "application/json" },
-      });
+      const errorText = await openaiResponse.text();
+      console.error("OpenAI API error:", errorText);
+      return new Response(
+        JSON.stringify({ error: errorText }),
+        {
+          status: openaiResponse.status,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
     }
 
-    // Helper function to broadcast to Realtime channel
-    const broadcastToChannel = async (event: string, payload: any) => {
-      try {
-        const broadcastResponse = await fetch(
-          `${Deno.env.get("SUPABASE_URL")}/realtime/v1/api/broadcast`,
-          {
-            method: "POST",
-            headers: {
-              "apikey": "sb_publishable_3jmhHH_JX4KQcT-2i8MpzQ_XtTS9mWC",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              messages: [
-                {
-                  topic: channel_id,
-                  event: event,
-                  payload: payload,
-                },
-              ],
-            }),
-          },
-        );
-
-        if (!broadcastResponse.ok) {
-          console.log("⚠️ Broadcast failed:", await broadcastResponse.text());
-        } else {
-          console.log("✅ Broadcast successful:", event);
-        }
-      } catch (e) {
-        console.log("⚠️ Broadcast error:", e);
-      }
-    };
-
-    // Stream OpenAI response and broadcast chunks
+    // Stream OpenAI response and broadcast chunks to client
     const reader = openaiResponse.body!.getReader();
     const decoder = new TextDecoder();
     let fullText = "";
@@ -229,31 +249,24 @@ Only in the rare case where the text clearly does NOT describe any food and you 
         const lines = chunk.split("\n");
 
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim();
+          if (!line.startsWith("data: ")) continue;
 
-            if (data === "[DONE]") {
-              break;
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") break;
+
+          try {
+            const json = JSON.parse(data);
+
+            // Extract and broadcast text deltas
+            if (json.type === "response.output_text.delta" && json.delta) {
+              fullText += json.delta;
+              await broadcastToChannel(channel_id, "nutrition_delta", {
+                delta: json.delta,
+                fullText: fullText,
+              });
             }
-
-            try {
-              const json = JSON.parse(data);
-
-              // Extract text from delta events
-              if (json.type === "response.output_text.delta" && json.delta) {
-                fullText += json.delta;
-
-                // Broadcast the delta to the Swift client
-                await broadcastToChannel("nutrition_delta", {
-                  delta: json.delta,
-                  fullText: fullText,
-                });
-
-                console.log("📝 Broadcasted delta:", json.delta);
-              }
-            } catch (e) {
-              // Skip non-JSON lines
-            }
+          } catch {
+            // Skip invalid JSON lines
           }
         }
       }
@@ -262,29 +275,29 @@ Only in the rare case where the text clearly does NOT describe any food and you 
     }
 
     // Send completion event
-    await broadcastToChannel("nutrition_complete", {
+    await broadcastToChannel(channel_id, "nutrition_complete", {
       fullText: fullText,
     });
 
-    console.log("✅ Streaming complete");
-
-    // Return success (Swift will have received everything via Realtime)
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Nutrition info streamed successfully",
+        message: "Nutrition analysis completed",
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" },
-      },
+        headers: { "Content-Type": "application/json" }
+      }
     );
-  } catch (err) {
-    console.log("🔥 Server error:", err);
-    const errorMessage = err instanceof Error ? err.message : String(err);
+  } catch (error) {
+    console.error("Server error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
     );
   }
 });
