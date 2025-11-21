@@ -8,17 +8,13 @@ struct TranscriptionResponse: Codable {
     let text: String
 }
 
-// MARK: - Nutrition Info Response
-struct NutritionResponse: Codable {
-    let nutritionInfo: String
-}
-
 // MARK: - Processing State
 enum ProcessingState {
     case idle
     case recording
     case transcribing
     case calculatingNutrition(transcription: String)
+    case streamingNutrition(transcription: String, partialInfo: String)
     case completed(nutritionInfo: String)
     case error(message: String)
     
@@ -26,7 +22,7 @@ enum ProcessingState {
         switch self {
         case .idle, .completed, .error:
             return false
-        case .recording, .transcribing, .calculatingNutrition:
+        case .recording, .transcribing, .calculatingNutrition, .streamingNutrition:
             return true
         }
     }
@@ -40,6 +36,7 @@ class AudioRecorder: NSObject, ObservableObject {
     private var audioRecorder: AVAudioRecorder?
     private var timer: Timer?
     private var recordingURL: URL?
+    private var channelTask: Task<Void, Never>?
     
     // Computed property for display text
     var displayText: String {
@@ -52,6 +49,8 @@ class AudioRecorder: NSObject, ObservableObject {
             return "Transcribing..."
         case .calculatingNutrition(let transcription):
             return "Calculating:\n\(transcription)"
+        case .streamingNutrition(let transcription, let partialInfo):
+            return partialInfo.isEmpty ? "Calculating:\n\(transcription)" : partialInfo
         case .completed(let nutritionInfo):
             return nutritionInfo
         case .error(let message):
@@ -59,7 +58,7 @@ class AudioRecorder: NSObject, ObservableObject {
         }
     }
     
-    // Helper computed properties for convenience
+    // Helper computed properties
     var isRecording: Bool {
         if case .recording = state { return true }
         return false
@@ -99,8 +98,6 @@ class AudioRecorder: NSObject, ObservableObject {
     // MARK: - Start Recording
     func startRecording() {
         HapticManager.shared.medium()
-        
-        // Reset state
         state = .recording
         
         let tempDir = FileManager.default.temporaryDirectory
@@ -118,7 +115,6 @@ class AudioRecorder: NSObject, ObservableObject {
             audioRecorder?.isMeteringEnabled = true
             audioRecorder?.record()
             
-            // Monitor audio levels
             timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
                 self?.updateAudioLevel()
             }
@@ -137,7 +133,6 @@ class AudioRecorder: NSObject, ObservableObject {
         audioRecorder?.stop()
         timer?.invalidate()
         timer = nil
-        
         currentAudioLevel = 1.0
         
         if let url = recordingURL {
@@ -178,8 +173,8 @@ class AudioRecorder: NSObject, ObservableObject {
             print("✅ Transcription: \(transcription)")
             try? FileManager.default.removeItem(at: fileURL)
             
-            // Calculate nutrition info after successful transcription
-            await calculateNutritionInfo(transcription: transcription)
+            // Calculate nutrition with Realtime streaming
+            await calculateNutritionWithRealtime(transcription: transcription)
             
         } catch let error as FunctionsError {
             print("❌ Functions Error: \(error)")
@@ -208,8 +203,6 @@ class AudioRecorder: NSObject, ObservableObject {
         
         recorder.updateMeters()
         let averagePower = recorder.averagePower(forChannel: 0)
-        
-        // Normalize to 0.85-1.35 range for more obvious pulsing
         let normalized = max(0.0, (averagePower + 60) / 60)
         let scale = 0.85 + (CGFloat(normalized) * 0.5)
         
@@ -218,83 +211,149 @@ class AudioRecorder: NSObject, ObservableObject {
         }
     }
     
-    // MARK: - Calculate Nutrition Info
-    private func calculateNutritionInfo(transcription: String) async {
+    // MARK: - Calculate Nutrition with Realtime
+    private func calculateNutritionWithRealtime(transcription: String) async {
         let trimmedText = transcription.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Check if text is empty or too short (less than 5 characters)
+        // Validation
         guard !trimmedText.isEmpty, trimmedText.count >= 5 else {
-            print("⚠️ Transcription too short to process: '\(trimmedText)'")
+            print("⚠️ Transcription too short")
             DispatchQueue.main.async {
                 self.state = .error(message: "Transcription too short")
             }
             return
         }
         
-        // Filter out common false positives
         let invalidPhrases = ["you", "um", "uh", "hmm", "ah", "okay", "ok", "test"]
-        let lowercasedText = trimmedText.lowercased()
-        
-        if invalidPhrases.contains(lowercasedText) {
-            print("⚠️ Transcription appears to be invalid: '\(trimmedText)'")
+        if invalidPhrases.contains(trimmedText.lowercased()) {
+            print("⚠️ Invalid transcription")
             DispatchQueue.main.async {
                 self.state = .error(message: "Invalid transcription")
             }
             return
         }
         
-        // Check if text has at least 2 words (split by spaces)
-        let wordCount = trimmedText.split(separator: " ").count
-        guard wordCount >= 2 else {
-            print("⚠️ Transcription needs at least 2 words: '\(trimmedText)'")
+        guard trimmedText.split(separator: " ").count >= 2 else {
+            print("⚠️ Needs more words")
             DispatchQueue.main.async {
                 self.state = .error(message: "Transcription needs more words")
             }
             return
         }
         
+        // Create unique channel ID
+        let channelId = "nutrition-\(UUID().uuidString)"
+        print("📡 Created channel: \(channelId)")
+        
+        // Create Realtime channel - THIS IS THE CORRECT API
+        let channel = SupabaseManager.client.channel(channelId)
+        
+        // Get broadcast streams for our events
+        let deltaStream = channel.broadcastStream(event: "nutrition_delta")
+        let completeStream = channel.broadcastStream(event: "nutrition_complete")
+        
+        // Subscribe to the channel
         do {
-            print("🧮 Started calculating nutrition info for: '\(trimmedText)'")
+            try await channel.subscribeWithError()
+            print("✅ Subscribed to channel: \(channelId)")
+        } catch {
+            print("❌ Failed to subscribe: \(error)")
+            DispatchQueue.main.async {
+                self.state = .error(message: "Failed to subscribe to updates")
+            }
+            return
+        }
+        
+        // Listen for delta messages
+        channelTask = Task {
+            print("👂 Listening for nutrition_delta...")
+            for await message in deltaStream {
+                print("📥 Delta message: \(message)")
+                
+                // Debug: Check what we get from message["payload"]
+                if let payloadAny = message["payload"] {
+                    print("🔍 payload type: \(type(of: payloadAny))")
+                    print("🔍 payload value: \(payloadAny)")
+                    
+                    // Try to get the object
+                    if let payload = payloadAny.objectValue {
+                        print("✅ Got payload object: \(payload)")
+                        
+                        if let fullText = payload["fullText"]?.stringValue {
+                            print("✅ Got fullText: \(fullText.prefix(50))...")
+                            DispatchQueue.main.async {
+                                self.state = .streamingNutrition(
+                                    transcription: trimmedText,
+                                    partialInfo: fullText
+                                )
+                            }
+                            print("📝 Updated UI with \(fullText.count) characters")
+                        } else {
+                            print("❌ Could not extract fullText from payload")
+                        }
+                    } else {
+                        print("❌ Could not get objectValue from payload")
+                    }
+                } else {
+                    print("❌ No payload in message")
+                }
+            }
+        }
+        
+        // Listen for completion
+        Task {
+            print("👂 Listening for nutrition_complete...")
+            for await message in completeStream {
+                print("📥 Complete message: \(message)")
+                
+                // The actual data is inside message["payload"]
+                if let payload = message["payload"]?.objectValue,
+                   let fullText = payload["fullText"]?.stringValue {
+                    DispatchQueue.main.async {
+                        self.state = .completed(nutritionInfo: fullText)
+                        HapticManager.shared.success()
+                    }
+                    print("✅ Nutrition complete!")
+                    
+                    // Cleanup
+                    await channel.unsubscribe()
+                    self.channelTask?.cancel()
+                    self.channelTask = nil
+                }
+            }
+        }
+        
+        // Call edge function with channel ID
+        do {
+            print("🧮 Calling edge function...")
+            
             let requestBody: [String: Any] = [
-                "transcribed_meal": transcription
+                "transcribed_meal": transcription,
+                "channel_id": channelId
             ]
             
             let jsonData = try JSONSerialization.data(withJSONObject: requestBody)
             
-            // Get string response from the edge function
-            let response: NutritionResponse = try await SupabaseManager.client.functions.invoke(
+            struct EdgeResponse: Codable {
+                let success: Bool
+                let message: String?
+            }
+            
+            let _: EdgeResponse = try await SupabaseManager.client.functions.invoke(
                 "calculate-calories",
                 options: FunctionInvokeOptions(body: jsonData)
             )
             
-            DispatchQueue.main.async {
-                self.state = .completed(nutritionInfo: response.nutritionInfo)
-                HapticManager.shared.success()
-            }
+            print("✅ Edge function started")
             
-            print("✅ Nutrition info calculated successfully")
-            print("📊 Full response: \(response.nutritionInfo)")
-            print("📊 For meal: '\(trimmedText)'")
-            
-        } catch let error as FunctionsError {
-            print("❌ Calculate-Calories Functions Error: \(error)")
-            if case .httpError(let code, let data) = error {
-                print("❌ HTTP Status Code: \(code)")
-                if let errorString = String(data: data, encoding: .utf8) {
-                    print("❌ Error Response Body: \(errorString)")
-                }
-            }
+        } catch {
+            print("❌ Edge function error: \(error)")
             DispatchQueue.main.async {
                 self.state = .error(message: "Failed to calculate nutrition")
                 HapticManager.shared.error()
             }
-        } catch {
-            print("❌ Failed to calculate nutrition info: \(error.localizedDescription)")
-            print("❌ Error details: \(error)")
-            DispatchQueue.main.async {
-                self.state = .error(message: error.localizedDescription)
-                HapticManager.shared.error()
-            }
+            await channel.unsubscribe()
+            channelTask?.cancel()
         }
     }
 }

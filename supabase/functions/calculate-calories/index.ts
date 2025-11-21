@@ -7,14 +7,16 @@ Deno.serve(async (req) => {
       return new Response("Method not allowed", { status: 405 });
     }
 
-    const { transcribed_meal } = await req.json();
+    const { transcribed_meal, channel_id } = await req.json();
     console.log("🍽 Transcribed meal:", transcribed_meal);
+    console.log("📡 Channel ID:", channel_id);
 
-    // -------- OpenAI payload (Responses API, gpt-4.1-mini + web_search) --------
+    // -------- OpenAI payload with streaming --------
     const payload = {
       model: "gpt-4.1-mini",
-      temperature: 0.1, // more deterministic, better math
+      temperature: 0.1,
       max_output_tokens: 800,
+      stream: true,
       tools: [
         { type: "web_search" },
       ],
@@ -158,12 +160,9 @@ Only in the rare case where the text clearly does NOT describe any food and you 
       ],
     };
 
-    console.log(
-      "📤 Sending payload to OpenAI:",
-      JSON.stringify(payload, null, 2),
-    );
+    console.log("📤 Sending streaming request to OpenAI");
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${Deno.env.get("OPEN_AI_TRANSCRIBE_API_KEY")}`,
@@ -172,84 +171,114 @@ Only in the rare case where the text clearly does NOT describe any food and you 
       body: JSON.stringify(payload),
     });
 
-    console.log("📡 OpenAI HTTP status:", response.status);
+    console.log("📡 OpenAI HTTP status:", openaiResponse.status);
 
-    if (!response.ok) {
-      const err = await response.text();
+    if (!openaiResponse.ok) {
+      const err = await openaiResponse.text();
       console.log("❌ OpenAI error:", err);
       return new Response(JSON.stringify({ error: err }), {
-        status: response.status,
+        status: openaiResponse.status,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    const result = await response.json();
+    // Helper function to broadcast to Realtime channel
+    const broadcastToChannel = async (event: string, payload: any) => {
+      try {
+        const broadcastResponse = await fetch(
+          `${Deno.env.get("SUPABASE_URL")}/realtime/v1/api/broadcast`,
+          {
+            method: "POST",
+            headers: {
+              "apikey": "sb_publishable_3jmhHH_JX4KQcT-2i8MpzQ_XtTS9mWC",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messages: [
+                {
+                  topic: channel_id,
+                  event: event,
+                  payload: payload,
+                },
+              ],
+            }),
+          },
+        );
 
-    console.log(
-      "📦 OpenAI response shape:",
-      JSON.stringify(
-        {
-          id: result.id,
-          status: result.status,
-          model: result.model,
-          outputTypes: Array.isArray(result.output)
-            ? result.output.map((o: any) => o.type)
-            : null,
-        },
-        null,
-        2,
-      ),
-    );
-
-    // -------- Extract the final assistant text --------
-    let outputText = "";
-
-    // 1) Best case: convenience field
-    if (typeof result.output_text === "string" && result.output_text.trim()) {
-      console.log("✅ Using result.output_text");
-      outputText = result.output_text.trim();
-    }
-
-    // 2) Normal Responses API pattern: find message item
-    if (!outputText && Array.isArray(result.output)) {
-      console.log("ℹ️ Searching result.output[] for message item...");
-
-      const messageItem = result.output.find((item: any) =>
-        item.type === "message"
-      ) ?? null;
-
-      if (messageItem && Array.isArray(messageItem.content)) {
-        const first = messageItem.content[0];
-
-        if (first && typeof first.text === "string") {
-          outputText = first.text.trim();
-          console.log("✅ Extracted from message.content[0].text");
+        if (!broadcastResponse.ok) {
+          console.log("⚠️ Broadcast failed:", await broadcastResponse.text());
         } else {
-          console.log(
-            "❌ message.content[0].text missing or not a string:",
-            JSON.stringify(first, null, 2),
-          );
+          console.log("✅ Broadcast successful:", event);
         }
-      } else {
-        console.log("❌ No message item with content found in result.output");
+      } catch (e) {
+        console.log("⚠️ Broadcast error:", e);
       }
+    };
+
+    // Stream OpenAI response and broadcast chunks
+    const reader = openaiResponse.body!.getReader();
+    const decoder = new TextDecoder();
+    let fullText = "";
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6).trim();
+
+            if (data === "[DONE]") {
+              break;
+            }
+
+            try {
+              const json = JSON.parse(data);
+
+              // Extract text from delta events
+              if (json.type === "response.output_text.delta" && json.delta) {
+                fullText += json.delta;
+
+                // Broadcast the delta to the Swift client
+                await broadcastToChannel("nutrition_delta", {
+                  delta: json.delta,
+                  fullText: fullText,
+                });
+
+                console.log("📝 Broadcasted delta:", json.delta);
+              }
+            } catch (e) {
+              // Skip non-JSON lines
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
     }
 
-    if (!outputText) {
-      console.log("⚠️ outputText is empty – falling back to debug dump.");
-      outputText = "Model returned no usable content.\n\nRaw result.output:\n" +
-        JSON.stringify(result.output, null, 2);
-    }
-
-    console.log(
-      "📝 Final extracted output (truncated):",
-      outputText.slice(0, 400),
-    );
-
-    return new Response(JSON.stringify({ nutritionInfo: outputText }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    // Send completion event
+    await broadcastToChannel("nutrition_complete", {
+      fullText: fullText,
     });
+
+    console.log("✅ Streaming complete");
+
+    // Return success (Swift will have received everything via Realtime)
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Nutrition info streamed successfully",
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (err) {
     console.log("🔥 Server error:", err);
     const errorMessage = err instanceof Error ? err.message : String(err);
