@@ -41,25 +41,25 @@ struct TogglePill: View {
 
     @ViewBuilder
     private var capsuleContent: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Spacing.xs) {
             if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color(UIColor.systemBackground))
+                    .font(.iconSmall)
+                    .foregroundColor(Color(uiColor: .systemBackground))
             }
 
             Text(title)
-                .font(AppTypography.caption)
-                .foregroundColor(isSelected ? Color(UIColor.systemBackground) : AppColors.primaryText)
+                .font(.caption)
+                .foregroundColor(isSelected ? Color(uiColor: .systemBackground) : .textPrimary)
         }
-        .padding(.horizontal, AppSpacing.md)
-        .padding(.vertical, AppSpacing.sm)
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.sm)
         .background(
             Capsule()
-                .fill(isSelected ? AppColors.primaryText : Color(UIColor.systemBackground))
+                .fill(isSelected ? Color.textPrimary : .cardBackground)
                 .overlay(
                     Capsule()
-                        .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: 1.5)
+                        .stroke(isSelected ? Color.textPrimary : .border, lineWidth: LineWidth.regular)
                 )
         )
     }
@@ -67,16 +67,16 @@ struct TogglePill: View {
     @ViewBuilder
     private var roundedContent: some View {
         Text(title)
-            .font(AppTypography.bodyMedium)
-            .foregroundColor(isSelected ? Color(UIColor.systemBackground) : AppColors.primaryText)
+            .font(.bodyMedium)
+            .foregroundColor(isSelected ? Color(uiColor: .systemBackground) : .textPrimary)
             .frame(maxWidth: .infinity)
-            .frame(height: 52)
+            .frame(height: Dimensions.buttonHeightMedium)
             .background(
-                RoundedRectangle(cornerRadius: AppCornerRadius.pill)
-                    .fill(isSelected ? AppColors.primaryText : Color(UIColor.systemBackground))
+                RoundedRectangle(cornerRadius: CornerRadius.pill)
+                    .fill(isSelected ? Color.textPrimary : .cardBackground)
                     .overlay(
-                        RoundedRectangle(cornerRadius: AppCornerRadius.pill)
-                            .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: 1.5)
+                        RoundedRectangle(cornerRadius: CornerRadius.pill)
+                            .stroke(isSelected ? Color.textPrimary : .border, lineWidth: LineWidth.regular)
                     )
             )
     }

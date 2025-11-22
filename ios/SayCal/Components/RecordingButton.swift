@@ -37,8 +37,8 @@ struct RecordingButton: View {
         }
         .disabled(audioRecorder.isProcessing && !audioRecorder.isRecording)
         .scaleEffect(audioRecorder.isRecording ? audioRecorder.currentAudioLevel : 1.0)
-        .animation(.easeInOut(duration: 0.1), value: audioRecorder.currentAudioLevel)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: audioRecorder.isRecording)
+        .animation(Animation.quick, value: audioRecorder.currentAudioLevel)
+        .animation(Animation.springResponsive, value: audioRecorder.isRecording)
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
@@ -55,13 +55,13 @@ struct RecordingButton: View {
     }
     
     // MARK: - Computed Properties
-    
+
     private var buttonSize: CGFloat {
-        audioRecorder.isRecording ? 88 : 72
+        audioRecorder.isRecording ? Dimensions.recordingButtonActive : Dimensions.recordingButtonIdle
     }
 
     private var iconSize: CGFloat {
-        audioRecorder.isRecording ? 32 : 28
+        audioRecorder.isRecording ? Dimensions.recordingIconActive : Dimensions.recordingIconIdle
     }
 
     private var iconName: String {
@@ -70,16 +70,16 @@ struct RecordingButton: View {
 
     private var gradientColors: [Color] {
         if audioRecorder.isRecording {
-            return [Color.red, Color.red.opacity(0.8)]
+            return [Color.recording, Color.recording.opacity(Opacity.strong)]
         } else {
-            return [Color(UIColor.label), Color(UIColor.label).opacity(0.9)]
+            return [Color.textPrimary, Color.textPrimary.opacity(Opacity.veryStrong)]
         }
     }
 
     private var shadowColor: Color {
         audioRecorder.isRecording
-            ? Color.red.opacity(0.3)
-            : Color.black.opacity(0.15)
+            ? Color.recording.opacity(Opacity.visible)
+            : Color.black.opacity(Opacity.light)
     }
 }
 

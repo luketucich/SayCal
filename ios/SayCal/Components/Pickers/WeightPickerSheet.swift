@@ -26,8 +26,8 @@ struct WeightPickerSheet: View {
                         HapticManager.shared.medium()
                         isPresented = false
                     }
-                    .font(AppTypography.bodySemibold)
-                    .foregroundColor(AppColors.primaryText)
+                    .font(.bodySemibold)
+                    .foregroundColor(.primaryText)
                 }
             }
         }

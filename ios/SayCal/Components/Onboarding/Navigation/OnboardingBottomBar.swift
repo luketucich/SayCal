@@ -31,7 +31,7 @@ struct OnboardingBottomBar: View {
         if !hideWhenFocused {
             VStack(spacing: 0) {
                 Divider()
-                    .overlay(Color(UIColor.systemGray5))
+                    .overlay(Color.border)
 
                 HStack {
                     if showBackButton {
@@ -40,8 +40,8 @@ struct OnboardingBottomBar: View {
                             onBack()
                         } label: {
                             Text("Back")
-                                .font(AppTypography.captionMedium)
-                                .foregroundColor(AppColors.secondaryText)
+                                .font(.captionMedium)
+                                .foregroundColor(.textSecondary)
                         }
                     }
 
@@ -51,25 +51,25 @@ struct OnboardingBottomBar: View {
                         HapticManager.shared.medium()
                         onNext()
                     } label: {
-                        HStack(spacing: 6) {
+                        HStack(spacing: Spacing.xs) {
                             Text(nextButtonText)
-                                .font(AppTypography.bodyMedium)
+                                .font(.bodyMedium)
                             Image(systemName: nextButtonIcon)
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.iconSemibold)
                         }
-                        .foregroundColor(isNextEnabled ? Color(UIColor.systemBackground) : Color(UIColor.secondaryLabel))
-                        .padding(.horizontal, AppSpacing.xl)
-                        .frame(height: 56)
+                        .foregroundColor(isNextEnabled ? Color(uiColor: .systemBackground) : .textDisabled)
+                        .padding(.horizontal, Spacing.xxl)
+                        .frame(height: Dimensions.buttonHeightLarge)
                         .background(
-                            RoundedRectangle(cornerRadius: AppCornerRadius.pill)
-                                .fill(isNextEnabled ? AppColors.primaryText : Color(UIColor.systemGray4))
+                            RoundedRectangle(cornerRadius: CornerRadius.pill)
+                                .fill(isNextEnabled ? Color.textPrimary : .borderSubtle)
                         )
                     }
                     .disabled(!isNextEnabled)
                 }
-                .padding(.horizontal, AppSpacing.lg)
-                .padding(.vertical, AppSpacing.md)
-                .background(Color(UIColor.systemBackground))
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.md)
+                .background(Color.cardBackground)
             }
         }
     }

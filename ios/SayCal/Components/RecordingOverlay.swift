@@ -11,13 +11,13 @@ struct RecordingOverlay: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: audioRecorder.displayText.isEmpty)
+        .animation(Animation.springSmooth, value: audioRecorder.displayText.isEmpty)
     }
-    
+
     private var overlayContent: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.md) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             // Header with status indicator
-            HStack(spacing: AppSpacing.sm) {
+            HStack(spacing: Spacing.sm) {
                 statusIndicator
                 statusText
                 Spacer()
@@ -27,50 +27,50 @@ struct RecordingOverlay: View {
             if case .streamingNutrition(_, let partialInfo) = audioRecorder.state, !partialInfo.isEmpty {
                 ScrollView {
                     Text(partialInfo)
-                        .font(AppTypography.caption)
-                        .foregroundColor(AppColors.primaryText)
+                        .font(.caption)
+                        .foregroundColor(.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxHeight: 200)
+                .frame(maxHeight: Dimensions.pickerHeight)
             } else if case .completed(let nutritionInfo) = audioRecorder.state {
                 ScrollView {
                     Text(nutritionInfo)
-                        .font(AppTypography.caption)
-                        .foregroundColor(AppColors.primaryText)
+                        .font(.caption)
+                        .foregroundColor(.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxHeight: 200)
+                .frame(maxHeight: Dimensions.pickerHeight)
             } else if case .calculatingNutrition(let transcription) = audioRecorder.state {
-                VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(transcription)
-                        .font(AppTypography.captionMedium)
-                        .foregroundColor(AppColors.primaryText)
+                        .font(.captionMedium)
+                        .foregroundColor(.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else if case .error(let message) = audioRecorder.state {
-                HStack(spacing: AppSpacing.sm) {
+                HStack(spacing: Spacing.sm) {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .font(AppTypography.title3)
-                        .foregroundColor(AppColors.error)
+                        .font(.title3)
+                        .foregroundColor(.error)
 
                     Text(message)
-                        .font(AppTypography.captionMedium)
-                        .foregroundColor(AppColors.error)
+                        .font(.captionMedium)
+                        .foregroundColor(.error)
                 }
             }
         }
-        .padding(AppSpacing.lg)
+        .padding(Spacing.lg)
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.lg)
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
                 .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: AppCornerRadius.lg)
-                        .stroke(Color(UIColor.separator).opacity(0.5), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: CornerRadius.lg)
+                        .stroke(Color.divider.opacity(Opacity.semitransparent), lineWidth: LineWidth.thin)
                 )
-                .shadow(color: AppShadow.large.color, radius: AppShadow.large.radius, x: AppShadow.large.x, y: AppShadow.large.y)
+                .shadow(color: Shadows.large.color, radius: Shadows.large.radius, x: Shadows.large.x, y: Shadows.large.y)
         )
-        .padding(.horizontal, AppSpacing.lg)
-        .padding(.top, AppSpacing.sm)
+        .padding(.horizontal, Spacing.lg)
+        .padding(.top, Spacing.sm)
     }
     
     private var statusIndicator: some View {
@@ -79,60 +79,60 @@ struct RecordingOverlay: View {
             case .recording:
                 ZStack {
                     Circle()
-                        .fill(Color.red.opacity(0.2))
-                        .frame(width: 32, height: 32)
-                    
+                        .fill(Color.recording.opacity(Opacity.medium))
+                        .frame(width: Dimensions.iconXLarge, height: Dimensions.iconXLarge)
+
                     Circle()
-                        .fill(Color.red)
-                        .frame(width: 12, height: 12)
-                        .opacity(audioRecorder.isRecording ? 1 : 0.5)
+                        .fill(Color.recording)
+                        .frame(width: Dimensions.iconMedium, height: Dimensions.iconMedium)
+                        .opacity(audioRecorder.isRecording ? 1 : Opacity.semitransparent)
                         .scaleEffect(audioRecorder.isRecording ? 1.2 : 1.0)
-                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: audioRecorder.isRecording)
+                        .animation(Animation.pulse, value: audioRecorder.isRecording)
                 }
-                
+
             case .transcribing, .calculatingNutrition:
                 ZStack {
                     Circle()
-                        .fill(Color.blue.opacity(0.2))
-                        .frame(width: 32, height: 32)
-                    
+                        .fill(Color.processing.opacity(Opacity.medium))
+                        .frame(width: Dimensions.iconXLarge, height: Dimensions.iconXLarge)
+
                     ProgressView()
-                        .tint(.blue)
+                        .tint(.processing)
                 }
-                
+
             case .streamingNutrition:
                 ZStack {
                     Circle()
-                        .fill(Color.green.opacity(0.2))
-                        .frame(width: 32, height: 32)
-                    
+                        .fill(Color.completed.opacity(Opacity.medium))
+                        .frame(width: Dimensions.iconXLarge, height: Dimensions.iconXLarge)
+
                     Image(systemName: "waveform")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.green)
+                        .font(.iconSemibold)
+                        .foregroundColor(.completed)
                 }
-                
+
             case .completed:
                 ZStack {
                     Circle()
-                        .fill(Color.green.opacity(0.2))
-                        .frame(width: 32, height: 32)
-                    
+                        .fill(Color.completed.opacity(Opacity.medium))
+                        .frame(width: Dimensions.iconXLarge, height: Dimensions.iconXLarge)
+
                     Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.green)
+                        .font(.iconBold)
+                        .foregroundColor(.completed)
                 }
-                
+
             case .error:
                 ZStack {
                     Circle()
-                        .fill(Color.red.opacity(0.2))
-                        .frame(width: 32, height: 32)
-                    
+                        .fill(Color.error.opacity(Opacity.medium))
+                        .frame(width: Dimensions.iconXLarge, height: Dimensions.iconXLarge)
+
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.red)
+                        .font(.iconBold)
+                        .foregroundColor(.error)
                 }
-                
+
             case .idle:
                 EmptyView()
             }
@@ -144,33 +144,33 @@ struct RecordingOverlay: View {
             switch audioRecorder.state {
             case .recording:
                 Text("Recording...")
-                    .font(AppTypography.bodySemibold)
-                    .foregroundColor(AppColors.primaryText)
+                    .font(.bodySemibold)
+                    .foregroundColor(.textPrimary)
 
             case .transcribing:
                 Text("Transcribing...")
-                    .font(AppTypography.bodySemibold)
-                    .foregroundColor(AppColors.primaryText)
+                    .font(.bodySemibold)
+                    .foregroundColor(.textPrimary)
 
             case .calculatingNutrition:
                 Text("Calculating nutrition...")
-                    .font(AppTypography.bodySemibold)
-                    .foregroundColor(AppColors.primaryText)
+                    .font(.bodySemibold)
+                    .foregroundColor(.textPrimary)
 
             case .streamingNutrition:
                 Text("Analyzing...")
-                    .font(AppTypography.bodySemibold)
-                    .foregroundColor(AppColors.primaryText)
+                    .font(.bodySemibold)
+                    .foregroundColor(.textPrimary)
 
             case .completed:
                 Text("Complete")
-                    .font(AppTypography.bodySemibold)
-                    .foregroundColor(AppColors.success)
+                    .font(.bodySemibold)
+                    .foregroundColor(.success)
 
             case .error:
                 Text("Error")
-                    .font(AppTypography.bodySemibold)
-                    .foregroundColor(AppColors.error)
+                    .font(.bodySemibold)
+                    .foregroundColor(.error)
 
             case .idle:
                 EmptyView()

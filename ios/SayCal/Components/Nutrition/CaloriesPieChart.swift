@@ -41,42 +41,42 @@ struct CaloriesPieChart: View {
     }
 
     var body: some View {
-        VStack(spacing: AppSpacing.lg) {
+        VStack(spacing: Spacing.lg) {
             // Circular progress indicator
             ZStack {
                 // Background circle
                 Circle()
-                    .stroke(Color(UIColor.systemGray5), lineWidth: 20)
+                    .stroke(Color.border, lineWidth: LineWidth.chartStroke)
 
                 // Progress circle
                 Circle()
                     .trim(from: 0, to: animateProgress ? progressPercent : 0)
                     .stroke(
-                        AppColors.primaryText,
-                        style: StrokeStyle(lineWidth: 20, lineCap: .round)
+                        Color.textPrimary,
+                        style: StrokeStyle(lineWidth: LineWidth.chartStroke, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
-                    .animation(.spring(response: 0.8, dampingFraction: 0.75), value: animateProgress)
+                    .animation(Animation.springBouncy, value: animateProgress)
 
                 // Center content
-                VStack(spacing: AppSpacing.xs) {
+                VStack(spacing: Spacing.xs) {
                     Text("\(remainingCalories)")
-                        .font(AppTypography.displayLarge)
-                        .foregroundColor(AppColors.primaryText)
+                        .font(.displayLarge)
+                        .foregroundColor(.textPrimary)
 
                     Text("calories left")
-                        .font(AppTypography.caption)
-                        .foregroundColor(AppColors.secondaryText)
+                        .font(.caption)
+                        .foregroundColor(.textSecondary)
 
                     Text("of \(totalCalories)")
-                        .font(AppTypography.smallCaption)
-                        .foregroundColor(AppColors.tertiaryText)
+                        .font(.smallCaption)
+                        .foregroundColor(.textTertiary)
                 }
             }
-            .frame(width: 220, height: 220)
+            .frame(width: Dimensions.pieChartSize, height: Dimensions.pieChartSize)
 
             // Macro breakdown
-            HStack(spacing: AppSpacing.sm) {
+            HStack(spacing: Spacing.sm) {
                 MacroIndicator(
                     name: "Protein",
                     percentage: Int(proteinPercent * 100),
@@ -108,27 +108,27 @@ struct MacroIndicator: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: AppSpacing.xs) {
+        VStack(spacing: Spacing.xs) {
             Circle()
                 .fill(color)
-                .frame(width: 10, height: 10)
+                .frame(width: Dimensions.iconSmall, height: Dimensions.iconSmall)
 
             Text("\(percentage)%")
-                .font(AppTypography.bodyMedium)
-                .foregroundColor(AppColors.primaryText)
+                .font(.bodyMedium)
+                .foregroundColor(.textPrimary)
 
             Text(name)
-                .font(AppTypography.smallCaption)
-                .foregroundColor(AppColors.secondaryText)
+                .font(.smallCaption)
+                .foregroundColor(.textSecondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, AppSpacing.md)
+        .padding(.vertical, Spacing.md)
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.lg)
-                .fill(Color(UIColor.systemBackground))
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .fill(Color.cardBackground)
                 .overlay(
-                    RoundedRectangle(cornerRadius: AppCornerRadius.lg)
-                        .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
+                    RoundedRectangle(cornerRadius: CornerRadius.lg)
+                        .stroke(Color.border, lineWidth: LineWidth.regular)
                 )
         )
     }

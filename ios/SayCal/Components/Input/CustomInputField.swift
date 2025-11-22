@@ -9,17 +9,17 @@ struct CustomInputField: View {
 
     var body: some View {
         TextField(placeholder, text: $text)
-            .font(AppTypography.caption)
-            .foregroundColor(AppColors.primaryText)
-            .padding(.horizontal, AppSpacing.md)
-            .padding(.vertical, AppSpacing.sm)
+            .font(.caption)
+            .foregroundColor(.textPrimary)
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, Spacing.sm)
             .frame(maxWidth: 160)
             .background(
                 Capsule()
-                    .fill(Color(UIColor.systemBackground))
+                    .fill(Color.cardBackground)
                     .overlay(
                         Capsule()
-                            .stroke(AppColors.primaryText, lineWidth: 1.5)
+                            .stroke(Color.textPrimary, lineWidth: LineWidth.regular)
                     )
             )
             .focused($isFocused)

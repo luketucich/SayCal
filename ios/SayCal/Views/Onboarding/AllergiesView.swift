@@ -11,7 +11,7 @@ struct AllergiesView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                VStack(alignment: .leading, spacing: Spacing.xxl) {
                     OnboardingHeader(
                         title: "Food allergies",
                         subtitle: "Select any allergies you have (optional)"
@@ -28,7 +28,7 @@ struct AllergiesView: View {
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: AppSpacing.sm) {
+                    ], spacing: Spacing.sm) {
 
                         if isAddingAllergy {
                             CustomInputField(
@@ -97,7 +97,7 @@ struct AllergiesView: View {
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, AppSpacing.lg)
+                .padding(.horizontal, Spacing.lg)
             }
 
             OnboardingBottomBar(
@@ -116,7 +116,7 @@ struct AllergiesView: View {
                 }
             )
         }
-        .background(AppColors.lightBackground)
+        .background(Color.appBackground)
         .onAppear {
             let predefinedAllergies = Set(DietaryOptions.commonAllergies)
             let customAllergies = state.selectedAllergies.filter { !predefinedAllergies.contains($0) }

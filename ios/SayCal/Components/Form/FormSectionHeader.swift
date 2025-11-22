@@ -5,7 +5,7 @@ struct FormSectionHeader: View {
 
     var body: some View {
         Text(title)
-            .font(AppTypography.smallCaptionMedium)
-            .foregroundColor(AppColors.secondaryText)
+            .font(.smallCaptionMedium)
+            .foregroundColor(.textSecondary)
     }
 }

@@ -6,13 +6,13 @@ struct UnitsPreferenceView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                VStack(alignment: .leading, spacing: Spacing.xxl) {
                     OnboardingHeader(
                         title: "Choose your units",
                         subtitle: "Select your preferred measurement system"
                     )
 
-                    HStack(spacing: AppSpacing.sm) {
+                    HStack(spacing: Spacing.sm) {
                         TogglePill(
                             title: "Metric",
                             isSelected: state.unitsPreference == .metric,
@@ -36,7 +36,7 @@ struct UnitsPreferenceView: View {
                     
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, AppSpacing.lg)
+                .padding(.horizontal, Spacing.lg)
             }
 
             OnboardingBottomBar(
@@ -44,7 +44,7 @@ struct UnitsPreferenceView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(AppColors.lightBackground)
+        .background(Color.appBackground)
     }
 }
 

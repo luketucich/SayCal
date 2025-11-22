@@ -17,27 +17,27 @@ struct GoogleAuthButton: View {
                     }
                 }
             } label: {
-                HStack(spacing: 8) {
+                HStack(spacing: Spacing.sm) {
                     Text("G")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.iconLarge)
 
                     Text("Sign in with Google")
-                        .font(AppTypography.bodyMedium)
+                        .font(.bodyMedium)
                 }
-                .foregroundColor(AppColors.primaryText)
+                .foregroundColor(.textPrimary)
                 .frame(maxWidth: .infinity)
-                .frame(height: 56)
+                .frame(height: Dimensions.buttonHeightLarge)
                 .background(
-                    RoundedRectangle(cornerRadius: AppCornerRadius.pill)
-                        .stroke(AppColors.primaryText, lineWidth: 1.5)
+                    RoundedRectangle(cornerRadius: CornerRadius.pill)
+                        .stroke(Color.textPrimary, lineWidth: LineWidth.regular)
                 )
             }
-            
+
             if let errorMessage {
                 Text(errorMessage)
-                    .foregroundColor(.red)
+                    .foregroundColor(.error)
                     .font(.caption)
-                    .padding(.top, 4)
+                    .padding(.top, Spacing.xxs)
             }
         }
     }

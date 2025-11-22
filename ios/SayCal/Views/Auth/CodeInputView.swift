@@ -11,23 +11,23 @@ struct CodeInputView: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        VStack(spacing: AppSpacing.xl) {
+        VStack(spacing: Spacing.xl) {
             OnboardingHeader(
                 title: "Enter verification code",
                 subtitle: "We sent a 6-digit code to \(email)"
             )
 
-            VStack(spacing: AppSpacing.md) {
-                HStack(spacing: AppSpacing.sm) {
+            VStack(spacing: Spacing.md) {
+                HStack(spacing: Spacing.sm) {
                     ForEach(0..<6, id: \.self) { index in
                         ZStack {
-                            RoundedRectangle(cornerRadius: AppCornerRadius.xs)
-                                .stroke(code.count == index ? AppColors.primaryText : Color.primary.opacity(0.3), lineWidth: 1)
-                                .frame(width: 48, height: 56)
+                            RoundedRectangle(cornerRadius: CornerRadius.xs)
+                                .stroke(code.count == index ? .textPrimary : Color.border.opacity(Opacity.visible), lineWidth: LineWidth.thin)
+                                .frame(width: Dimensions.codeInputWidth, height: Dimensions.buttonHeightLarge)
 
                             if index < code.count {
                                 Text(String(code[code.index(code.startIndex, offsetBy: index)]))
-                                    .font(AppTypography.title2)
+                                    .font(.title2)
                             }
                         }
                     }
@@ -38,7 +38,7 @@ struct CodeInputView: View {
                         .textContentType(.oneTimeCode)
                         .focused($isFocused)
                         .frame(width: 1, height: 1)
-                        .opacity(0.01)
+                        .opacity(Opacity.invisible)
                         .onChange(of: code) { oldValue, newValue in
                             if newValue.count > 6 {
                                 code = String(newValue.prefix(6))
@@ -61,8 +61,8 @@ struct CodeInputView: View {
 
                 if let errorMessage {
                     Text(errorMessage)
-                        .foregroundColor(AppColors.error)
-                        .font(AppTypography.smallCaption)
+                        .foregroundColor(.error)
+                        .font(.smallCaption)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
@@ -82,12 +82,12 @@ struct CodeInputView: View {
                     }
                 }
                 .disabled(isLoading)
-                .padding(.top, AppSpacing.xs)
+                .padding(.top, Spacing.xs)
             }
 
             Spacer()
         }
-        .padding(AppSpacing.xl)
+        .padding(Spacing.xl)
     }
 }
 

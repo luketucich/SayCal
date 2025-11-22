@@ -6,70 +6,70 @@ struct GoalsView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                VStack(alignment: .leading, spacing: Spacing.xxl) {
                     OnboardingHeader(
                         title: "Your goal",
                         subtitle: "What are you trying to achieve?"
                     )
 
-                    VStack(spacing: AppSpacing.sm) {
+                    VStack(spacing: Spacing.sm) {
                         HStack {
-                            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                            VStack(alignment: .leading, spacing: Spacing.xxs) {
                                 Text("Your Target Calories")
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(AppColors.secondaryText)
+                                    .font(.caption)
+                                    .foregroundColor(.textSecondary)
 
                                 Text("\(state.targetCalories)")
-                                    .font(AppTypography.displayLarge)
-                                    .foregroundColor(AppColors.primaryText)
+                                    .font(.displayLarge)
+                                    .foregroundColor(.textPrimary)
 
                                 Text("calories per day")
-                                    .font(AppTypography.smallCaption)
-                                    .foregroundColor(AppColors.tertiaryText)
+                                    .font(.smallCaption)
+                                    .foregroundColor(.textTertiary)
                             }
 
                             Spacer()
                         }
-                        .padding(AppSpacing.lg)
+                        .padding(Spacing.lg)
                         .background(
-                            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
-                                .fill(Color(UIColor.systemGray6))
+                            RoundedRectangle(cornerRadius: CornerRadius.sm)
+                                .fill(Color.overlayBackground)
                         )
 
                         let macros = UserManager.calculateMacroPercentages(for: state.goal)
 
-                        HStack(spacing: AppSpacing.md) {
+                        HStack(spacing: Spacing.md) {
                             OnboardingMacroCard(
                                 title: "Carbs",
                                 percentage: macros.carbs,
-                                color: .blue
+                                color: .macroCarbs
                             )
 
                             OnboardingMacroCard(
                                 title: "Fats",
                                 percentage: macros.fats,
-                                color: .orange
+                                color: .macroFats
                             )
 
                             OnboardingMacroCard(
                                 title: "Protein",
                                 percentage: macros.protein,
-                                color: .green
+                                color: .macroProtein
                             )
                         }
 
                         HStack {
                             Image(systemName: "info.circle")
-                                .font(AppTypography.smallCaption)
-                                .foregroundColor(AppColors.tertiaryText)
+                                .font(.smallCaption)
+                                .foregroundColor(.textTertiary)
 
                             Text("You can edit your target calories and macros anytime in your profile")
-                                .font(AppTypography.smallCaption)
-                                .foregroundColor(AppColors.secondaryText)
+                                .font(.smallCaption)
+                                .foregroundColor(.textSecondary)
                         }
                     }
 
-                    VStack(spacing: AppSpacing.sm) {
+                    VStack(spacing: Spacing.sm) {
                         ForEach(Goal.allCases, id: \.self) { goal in
                             SelectableCard(
                                 title: goal.displayName,
@@ -85,7 +85,7 @@ struct GoalsView: View {
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, AppSpacing.lg)
+                .padding(.horizontal, Spacing.lg)
             }
 
             OnboardingBottomBar(
@@ -93,7 +93,7 @@ struct GoalsView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(AppColors.lightBackground)
+        .background(Color.appBackground)
     }
 }
 
@@ -103,27 +103,27 @@ struct OnboardingMacroCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: AppSpacing.xs) {
+        VStack(spacing: Spacing.xs) {
             Circle()
                 .fill(color)
-                .frame(width: 8, height: 8)
+                .frame(width: Dimensions.iconXSmall, height: Dimensions.iconXSmall)
 
             Text("\(percentage)%")
-                .font(AppTypography.title2)
-                .foregroundColor(AppColors.primaryText)
+                .font(.title2)
+                .foregroundColor(.textPrimary)
 
             Text(title)
-                .font(AppTypography.smallCaptionMedium)
-                .foregroundColor(AppColors.secondaryText)
+                .font(.smallCaptionMedium)
+                .foregroundColor(.textSecondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, AppSpacing.lg)
+        .padding(.vertical, Spacing.lg)
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.lg)
-                .fill(Color(UIColor.systemBackground))
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .fill(Color.cardBackground)
                 .overlay(
-                    RoundedRectangle(cornerRadius: AppCornerRadius.lg)
-                        .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
+                    RoundedRectangle(cornerRadius: CornerRadius.lg)
+                        .stroke(Color.border, lineWidth: LineWidth.regular)
                 )
         )
     }

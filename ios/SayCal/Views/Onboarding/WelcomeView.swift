@@ -6,27 +6,27 @@ struct WelcomeView: View {
 
     var body: some View {
         ZStack {
-            AppColors.lightBackground
+            Color.appBackground
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer()
 
-                VStack(alignment: .leading, spacing: AppSpacing.lg) {
+                VStack(alignment: .leading, spacing: Spacing.lg) {
                     Text("welcome.")
-                        .font(.system(size: 48, weight: .bold))
-                        .foregroundColor(AppColors.primaryText)
-                        .padding(.bottom, AppSpacing.xs)
+                        .font(.displayHero)
+                        .foregroundColor(.textPrimary)
+                        .padding(.bottom, Spacing.xs)
 
                     Text("Track your nutrition, effortlessly.")
-                        .font(AppTypography.body)
-                        .foregroundColor(AppColors.secondaryText)
+                        .font(.body)
+                        .foregroundColor(.textSecondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, AppSpacing.xl)
-                .padding(.bottom, AppSpacing.xxxl)
+                .padding(.horizontal, Spacing.xl)
+                .padding(.bottom, Spacing.xxxl)
 
-                VStack(spacing: AppSpacing.md) {
+                VStack(spacing: Spacing.md) {
                     AppleAuthButton()
 
                     GoogleAuthButton()
@@ -36,13 +36,13 @@ struct WelcomeView: View {
                         showEmailAuth = true
                     } label: {
                         Text("Use email instead")
-                            .font(AppTypography.caption)
-                            .foregroundColor(AppColors.secondaryText)
+                            .font(.caption)
+                            .foregroundColor(.textSecondary)
                     }
-                    .padding(.top, AppSpacing.xs)
+                    .padding(.top, Spacing.xs)
                 }
-                .padding(.horizontal, AppSpacing.xl)
-                .padding(.bottom, AppSpacing.xxxl)
+                .padding(.horizontal, Spacing.xl)
+                .padding(.bottom, Spacing.xxxl)
             }
         }
         .sheet(isPresented: $showEmailAuth) {

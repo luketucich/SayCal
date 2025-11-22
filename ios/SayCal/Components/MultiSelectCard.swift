@@ -12,25 +12,25 @@ struct MultiSelectCard: View {
         } label: {
             HStack {
                 Text(title)
-                    .font(AppTypography.caption)
-                    .foregroundColor(AppColors.primaryText)
+                    .font(.caption)
+                    .foregroundColor(.textPrimary)
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(AppColors.primaryText)
+                        .font(.iconSmall)
+                        .foregroundColor(.textPrimary)
                 }
             }
-            .padding(.horizontal, AppSpacing.sm)
-            .padding(.vertical, AppSpacing.sm)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, Spacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: AppCornerRadius.xs)
-                    .fill(Color(UIColor.systemBackground))
+                RoundedRectangle(cornerRadius: CornerRadius.xs)
+                    .fill(Color.cardBackground)
                     .overlay(
-                        RoundedRectangle(cornerRadius: AppCornerRadius.xs)
-                            .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                        RoundedRectangle(cornerRadius: CornerRadius.xs)
+                            .stroke(isSelected ? Color.borderActive : .border, lineWidth: isSelected ? LineWidth.regular : LineWidth.thin)
                     )
             )
         }
@@ -48,25 +48,25 @@ struct MultiSelectPill: View {
             HapticManager.shared.light()
             action()
         } label: {
-            HStack(spacing: AppSpacing.xxs) {
+            HStack(spacing: Spacing.xxs) {
                 Text(title)
-                    .font(AppTypography.smallCaption)
-                    .foregroundColor(AppColors.primaryText)
+                    .font(.smallCaption)
+                    .foregroundColor(.textPrimary)
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(AppColors.primaryText)
+                        .font(.icon)
+                        .foregroundColor(.textPrimary)
                 }
             }
-            .padding(.horizontal, AppSpacing.sm)
-            .padding(.vertical, AppSpacing.xs)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, Spacing.xs)
             .background(
                 Capsule()
-                    .fill(Color(UIColor.systemBackground))
+                    .fill(Color.cardBackground)
                     .overlay(
                         Capsule()
-                            .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                            .stroke(isSelected ? Color.borderActive : .border, lineWidth: isSelected ? LineWidth.regular : LineWidth.thin)
                     )
             )
         }
@@ -75,8 +75,8 @@ struct MultiSelectPill: View {
 }
 
 #Preview {
-    VStack(spacing: AppSpacing.sm) {
-        VStack(spacing: AppSpacing.xs) {
+    VStack(spacing: Spacing.sm) {
+        VStack(spacing: Spacing.xs) {
             MultiSelectCard(
                 title: "Vegetarian",
                 isSelected: true
@@ -98,13 +98,13 @@ struct MultiSelectPill: View {
         LazyVGrid(columns: [
             GridItem(.flexible()),
             GridItem(.flexible())
-        ], spacing: AppSpacing.xs) {
+        ], spacing: Spacing.xs) {
             MultiSelectPill(title: "Peanuts", isSelected: true) {}
             MultiSelectPill(title: "Tree Nuts", isSelected: false) {}
             MultiSelectPill(title: "Milk", isSelected: false) {}
             MultiSelectPill(title: "Eggs", isSelected: true) {}
         }
     }
-    .padding(AppSpacing.xl)
+    .padding(Spacing.xxl)
     .appBackground()
 }

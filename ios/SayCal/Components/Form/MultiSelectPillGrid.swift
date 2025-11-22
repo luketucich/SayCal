@@ -18,13 +18,13 @@ struct MultiSelectPillGrid: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             FormSectionHeader(title: title)
 
             LazyVGrid(columns: [
                 GridItem(.flexible()),
                 GridItem(.flexible())
-            ], spacing: AppSpacing.xs) {
+            ], spacing: Spacing.xs) {
 
                 if isAddingItem {
                     CustomInputField(

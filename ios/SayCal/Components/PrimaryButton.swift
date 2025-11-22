@@ -25,20 +25,20 @@ struct PrimaryButton: View {
         } label: {
             if isLoading {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: Color(UIColor.systemBackground)))
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color(uiColor: .systemBackground)))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(height: Dimensions.buttonHeightLarge)
             } else {
                 Text(title)
-                    .font(AppTypography.bodyMedium)
-                    .foregroundColor(isEnabled ? Color(UIColor.systemBackground) : Color(UIColor.systemGray3))
+                    .font(.bodyMedium)
+                    .foregroundColor(isEnabled ? Color(uiColor: .systemBackground) : .textDisabled)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(height: Dimensions.buttonHeightLarge)
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.pill)
-                .fill(isEnabled ? Color(UIColor.label) : Color(UIColor.systemGray5))
+            RoundedRectangle(cornerRadius: CornerRadius.pill)
+                .fill(isEnabled ? Color.textPrimary : .border)
         )
         .disabled(!isEnabled || isLoading)
     }
@@ -54,14 +54,14 @@ struct SecondaryButton: View {
             action()
         } label: {
             Text(title)
-                .font(AppTypography.bodyMedium)
-                .foregroundColor(Color(UIColor.label))
+                .font(.bodyMedium)
+                .foregroundColor(.textPrimary)
                 .frame(maxWidth: .infinity)
-                .frame(height: 56)
+                .frame(height: Dimensions.buttonHeightLarge)
         }
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.pill)
-                .stroke(Color(UIColor.label), lineWidth: 1.5)
+            RoundedRectangle(cornerRadius: CornerRadius.pill)
+                .stroke(Color.textPrimary, lineWidth: LineWidth.regular)
         )
     }
 }
@@ -76,8 +76,8 @@ struct TextButton: View {
             action()
         } label: {
             Text(title)
-                .font(AppTypography.caption)
-                .foregroundColor(AppColors.secondaryText)
+                .font(.caption)
+                .foregroundColor(.textSecondary)
         }
     }
 }

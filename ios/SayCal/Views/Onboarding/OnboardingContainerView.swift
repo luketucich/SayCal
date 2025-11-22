@@ -89,11 +89,11 @@ struct OnboardingContainerView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 ProgressBar(currentStep: state.currentStep, totalSteps: state.totalSteps)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                
+                    .padding(.horizontal, Spacing.xl)
+                    .padding(.vertical, Spacing.md)
+
                 Divider()
-                    .overlay(Color(UIColor.systemGray5))
+                    .overlay(Color.border)
 
                 currentStepView
                     .transition(.asymmetric(
@@ -102,7 +102,7 @@ struct OnboardingContainerView: View {
                     ))
                     .id(state.currentStep)
             }
-            .background(AppColors.lightBackground)
+            .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -136,21 +136,21 @@ struct ProgressBar: View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 // Background track
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(UIColor.systemGray5))
-                    .frame(height: 6)
+                RoundedRectangle(cornerRadius: CornerRadius.progress)
+                    .fill(Color.border)
+                    .frame(height: Dimensions.progressBarHeight)
 
                 // Progress fill
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(UIColor.label))
+                RoundedRectangle(cornerRadius: CornerRadius.progress)
+                    .fill(Color.textPrimary)
                     .frame(
                         width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps),
-                        height: 6
+                        height: Dimensions.progressBarHeight
                     )
-                    .animation(.easeInOut(duration: 0.3), value: currentStep)
+                    .animation(Animation.standard, value: currentStep)
             }
         }
-        .frame(height: 6)
+        .frame(height: Dimensions.progressBarHeight)
     }
 }
 

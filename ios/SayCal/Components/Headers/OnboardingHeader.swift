@@ -12,17 +12,17 @@ struct OnboardingHeader: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             Text(useLowercaseTitle ? title.lowercased() + "." : title)
-                .font(AppTypography.title1)
-                .foregroundColor(AppColors.primaryText)
+                .font(.title1)
+                .foregroundColor(.textPrimary)
 
             Text(subtitle)
-                .font(AppTypography.caption)
-                .foregroundColor(AppColors.secondaryText)
+                .font(.caption)
+                .foregroundColor(.textSecondary)
                 .lineSpacing(4)
         }
-        .padding(.top, AppSpacing.xl)
+        .padding(.top, Spacing.xxl)
     }
 }
 

@@ -12,32 +12,32 @@ struct UnitCard: View {
             action()
         } label: {
             HStack {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(title)
-                        .font(AppTypography.bodyMedium)
-                        .foregroundColor(AppColors.primaryText)
+                        .font(.bodyMedium)
+                        .foregroundColor(.textPrimary)
 
                     Text(subtitle)
-                        .font(AppTypography.smallCaption)
-                        .foregroundColor(AppColors.secondaryText)
+                        .font(.smallCaption)
+                        .foregroundColor(.textSecondary)
                 }
 
                 Spacer()
 
                 Circle()
-                    .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray4), lineWidth: 2)
-                    .frame(width: 24, height: 24)
+                    .stroke(isSelected ? Color.borderActive : .borderSubtle, lineWidth: LineWidth.thick)
+                    .frame(width: Dimensions.radioOuter, height: Dimensions.radioOuter)
                     .overlay(
                         Circle()
-                            .fill(AppColors.primaryText)
-                            .frame(width: 12, height: 12)
+                            .fill(Color.textPrimary)
+                            .frame(width: Dimensions.radioInner, height: Dimensions.radioInner)
                             .opacity(isSelected ? 1 : 0)
                     )
             }
-            .padding(AppSpacing.lg)
+            .padding(Spacing.lg)
             .background(
-                RoundedRectangle(cornerRadius: AppCornerRadius.md)
-                    .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: CornerRadius.md)
+                    .stroke(isSelected ? Color.borderActive : .border, lineWidth: isSelected ? LineWidth.thick : LineWidth.thin)
             )
         }
         .buttonStyle(.plain)

@@ -6,39 +6,39 @@ struct ObserveProfileView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+            VStack(alignment: .leading, spacing: Spacing.xxl) {
                 OnboardingHeader(
                     title: "Your Profile",
                     subtitle: "View and manage your information"
                 )
 
-                VStack(spacing: AppSpacing.xl) {
+                VStack(spacing: Spacing.xl) {
                     ProfileSection(title: "Goals") {
-                        VStack(spacing: AppSpacing.sm) {
+                        VStack(spacing: Spacing.sm) {
                             HStack {
-                                VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                                VStack(alignment: .leading, spacing: Spacing.xxs) {
                                     Text("Your Target Calories")
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(AppColors.secondaryText)
+                                        .font(.caption)
+                                        .foregroundColor(.textSecondary)
 
                                     Text("\(profile.targetCalories)")
-                                        .font(AppTypography.displayLarge)
-                                        .foregroundColor(AppColors.primaryText)
+                                        .font(.displayLarge)
+                                        .foregroundColor(.textPrimary)
 
                                     Text("calories per day")
-                                        .font(AppTypography.smallCaption)
-                                        .foregroundColor(AppColors.tertiaryText)
+                                        .font(.smallCaption)
+                                        .foregroundColor(.textTertiary)
                                 }
 
                                 Spacer()
                             }
-                            .padding(AppSpacing.lg)
+                            .padding(Spacing.lg)
                             .background(
-                                RoundedRectangle(cornerRadius: AppCornerRadius.sm)
+                                RoundedRectangle(cornerRadius: CornerRadius.sm)
                                     .fill(Color(UIColor.systemGray6))
                             )
 
-                            HStack(spacing: AppSpacing.sm) {
+                            HStack(spacing: Spacing.sm) {
                                 MacroDisplayCard(
                                     title: "Carbs",
                                     percentage: profile.carbsPercent,
@@ -64,7 +64,7 @@ struct ObserveProfileView: View {
                     }
 
                     ProfileSection(title: "Basic Information") {
-                        VStack(spacing: AppSpacing.sm) {
+                        VStack(spacing: Spacing.sm) {
                             ProfileInfoCard(label: "Sex", value: profile.sex.displayName)
                             ProfileInfoCard(label: "Age", value: "\(profile.age) years")
                             ProfileInfoCard(label: "Units", value: profile.unitsPreference.displayName)
@@ -72,7 +72,7 @@ struct ObserveProfileView: View {
                     }
 
                     ProfileSection(title: "Physical Stats") {
-                        VStack(spacing: AppSpacing.sm) {
+                        VStack(spacing: Spacing.sm) {
                             if profile.unitsPreference == .imperial {
                                 let (feet, inches) = profile.heightCm.cmToFeetAndInches
                                 ProfileInfoCard(label: "Height", value: "\(feet)' \(inches)\"")
@@ -94,20 +94,20 @@ struct ObserveProfileView: View {
                             LazyVGrid(columns: [
                                 GridItem(.flexible()),
                                 GridItem(.flexible())
-                            ], spacing: AppSpacing.xs) {
+                            ], spacing: Spacing.xs) {
                                 ForEach(preferences, id: \.self) { preference in
                                     ProfilePillBadge(text: preference.replacingOccurrences(of: "_", with: " ").capitalized)
                                 }
                             }
                         } else {
                             Text("None")
-                                .font(AppTypography.caption)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, AppSpacing.md)
-                                .padding(.vertical, AppSpacing.sm)
+                                .padding(.horizontal, Spacing.md)
+                                .padding(.vertical, Spacing.sm)
                                 .background(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.sm)
+                                    RoundedRectangle(cornerRadius: CornerRadius.sm)
                                         .stroke(Color(UIColor.systemGray5), lineWidth: 1)
                                 )
                         }
@@ -118,20 +118,20 @@ struct ObserveProfileView: View {
                             LazyVGrid(columns: [
                                 GridItem(.flexible()),
                                 GridItem(.flexible())
-                            ], spacing: AppSpacing.xs) {
+                            ], spacing: Spacing.xs) {
                                 ForEach(allergies, id: \.self) { allergy in
                                     ProfilePillBadge(text: allergy.replacingOccurrences(of: "_", with: " ").capitalized)
                                 }
                             }
                         } else {
                             Text("None")
-                                .font(AppTypography.caption)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, AppSpacing.md)
-                                .padding(.vertical, AppSpacing.sm)
+                                .padding(.horizontal, Spacing.md)
+                                .padding(.vertical, Spacing.sm)
                                 .background(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.sm)
+                                    RoundedRectangle(cornerRadius: CornerRadius.sm)
                                         .stroke(Color(UIColor.systemGray5), lineWidth: 1)
                                 )
                         }
@@ -151,21 +151,21 @@ struct ObserveProfileView: View {
                         HStack {
                             Spacer()
                             Text("Sign Out")
-                                .font(AppTypography.bodySemibold)
-                                .foregroundColor(AppColors.error)
+                                .font(.bodySemibold)
+                                .foregroundColor(.error)
                             Spacer()
                         }
                         .frame(height: 48)
                         .background(
-                            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
-                                .stroke(AppColors.error, lineWidth: 1)
+                            RoundedRectangle(cornerRadius: CornerRadius.sm)
+                                .stroke(.error, lineWidth: 1)
                         )
                     }
                 }
 
                 Spacer(minLength: 100)
             }
-            .padding(.horizontal, AppSpacing.lg)
+            .padding(.horizontal, Spacing.lg)
         }
         .background(Color(UIColor.systemBackground))
     }
@@ -181,10 +181,10 @@ struct ProfileSection<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             Text(title)
-                .font(AppTypography.smallCaptionMedium)
-                .foregroundColor(AppColors.secondaryText)
+                .font(.smallCaptionMedium)
+                .foregroundColor(.textSecondary)
 
             content
         }
@@ -198,19 +198,19 @@ struct ProfileInfoCard: View {
     var body: some View {
         HStack {
             Text(label)
-                .font(AppTypography.caption)
-                .foregroundColor(AppColors.secondaryText)
+                .font(.caption)
+                .foregroundColor(.textSecondary)
 
             Spacer()
 
             Text(value)
-                .font(AppTypography.body)
-                .foregroundColor(AppColors.primaryText)
+                .font(.body)
+                .foregroundColor(.textPrimary)
         }
-        .padding(.horizontal, AppSpacing.md)
-        .padding(.vertical, AppSpacing.sm)
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
+            RoundedRectangle(cornerRadius: CornerRadius.sm)
                 .stroke(Color(UIColor.systemGray5), lineWidth: 1)
         )
     }
@@ -221,13 +221,13 @@ struct ProfilePillBadge: View {
 
     var body: some View {
         Text(text)
-            .font(AppTypography.smallCaptionMedium)
-            .foregroundColor(AppColors.primaryText)
-            .padding(.horizontal, AppSpacing.md)
-            .padding(.vertical, AppSpacing.sm)
+            .font(.smallCaptionMedium)
+            .foregroundColor(.textPrimary)
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, Spacing.sm)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: AppCornerRadius.sm)
+                RoundedRectangle(cornerRadius: CornerRadius.sm)
                     .stroke(Color(UIColor.systemGray5), lineWidth: 1)
             )
     }
@@ -239,19 +239,19 @@ struct MacroDisplayCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: AppSpacing.xxs) {
+        VStack(spacing: Spacing.xxs) {
             Text(title)
-                .font(AppTypography.smallCaptionMedium)
-                .foregroundColor(AppColors.secondaryText)
+                .font(.smallCaptionMedium)
+                .foregroundColor(.textSecondary)
 
             Text("\(percentage)%")
-                .font(AppTypography.title3)
+                .font(.title3)
                 .foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, AppSpacing.sm)
+        .padding(.vertical, Spacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
+            RoundedRectangle(cornerRadius: CornerRadius.sm)
                 .fill(color.opacity(0.1))
         )
     }

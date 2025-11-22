@@ -9,19 +9,19 @@ struct PhysicalStatsView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                VStack(alignment: .leading, spacing: Spacing.xxl) {
                     OnboardingHeader(
                         title: "Your physical stats",
                         subtitle: "We'll use this to calculate your caloric needs"
                     )
 
-                    VStack(spacing: AppSpacing.lg) {
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    VStack(spacing: Spacing.lg) {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
                             Text("Sex")
-                                .font(AppTypography.smallCaptionMedium)
-                                .foregroundColor(AppColors.secondaryText)
+                                .font(.smallCaptionMedium)
+                                .foregroundColor(.textSecondary)
 
-                            HStack(spacing: AppSpacing.sm) {
+                            HStack(spacing: Spacing.sm) {
                                 TogglePill(
                                     title: "Male",
                                     isSelected: state.sex == .male,
@@ -44,10 +44,10 @@ struct PhysicalStatsView: View {
                             }
                         }
 
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
                             Text("Age")
-                                .font(AppTypography.smallCaptionMedium)
-                                .foregroundColor(AppColors.secondaryText)
+                                .font(.smallCaptionMedium)
+                                .foregroundColor(.textSecondary)
 
                             Button {
                                 HapticManager.shared.light()
@@ -55,32 +55,32 @@ struct PhysicalStatsView: View {
                             } label: {
                                 HStack {
                                     Text("\(state.age) years")
-                                        .font(AppTypography.bodyMedium)
-                                        .foregroundColor(AppColors.primaryText)
+                                        .font(.bodyMedium)
+                                        .foregroundColor(.textPrimary)
 
                                     Spacer()
 
                                     Image(systemName: "chevron.down")
                                         .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(AppColors.secondaryText)
+                                        .foregroundColor(.textSecondary)
                                 }
-                                .padding(.horizontal, AppSpacing.lg)
-                                .padding(.vertical, AppSpacing.md)
+                                .padding(.horizontal, Spacing.lg)
+                                .padding(.vertical, Spacing.md)
                                 .background(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                    RoundedRectangle(cornerRadius: CornerRadius.md)
                                         .fill(Color(UIColor.systemBackground))
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                            RoundedRectangle(cornerRadius: CornerRadius.md)
                                                 .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
                                         )
                                 )
                             }
                         }
 
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
                             Text("Height")
-                                .font(AppTypography.smallCaptionMedium)
-                                .foregroundColor(AppColors.secondaryText)
+                                .font(.smallCaptionMedium)
+                                .foregroundColor(.textSecondary)
 
                             Button {
                                 HapticManager.shared.light()
@@ -89,37 +89,37 @@ struct PhysicalStatsView: View {
                                 HStack {
                                     if state.unitsPreference == .metric {
                                         Text("\(state.heightCm) cm")
-                                            .font(AppTypography.bodyMedium)
-                                            .foregroundColor(AppColors.primaryText)
+                                            .font(.bodyMedium)
+                                            .foregroundColor(.textPrimary)
                                     } else {
                                         Text("\(state.heightFeet)' \(state.heightInches)\"")
-                                            .font(AppTypography.bodyMedium)
-                                            .foregroundColor(AppColors.primaryText)
+                                            .font(.bodyMedium)
+                                            .foregroundColor(.textPrimary)
                                     }
 
                                     Spacer()
 
                                     Image(systemName: "chevron.down")
                                         .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(AppColors.secondaryText)
+                                        .foregroundColor(.textSecondary)
                                 }
-                                .padding(.horizontal, AppSpacing.lg)
-                                .padding(.vertical, AppSpacing.md)
+                                .padding(.horizontal, Spacing.lg)
+                                .padding(.vertical, Spacing.md)
                                 .background(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                    RoundedRectangle(cornerRadius: CornerRadius.md)
                                         .fill(Color(UIColor.systemBackground))
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                            RoundedRectangle(cornerRadius: CornerRadius.md)
                                                 .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
                                         )
                                 )
                             }
                         }
 
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
                             Text("Weight")
-                                .font(AppTypography.smallCaptionMedium)
-                                .foregroundColor(AppColors.secondaryText)
+                                .font(.smallCaptionMedium)
+                                .foregroundColor(.textSecondary)
 
                             Button {
                                 HapticManager.shared.light()
@@ -128,27 +128,27 @@ struct PhysicalStatsView: View {
                                 HStack {
                                     if state.unitsPreference == .metric {
                                         Text(String(format: "%.1f kg", state.weightKg))
-                                            .font(AppTypography.bodyMedium)
-                                            .foregroundColor(AppColors.primaryText)
+                                            .font(.bodyMedium)
+                                            .foregroundColor(.textPrimary)
                                     } else {
                                         Text("\(Int(state.weightLbs)) lbs")
-                                            .font(AppTypography.bodyMedium)
-                                            .foregroundColor(AppColors.primaryText)
+                                            .font(.bodyMedium)
+                                            .foregroundColor(.textPrimary)
                                     }
 
                                     Spacer()
 
                                     Image(systemName: "chevron.down")
                                         .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(AppColors.secondaryText)
+                                        .foregroundColor(.textSecondary)
                                 }
-                                .padding(.horizontal, AppSpacing.lg)
-                                .padding(.vertical, AppSpacing.md)
+                                .padding(.horizontal, Spacing.lg)
+                                .padding(.vertical, Spacing.md)
                                 .background(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                    RoundedRectangle(cornerRadius: CornerRadius.md)
                                         .fill(Color(UIColor.systemBackground))
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                            RoundedRectangle(cornerRadius: CornerRadius.md)
                                                 .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
                                         )
                                 )
@@ -158,7 +158,7 @@ struct PhysicalStatsView: View {
                     
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, AppSpacing.lg)
+                .padding(.horizontal, Spacing.lg)
             }
 
             OnboardingBottomBar(
@@ -167,7 +167,7 @@ struct PhysicalStatsView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(AppColors.lightBackground)
+        .background(Color.appBackground)
         .sheet(isPresented: $showAgePicker) {
             PickerSheet(
                 title: "Select Age",
