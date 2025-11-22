@@ -21,8 +21,8 @@ struct ProfileView: View {
                                     isEditing = true
                                 } label: {
                                     Text("Edit")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(UIColor.label))
+                                        .font(AppTypography.bodyMedium)
+                                        .foregroundColor(AppColors.primaryText)
                                 }
                             }
                         }
@@ -37,14 +37,14 @@ struct ProfileView: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
-                            HStack(spacing: 16) {
+                            HStack(spacing: AppSpacing.md) {
                                 Button {
                                     HapticManager.shared.light()
                                     isEditing = false
                                 } label: {
                                     Text("Cancel")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(UIColor.secondaryLabel))
+                                        .font(AppTypography.bodyMedium)
+                                        .foregroundColor(AppColors.secondaryText)
                                 }
 
                                 Button {
@@ -55,11 +55,11 @@ struct ProfileView: View {
                                 } label: {
                                     if isSaving {
                                         ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: Color(UIColor.label)))
+                                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primaryText))
                                     } else {
                                         Text("Save")
-                                            .font(.system(size: 16, weight: .semibold))
-                                            .foregroundColor(Color(UIColor.label))
+                                            .font(AppTypography.bodySemibold)
+                                            .foregroundColor(AppColors.primaryText)
                                     }
                                 }
                                 .disabled(isSaving)
@@ -70,7 +70,8 @@ struct ProfileView: View {
             } else {
                 VStack {
                     Text("No profile data available")
-                        .foregroundStyle(.secondary)
+                        .font(AppTypography.body)
+                        .foregroundStyle(AppColors.secondaryText)
                 }
                 .navigationTitle("Profile")
             }

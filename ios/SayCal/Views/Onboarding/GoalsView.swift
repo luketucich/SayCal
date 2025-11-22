@@ -6,37 +6,37 @@ struct GoalsView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
                     OnboardingHeader(
                         title: "Your goal",
                         subtitle: "What are you trying to achieve?"
                     )
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: AppSpacing.sm) {
                         HStack {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                                 Text("Your Target Calories")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(Color(UIColor.secondaryLabel))
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(AppColors.secondaryText)
 
                                 Text("\(state.targetCalories)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(UIColor.label))
+                                    .font(AppTypography.displayLarge)
+                                    .foregroundColor(AppColors.primaryText)
 
                                 Text("calories per day")
-                                    .font(.system(size: 13))
-                                    .foregroundColor(Color(UIColor.tertiaryLabel))
+                                    .font(AppTypography.smallCaption)
+                                    .foregroundColor(AppColors.tertiaryText)
                             }
 
                             Spacer()
                         }
-                        .padding(20)
+                        .padding(AppSpacing.lg)
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
                                 .fill(Color(UIColor.systemGray6))
                         )
 
-                        HStack(spacing: 12) {
+                        HStack(spacing: AppSpacing.sm) {
                             let macros = UserManager.calculateMacroPercentages(for: state.goal)
 
                             OnboardingMacroCard(
@@ -60,16 +60,16 @@ struct GoalsView: View {
 
                         HStack {
                             Image(systemName: "info.circle")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color(UIColor.tertiaryLabel))
+                                .font(AppTypography.smallCaption)
+                                .foregroundColor(AppColors.tertiaryText)
 
                             Text("You can edit your target calories and macros anytime in your profile")
-                                .font(.system(size: 13))
-                                .foregroundColor(Color(UIColor.secondaryLabel))
+                                .font(AppTypography.smallCaption)
+                                .foregroundColor(AppColors.secondaryText)
                         }
                     }
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: AppSpacing.sm) {
                         ForEach(Goal.allCases, id: \.self) { goal in
                             SelectableCard(
                                 title: goal.displayName,
@@ -85,7 +85,7 @@ struct GoalsView: View {
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, AppSpacing.lg)
             }
 
             OnboardingBottomBar(
@@ -103,19 +103,19 @@ struct OnboardingMacroCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: AppSpacing.xxs) {
             Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(AppTypography.smallCaptionMedium)
+                .foregroundColor(AppColors.secondaryText)
 
             Text("\(percentage)%")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(AppTypography.title3)
                 .foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .padding(.vertical, AppSpacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
                 .fill(color.opacity(0.1))
         )
     }

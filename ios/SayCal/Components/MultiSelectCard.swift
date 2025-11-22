@@ -12,25 +12,25 @@ struct MultiSelectCard: View {
         } label: {
             HStack {
                 Text(title)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(AppTypography.caption)
+                    .foregroundColor(AppColors.primaryText)
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color(UIColor.label))
+                        .foregroundColor(AppColors.primaryText)
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .padding(.horizontal, AppSpacing.sm)
+            .padding(.vertical, AppSpacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: AppCornerRadius.xs)
                     .fill(Color(UIColor.systemBackground))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                        RoundedRectangle(cornerRadius: AppCornerRadius.xs)
+                            .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
                     )
             )
         }
@@ -48,25 +48,25 @@ struct MultiSelectPill: View {
             HapticManager.shared.light()
             action()
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: AppSpacing.xxs) {
                 Text(title)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(AppTypography.smallCaption)
+                    .foregroundColor(AppColors.primaryText)
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(UIColor.label))
+                        .foregroundColor(AppColors.primaryText)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, AppSpacing.sm)
+            .padding(.vertical, AppSpacing.xs)
             .background(
                 Capsule()
                     .fill(Color(UIColor.systemBackground))
                     .overlay(
                         Capsule()
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                            .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
                     )
             )
         }
@@ -75,8 +75,8 @@ struct MultiSelectPill: View {
 }
 
 #Preview {
-    VStack(spacing: 12) {
-        VStack(spacing: 8) {
+    VStack(spacing: AppSpacing.sm) {
+        VStack(spacing: AppSpacing.xs) {
             MultiSelectCard(
                 title: "Vegetarian",
                 isSelected: true
@@ -86,7 +86,7 @@ struct MultiSelectPill: View {
                 title: "Vegan",
                 isSelected: false
             ) {}
-            
+
             MultiSelectCard(
                 title: "Gluten Free",
                 isSelected: false
@@ -98,13 +98,13 @@ struct MultiSelectPill: View {
         LazyVGrid(columns: [
             GridItem(.flexible()),
             GridItem(.flexible())
-        ], spacing: 10) {
+        ], spacing: AppSpacing.xs) {
             MultiSelectPill(title: "Peanuts", isSelected: true) {}
             MultiSelectPill(title: "Tree Nuts", isSelected: false) {}
             MultiSelectPill(title: "Milk", isSelected: false) {}
             MultiSelectPill(title: "Eggs", isSelected: true) {}
         }
     }
-    .padding()
-    .background(Color(UIColor.systemGray6))
+    .padding(AppSpacing.xl)
+    .appBackground()
 }

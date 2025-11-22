@@ -25,6 +25,9 @@ struct AppColors {
 }
 
 struct AppTypography {
+    // MARK: - Display
+    static let displayLarge = Font.system(size: 36, weight: .bold, design: .rounded)
+
     // MARK: - Headers
     static let largeTitle = Font.system(size: 32, weight: .bold)
     static let title1 = Font.system(size: 28, weight: .bold)

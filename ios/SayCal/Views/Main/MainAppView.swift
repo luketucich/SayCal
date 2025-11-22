@@ -25,8 +25,8 @@ struct MainAppView: View {
             HStack {
                 Spacer()
                 RecordingButton(audioRecorder: audioRecorder)
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 8)
+                    .padding(.trailing, AppSpacing.lg)
+                    .padding(.bottom, AppSpacing.xs)
             }
             .background(.clear)
         }

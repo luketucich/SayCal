@@ -11,7 +11,7 @@ struct AllergiesView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
                     OnboardingHeader(
                         title: "Food allergies",
                         subtitle: "Select any allergies you have (optional)"
@@ -28,7 +28,7 @@ struct AllergiesView: View {
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: 10) {
+                    ], spacing: AppSpacing.sm) {
 
                         if isAddingAllergy {
                             CustomInputField(
@@ -96,7 +96,7 @@ struct AllergiesView: View {
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, AppSpacing.lg)
             }
 
             OnboardingBottomBar(
