@@ -3,8 +3,8 @@ import Supabase
 
 struct SupabaseManager {
     static let client = SupabaseClient(
-        supabaseURL: URL(string: "https://stzwzlzgroycxpebzkyq.supabase.co")!,
-        supabaseKey: "sb_publishable_3jmhHH_JX4KQcT-2i8MpzQ_XtTS9mWC",
+        supabaseURL: URL(string: Config.supabaseURL)!,
+        supabaseKey: Config.supabaseAnonKey,
         options: .init(
             auth: .init(
                 emitLocalSessionAsInitialSession: true

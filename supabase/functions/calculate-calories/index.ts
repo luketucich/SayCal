@@ -6,9 +6,7 @@ Deno.serve(async (req) => {
   try {
     const { transcribed_meal, channel_id } = await req.json();
     console.log("🍽 Analyzing meal:", transcribed_meal);
-    console.log("📡 Channel ID:", channel_id);
 
-    // Prepare OpenAI streaming request
     const payload = {
       model: "gpt-4.1-mini",
       temperature: 0.1,
@@ -34,18 +32,14 @@ Deno.serve(async (req) => {
       ],
     };
 
-    console.log("📤 Sending streaming request to OpenAI");
-
     const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${Deno.env.get("OPEN_AI_TRANSCRIBE_API_KEY")}`,
+        Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     });
-
-    console.log("📡 OpenAI HTTP status:", openaiResponse.status);
 
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text();
@@ -56,10 +50,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Stream response and broadcast to client
     await streamNutritionResponse(openaiResponse, channel_id);
-
-    console.log("✅ Streaming complete");
 
     return new Response(
       JSON.stringify({
@@ -81,7 +72,6 @@ Deno.serve(async (req) => {
   }
 });
 
-// Helper function to broadcast to Realtime channel
 async function broadcastToChannel(
   channelId: string,
   event: string,
@@ -93,7 +83,7 @@ async function broadcastToChannel(
       {
         method: "POST",
         headers: {
-          apikey: "sb_publishable_3jmhHH_JX4KQcT-2i8MpzQ_XtTS9mWC",
+          apikey: Deno.env.get("SUPABASE_ANON_KEY")!,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -110,15 +100,12 @@ async function broadcastToChannel(
 
     if (!response.ok) {
       console.warn("⚠️ Broadcast failed:", await response.text());
-    } else {
-      console.log("✅ Broadcast successful:", event);
     }
   } catch (e) {
     console.warn("⚠️ Broadcast error:", e);
   }
 }
 
-// Stream OpenAI response and broadcast chunks
 async function streamNutritionResponse(
   openaiResponse: Response,
   channelId: string,
@@ -144,7 +131,6 @@ async function streamNutritionResponse(
         try {
           const json = JSON.parse(data);
 
-          // Extract text from delta events
           if (json.type === "response.output_text.delta" && json.delta) {
             fullText += json.delta;
 
@@ -152,8 +138,6 @@ async function streamNutritionResponse(
               delta: json.delta,
               fullText,
             });
-
-            console.log("📝 Broadcasted delta:", json.delta);
           }
         } catch {
           // Skip non-JSON lines
@@ -161,14 +145,12 @@ async function streamNutritionResponse(
       }
     }
 
-    // Send completion event
     await broadcastToChannel(channelId, "nutrition_complete", { fullText });
   } finally {
     reader.releaseLock();
   }
 }
 
-// Build nutrition analysis prompt
 function buildNutritionPrompt(meal: string): string {
   return `
 Analyze this meal: "${meal}"

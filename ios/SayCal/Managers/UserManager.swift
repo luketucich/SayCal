@@ -2,8 +2,6 @@ import Foundation
 import Supabase
 import Combine
 
-// MARK: - Custom Errors
-
 enum UserManagerError: LocalizedError {
     case noAuthenticatedUser
     case profileNotFound
@@ -24,50 +22,36 @@ enum UserManagerError: LocalizedError {
     }
 }
 
-// MARK: - UserManager
-
 @MainActor
 class UserManager: ObservableObject {
-
-    // MARK: - Singleton
-
     static let shared = UserManager()
-
-    private init() {
-        loadCachedData()
-        setupAuthListener()
-    }
-
-    // MARK: - Published Properties
 
     @Published private(set) var isAuthenticated: Bool = false
     @Published private(set) var isLoading: Bool = true
     @Published private(set) var currentUser: User?
     @Published private(set) var profile: UserProfile?
 
-    // MARK: - Private Properties
-
     private let client = SupabaseManager.client
     private var authStateTask: Task<Void, Never>?
     private var profileCheckComplete = false
-
-    // MARK: - Cache Keys
 
     private enum CacheKey {
         static let profile = "cached_user_profile"
         static let onboardingCompleted = "onboarding_completed"
     }
 
-    // MARK: - Date Decoder
+    private init() {
+        loadCachedData()
+        setupAuthListener()
+    }
 
-    // Custom decoder for Supabase date formats
+    // Custom decoder for Supabase ISO 8601 dates
     private lazy var decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let dateString = try container.decode(String.self)
 
-            // Try ISO 8601 format with fractional seconds first (Supabase default)
             let formatter = ISO8601DateFormatter()
             formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
@@ -75,7 +59,6 @@ class UserManager: ObservableObject {
                 return date
             }
 
-            // Fallback to basic ISO 8601 without fractional seconds
             formatter.formatOptions = [.withInternetDateTime]
             if let date = formatter.date(from: dateString) {
                 return date
@@ -89,14 +72,10 @@ class UserManager: ObservableObject {
         return decoder
     }()
 
-    // MARK: - Initialization
-
     private func loadCachedData() {
         profile = loadFromCache()
         print("📦 Loaded cached data on init")
     }
-
-    // MARK: - Public API - Authentication
 
     func signOut() async throws {
         do {
@@ -108,8 +87,6 @@ class UserManager: ObservableObject {
             throw error
         }
     }
-
-    // MARK: - Public API - Profile Management
 
     func createProfile(
         userId: UUID,
@@ -162,9 +139,7 @@ class UserManager: ObservableObject {
 
             print("✅ Profile inserted into database")
 
-            // Fetch back to get server-generated timestamps
             try await fetchProfileFromDatabase()
-
             print("✅ Profile created and synced successfully")
         } catch {
             print("❌ Failed to create profile: \(error)")
@@ -177,7 +152,6 @@ class UserManager: ObservableObject {
             throw UserManagerError.noAuthenticatedUser
         }
 
-        // Create update payload
         struct UserProfileUpdatePayload: Encodable {
             let units_preference: UnitsPreference
             let sex: Sex
@@ -215,7 +189,6 @@ class UserManager: ObservableObject {
         do {
             print("📝 Updating profile for user: \(userId)")
 
-            // Update database
             try await client
                 .from("user_profiles")
                 .update(payload)
@@ -224,9 +197,7 @@ class UserManager: ObservableObject {
 
             print("✅ Profile updated in database")
 
-            // Fetch back to get updated timestamps
             try await fetchProfileFromDatabase()
-
             print("✅ Profile updated and synced successfully")
         } catch {
             print("❌ Failed to update profile: \(error)")
@@ -239,18 +210,15 @@ class UserManager: ObservableObject {
             throw UserManagerError.noAuthenticatedUser
         }
 
-        print("🔄 Explicitly refreshing profile from server")
+        print("🔄 Refreshing profile from server")
         try await fetchProfileFromDatabase()
     }
-
-    // MARK: - Public API - Onboarding
 
     func completeOnboarding(with state: OnboardingState) async throws {
         guard let userId = currentUser?.id else {
             throw UserManagerError.noAuthenticatedUser
         }
 
-        // Convert to metric if needed (database stores everything in metric)
         let weightKg: Double
         if state.unitsPreference == .imperial {
             weightKg = state.weightLbs.lbsToKg
@@ -265,7 +233,6 @@ class UserManager: ObservableObject {
             heightCm = state.heightCm
         }
 
-        // Calculate target calories and macro percentages
         let targetCalories = UserManager.calculateTargetCalories(
             sex: state.sex,
             age: state.age,
@@ -276,7 +243,6 @@ class UserManager: ObservableObject {
         )
         let macros = UserManager.calculateMacroPercentages(for: state.goal)
 
-        // Create the profile
         try await createProfile(
             userId: userId,
             unitsPreference: state.unitsPreference,
@@ -295,9 +261,7 @@ class UserManager: ObservableObject {
         )
     }
 
-    // MARK: - Static Utilities
-
-    // Calculates target calories using Mifflin-St Jeor equation
+    // Mifflin-St Jeor equation
     static func calculateTargetCalories(
         sex: Sex,
         age: Int,
@@ -306,7 +270,6 @@ class UserManager: ObservableObject {
         activityLevel: ActivityLevel,
         goal: Goal
     ) -> Int {
-        // Mifflin-St Jeor Equation for BMR
         let bmr: Double
         if sex == .male {
             bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) + 5
@@ -314,35 +277,20 @@ class UserManager: ObservableObject {
             bmr = (10 * weightKg) + (6.25 * Double(heightCm)) - (5 * Double(age)) - 161
         }
 
-        // Calculate TDEE (Total Daily Energy Expenditure)
         let tdee = bmr * activityLevel.activityMultiplier
-
-        // Adjust based on goal
         let targetCalories = Int(tdee) + goal.calorieAdjustment
-
-        // Ensure minimum safe calories
         let minimumCalories = sex == .male ? 1500 : 1200
         return max(targetCalories, minimumCalories)
     }
 
     static func calculateMacroPercentages(for goal: Goal) -> (carbs: Int, fats: Int, protein: Int) {
         switch goal {
-        case .loseWeight:
-            // Higher protein to preserve muscle, moderate carbs and fats
-            return (carbs: 35, fats: 30, protein: 35)
-        case .maintainWeight:
-            // Balanced macros for maintenance
-            return (carbs: 40, fats: 30, protein: 30)
-        case .buildMuscle:
-            // High protein for muscle growth, higher carbs for energy
-            return (carbs: 40, fats: 25, protein: 35)
-        case .gainWeight:
-            // High carbs and protein for weight gain
-            return (carbs: 45, fats: 25, protein: 30)
+        case .loseWeight: return (carbs: 35, fats: 30, protein: 35)
+        case .maintainWeight: return (carbs: 40, fats: 30, protein: 30)
+        case .buildMuscle: return (carbs: 40, fats: 25, protein: 35)
+        case .gainWeight: return (carbs: 45, fats: 25, protein: 30)
         }
     }
-
-    // MARK: - Private - Auth State Management
 
     private func setupAuthListener() {
         authStateTask = Task {
@@ -367,13 +315,11 @@ class UserManager: ObservableObject {
     private func loadUserProfileOnAuth() async {
         guard let userId = currentUser?.id else { return }
 
-        // Check if cached profile is valid for current user
         if let cached = profile, cached.userId == userId {
             print("✅ Using cached profile for user: \(userId)")
             return
         }
 
-        // Fetch from database
         print("📥 Fetching profile from database for user: \(userId)")
         do {
             try await fetchProfileFromDatabase()
@@ -381,8 +327,6 @@ class UserManager: ObservableObject {
             print("⚠️ No profile found - user needs onboarding")
         }
     }
-
-    // MARK: - Private - Database Operations
 
     private func fetchProfileFromDatabase() async throws {
         guard let userId = currentUser?.id else {
@@ -397,10 +341,7 @@ class UserManager: ObservableObject {
                 .single()
                 .execute()
 
-            // Decode with custom date decoder
             let profile = try decoder.decode(UserProfile.self, from: response.data)
-
-            // Update state and cache atomically
             self.profile = profile
             saveToCache(profile)
 
@@ -408,15 +349,11 @@ class UserManager: ObservableObject {
         } catch {
             print("❌ Failed to fetch profile: \(error)")
 
-            // Clear profile if not found
             self.profile = nil
             UserDefaults.standard.removeObject(forKey: CacheKey.profile)
-
             throw UserManagerError.databaseError(error)
         }
     }
-
-    // MARK: - Private - Cache Management
 
     private func saveToCache(_ profile: UserProfile) {
         do {
@@ -451,8 +388,6 @@ class UserManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: CacheKey.onboardingCompleted)
         print("🗑️ Cache cleared")
     }
-
-    // MARK: - Cleanup
 
     deinit {
         authStateTask?.cancel()
