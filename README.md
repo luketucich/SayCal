@@ -21,36 +21,24 @@ AI-powered calorie tracking app with voice input. Record your meals with your vo
 ### Prerequisites
 
 - Xcode 15+
-- Supabase account
+- Supabase project
 - OpenAI API key
 
-### iOS App Configuration
+### iOS App
 
-1. **Create configuration file**:
-   ```bash
-   cd ios
-   cp Secrets.example.xcconfig Secrets.xcconfig
-   ```
+The Supabase URL and anon key are already configured in the code (these are meant to be public and are protected by Row Level Security policies).
 
-2. **Add your credentials to `ios/Secrets.xcconfig`**:
-   ```
-   SUPABASE_URL = https://your-project.supabase.co
-   SUPABASE_ANON_KEY = your-supabase-anon-key
-   ```
-
-3. **Link the config file in Xcode**:
-   - Open `SayCal.xcodeproj` in Xcode
-   - Select the project in the navigator
-   - Go to Info tab
-   - Under Configurations, set `Secrets` for both Debug and Release
+Just open and run:
+```bash
+open ios/SayCal.xcodeproj
+```
 
 ### Supabase Edge Functions
 
-1. **Set environment variables**:
+1. **Set OpenAI API key**:
    ```bash
    cd supabase
-   supabase secrets set OPENAI_API_KEY=your-openai-api-key
-   supabase secrets set SUPABASE_ANON_KEY=your-supabase-anon-key
+   supabase secrets set OPEN_AI_TRANSCRIBE_API_KEY=your-openai-api-key
    ```
 
 2. **Deploy functions**:
@@ -118,10 +106,9 @@ SayCal/
 
 ## Security
 
-- **Never hardcode** API keys or secrets
-- Use environment variables via `.xcconfig` files
-- Rotate exposed credentials immediately
-- `.gitignore` includes `Secrets.xcconfig`
+- Supabase anon keys are designed to be public (protected by RLS policies)
+- OpenAI API keys are kept server-side in edge functions
+- Database access controlled by Row Level Security (RLS)
 
 ## Contributing
 

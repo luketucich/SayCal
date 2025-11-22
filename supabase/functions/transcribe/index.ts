@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
+          Authorization: `Bearer ${Deno.env.get("OPEN_AI_TRANSCRIBE_API_KEY")}`,
         },
         body: formData,
       },

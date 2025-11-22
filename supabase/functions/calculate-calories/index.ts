@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
+        Authorization: `Bearer ${Deno.env.get("OPEN_AI_TRANSCRIBE_API_KEY")}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
@@ -83,7 +83,7 @@ async function broadcastToChannel(
       {
         method: "POST",
         headers: {
-          apikey: Deno.env.get("SUPABASE_ANON_KEY")!,
+          apikey: "sb_publishable_3jmhHH_JX4KQcT-2i8MpzQ_XtTS9mWC",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

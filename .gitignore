@@ -32,7 +32,6 @@ project.xcworkspace/xcuserdata/
 *.xcscmblueprint
 *.xcscheme
 !default.xcscheme
-Secrets.xcconfig
 
 # CocoaPods
 Pods/
