@@ -67,35 +67,35 @@ struct EditProfileView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxl) {
                 OnboardingHeader(
                     title: "Edit Profile",
                     subtitle: "Update your information"
                 )
 
-                VStack(spacing: 24) {
-                    VStack(alignment: .leading, spacing: 12) {
+                VStack(spacing: AppSpacing.xl) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         FormSectionHeader(title: "Goals")
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: AppSpacing.sm) {
                             HStack {
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                                     Text("Your Target Calories")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(Color(UIColor.secondaryLabel))
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(AppColors.secondaryText)
 
                                     Text("\(currentCalories)")
-                                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                                        .foregroundColor(Color(UIColor.label))
+                                        .font(AppTypography.largeTitle)
+                                        .foregroundColor(AppColors.primaryText)
 
                                     Text(manualCalories != nil ? "manual override" : "calories per day")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(manualCalories != nil ? Color.orange : Color(UIColor.tertiaryLabel))
+                                        .font(AppTypography.smallCaption)
+                                        .foregroundColor(manualCalories != nil ? AppColors.warning : AppColors.tertiaryText)
                                 }
 
                                 Spacer()
 
-                                HStack(spacing: 12) {
+                                HStack(spacing: AppSpacing.sm) {
                                     if manualCalories != nil {
                                         Button(action: {
                                             withAnimation(.easeInOut(duration: 0.2)) {
@@ -104,12 +104,12 @@ struct EditProfileView: View {
                                             HapticManager.shared.light()
                                         }) {
                                             Image(systemName: "arrow.counterclockwise")
-                                                .font(.system(size: 18, weight: .medium))
-                                                .foregroundColor(.orange)
-                                                .frame(width: 40, height: 40)
+                                                .font(AppTypography.bodyMedium)
+                                                .foregroundColor(AppColors.warning)
+                                                .frame(width: AppSpacing.xxxl, height: AppSpacing.xxxl)
                                                 .background(
                                                     Circle()
-                                                        .fill(Color.orange.opacity(0.15))
+                                                        .fill(AppColors.warning.opacity(0.15))
                                                 )
                                         }
                                     }
@@ -119,9 +119,9 @@ struct EditProfileView: View {
                                         HapticManager.shared.light()
                                     }) {
                                         Image(systemName: "pencil")
-                                            .font(.system(size: 18, weight: .medium))
-                                            .foregroundColor(Color(UIColor.label))
-                                            .frame(width: 40, height: 40)
+                                            .font(AppTypography.bodyMedium)
+                                            .foregroundColor(AppColors.primaryText)
+                                            .frame(width: AppSpacing.xxxl, height: AppSpacing.xxxl)
                                             .background(
                                                 Circle()
                                                     .fill(Color(UIColor.systemGray5))
@@ -129,15 +129,15 @@ struct EditProfileView: View {
                                     }
                                 }
                             }
-                            .padding(20)
+                            .padding(AppSpacing.lg)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
+                                RoundedRectangle(cornerRadius: AppCornerRadius.sm)
                                     .fill(Color(UIColor.systemGray6))
                             )
                         }
 
-                        VStack(spacing: 12) {
-                            HStack(spacing: 12) {
+                        VStack(spacing: AppSpacing.sm) {
+                            HStack(spacing: AppSpacing.sm) {
                                 MacroCard(
                                     title: "Carbs",
                                     percentage: currentCarbsPercent,
@@ -182,24 +182,24 @@ struct EditProfileView: View {
                                         }
                                         HapticManager.shared.light()
                                     }) {
-                                        HStack(spacing: 6) {
+                                        HStack(spacing: AppSpacing.xs) {
                                             Image(systemName: "arrow.counterclockwise")
-                                                .font(.system(size: 12))
+                                                .font(AppTypography.smallCaption)
                                             Text("Reset to recommended")
-                                                .font(.system(size: 13, weight: .medium))
+                                                .font(AppTypography.smallCaptionMedium)
                                         }
-                                        .foregroundColor(.orange)
+                                        .foregroundColor(AppColors.warning)
                                     }
                                     Spacer()
                                 } else {
-                                    HStack(spacing: 6) {
+                                    HStack(spacing: AppSpacing.xs) {
                                         Image(systemName: "info.circle")
-                                            .font(.system(size: 12))
-                                            .foregroundColor(Color(UIColor.tertiaryLabel))
+                                            .font(AppTypography.smallCaption)
+                                            .foregroundColor(AppColors.tertiaryText)
 
                                         Text("Recommended for \(goal.displayName)")
-                                            .font(.system(size: 13))
-                                            .foregroundColor(Color(UIColor.secondaryLabel))
+                                            .font(AppTypography.smallCaption)
+                                            .foregroundColor(AppColors.secondaryText)
                                     }
                                     Spacer()
                                 }
@@ -207,7 +207,7 @@ struct EditProfileView: View {
                         }
 
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: AppSpacing.sm) {
                             ForEach(Goal.allCases, id: \.self) { goalOption in
                                 SelectableCard(
                                     title: goalOption.displayName,
@@ -226,10 +226,10 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         FormSectionHeader(title: "Activity Level")
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: AppSpacing.sm) {
                             ForEach(ActivityLevel.allCases, id: \.self) { level in
                                 SelectableCard(
                                     title: level.displayName,
@@ -243,10 +243,10 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         FormSectionHeader(title: "Units")
 
-                        HStack(spacing: 12) {
+                        HStack(spacing: AppSpacing.sm) {
                             TogglePill(
                                 title: "Metric",
                                 isSelected: unitsPreference == .metric,
@@ -271,10 +271,10 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         FormSectionHeader(title: "Sex")
 
-                        HStack(spacing: 12) {
+                        HStack(spacing: AppSpacing.sm) {
                             TogglePill(
                                 title: "Male",
                                 isSelected: sex == .male,
@@ -297,7 +297,7 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         FormSectionHeader(title: "Age")
 
                         FormPickerButton(label: "\(age) years") {
@@ -306,7 +306,7 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         FormSectionHeader(title: "Height")
 
                         FormPickerButton(
@@ -317,7 +317,7 @@ struct EditProfileView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         FormSectionHeader(title: "Weight")
 
                         FormPickerButton(
@@ -343,7 +343,7 @@ struct EditProfileView: View {
 
                 Spacer(minLength: 100)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, AppSpacing.lg)
         }
         .background(Color(UIColor.systemBackground))
         .sheet(isPresented: $showCaloriePicker) {
@@ -586,25 +586,25 @@ struct MacroCard: View {
     let onEdit: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: AppSpacing.xs) {
             Text(title)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(AppTypography.smallCaptionMedium)
+                .foregroundColor(AppColors.secondaryText)
 
             Text("\(percentage)%")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(AppTypography.title2)
                 .foregroundColor(color)
 
             Button(action: onEdit) {
                 Image(systemName: "pencil.circle.fill")
-                    .font(.system(size: 20))
+                    .font(AppTypography.title3)
                     .foregroundColor(color)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
+        .padding(.vertical, AppSpacing.md)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
                 .fill(color.opacity(0.1))
         )
     }

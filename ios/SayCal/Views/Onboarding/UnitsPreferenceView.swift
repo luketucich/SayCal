@@ -6,13 +6,13 @@ struct UnitsPreferenceView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
                     OnboardingHeader(
                         title: "Choose your units",
                         subtitle: "Select your preferred measurement system"
                     )
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: AppSpacing.sm) {
                         UnitCard(
                             title: "Metric",
                             subtitle: "Kilograms • Centimeters",
@@ -36,7 +36,7 @@ struct UnitsPreferenceView: View {
                     
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, AppSpacing.lg)
             }
 
             OnboardingBottomBar(
