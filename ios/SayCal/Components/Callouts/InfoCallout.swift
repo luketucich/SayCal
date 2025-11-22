@@ -4,22 +4,23 @@ struct InfoCallout: View {
     let message: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .top, spacing: Theme.Spacing.xs) {
             Image(systemName: "info.circle")
                 .font(.system(size: 14))
-                .foregroundColor(Color(UIColor.tertiaryLabel))
+                .foregroundColor(Theme.Colors.accent)
 
             Text(message)
-                .font(.system(size: 13))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(Theme.Typography.caption)
+                .foregroundColor(Theme.Colors.secondaryLabel)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
+        .padding(Theme.Spacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(UIColor.systemGray6))
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                .fill(Theme.Colors.accentLight)
         )
+        .cardShadow()
     }
 }
 

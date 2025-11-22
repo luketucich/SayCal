@@ -36,9 +36,9 @@ struct CaloriesPieChart: View {
     
     private var macroData: [(name: String, value: Double, color: Color)] {
         [
-            ("Protein", proteinPercent, .blue),
-            ("Carbs", carbsPercent, .green),
-            ("Fats", fatsPercent, .orange)
+            ("Protein", proteinPercent, Theme.Colors.protein),
+            ("Carbs", carbsPercent, Theme.Colors.carbs),
+            ("Fats", fatsPercent, Theme.Colors.fats)
         ]
     }
     
@@ -73,8 +73,8 @@ struct CaloriesPieChart: View {
                 .stroke(
                     LinearGradient(
                         colors: [
-                            Color.blue,
-                            Color.purple
+                            Theme.Colors.accent.opacity(0.8),
+                            Theme.Colors.accent
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -111,14 +111,14 @@ struct CaloriesPieChart: View {
                 VStack(spacing: size * 0.015) {
                     // Grams remaining
                     Text("\(gramsRemaining(for: index))g")
-                        .font(.system(size: size * 0.06, weight: .semibold, design: .rounded))
+                        .font(Theme.Typography.number(size: size * 0.06, weight: .semibold))
                         .foregroundStyle(macro.color)
-                    
+
                     // Label
                     Text(macro.name)
                         .font(.system(size: size * 0.038, weight: .regular))
-                        .foregroundStyle(Color.secondary)
-                    
+                        .foregroundStyle(Theme.Colors.secondaryLabel)
+
                     // Small indicator bar
                     RoundedRectangle(cornerRadius: 2)
                         .fill(macro.color)
@@ -127,9 +127,10 @@ struct CaloriesPieChart: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, size * 0.04)
                 .background(
-                    RoundedRectangle(cornerRadius: size * 0.025)
-                        .fill(Color.gray.tertiary)
+                    RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                        .fill(macro.color.opacity(0.1))
                 )
+                .cardShadow()
             }
         }
         .padding(.horizontal, size * 0.05)

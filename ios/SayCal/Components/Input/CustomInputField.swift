@@ -9,19 +9,20 @@ struct CustomInputField: View {
 
     var body: some View {
         TextField(placeholder, text: $text)
-            .font(.system(size: 14))
-            .foregroundColor(Color(UIColor.label))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .font(Theme.Typography.caption)
+            .foregroundColor(Theme.Colors.label)
+            .padding(.horizontal, Theme.Spacing.sm)
+            .padding(.vertical, Theme.Spacing.xs + 2)
             .frame(maxWidth: 160)
             .background(
                 Capsule()
-                    .fill(Color(UIColor.systemBackground))
-                    .overlay(
-                        Capsule()
-                            .stroke(Color(UIColor.label), lineWidth: 1.5)
-                    )
+                    .fill(Theme.Colors.background)
             )
+            .overlay(
+                Capsule()
+                    .stroke(Theme.Colors.accent, lineWidth: Theme.BorderWidth.standard)
+            )
+            .cardShadow()
             .focused($isFocused)
             .onSubmit(onSubmit)
     }
