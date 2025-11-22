@@ -6,16 +6,13 @@ Deno.serve(async (req) => {
   try {
     const { audio, format = "webm", timestamp } = await req.json();
 
-    // Decode base64 audio
     const audioBytes = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0));
 
-    // Prepare FormData for OpenAI Whisper API
     const formData = new FormData();
     const audioBlob = new Blob([audioBytes], { type: `audio/${format}` });
     formData.append("file", audioBlob, `audio.${format}`);
     formData.append("model", "whisper-1");
 
-    // Call OpenAI Transcription API
     const response = await fetch(
       "https://api.openai.com/v1/audio/transcriptions",
       {

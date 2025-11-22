@@ -3,12 +3,10 @@ import AVFoundation
 import Combine
 import Supabase
 
-// MARK: - Transcription Response
 struct TranscriptionResponse: Codable {
     let text: String
 }
 
-// MARK: - Processing State
 enum ProcessingState {
     case idle
     case recording
@@ -28,7 +26,6 @@ enum ProcessingState {
     }
 }
 
-// MARK: - Audio Recorder
 class AudioRecorder: NSObject, ObservableObject {
     @Published var state: ProcessingState = .idle
     @Published var currentAudioLevel: CGFloat = 1.0
@@ -37,8 +34,7 @@ class AudioRecorder: NSObject, ObservableObject {
     private var timer: Timer?
     private var recordingURL: URL?
     private var channelTask: Task<Void, Never>?
-    
-    // Computed property for display text
+
     var displayText: String {
         switch state {
         case .idle:
@@ -57,8 +53,7 @@ class AudioRecorder: NSObject, ObservableObject {
             return "Error: \(message)"
         }
     }
-    
-    // Helper computed properties
+
     var isRecording: Bool {
         if case .recording = state { return true }
         return false
@@ -72,8 +67,7 @@ class AudioRecorder: NSObject, ObservableObject {
         super.init()
         setupAudioSession()
     }
-    
-    // MARK: - Audio Session Setup
+
     func setupAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -83,8 +77,7 @@ class AudioRecorder: NSObject, ObservableObject {
             print("❌ Failed to set up audio session: \(error)")
         }
     }
-    
-    // MARK: - Permission Request
+
     func requestPermission() {
         AVAudioApplication.requestRecordPermission { granted in
             if granted {
@@ -94,8 +87,7 @@ class AudioRecorder: NSObject, ObservableObject {
             }
         }
     }
-    
-    // MARK: - Start Recording
+
     func startRecording() {
         HapticManager.shared.medium()
         state = .recording
@@ -125,8 +117,7 @@ class AudioRecorder: NSObject, ObservableObject {
             state = .error(message: "Failed to start recording")
         }
     }
-    
-    // MARK: - Stop Recording
+
     func stopRecording() {
         HapticManager.shared.medium()
         
@@ -143,8 +134,7 @@ class AudioRecorder: NSObject, ObservableObject {
             }
         }
     }
-    
-    // MARK: - Upload Audio to Supabase
+
     private func uploadAudioToSupabase(_ fileURL: URL) async {
         do {
             let audioData = try Data(contentsOf: fileURL)
@@ -172,8 +162,7 @@ class AudioRecorder: NSObject, ObservableObject {
             
             print("✅ Transcription: \(transcription)")
             try? FileManager.default.removeItem(at: fileURL)
-            
-            // Calculate nutrition with Realtime streaming
+
             await calculateNutritionWithRealtime(transcription: transcription)
             
         } catch let error as FunctionsError {
@@ -196,8 +185,7 @@ class AudioRecorder: NSObject, ObservableObject {
             }
         }
     }
-    
-    // MARK: - Update Audio Level
+
     private func updateAudioLevel() {
         guard let recorder = audioRecorder else { return }
         
@@ -210,12 +198,10 @@ class AudioRecorder: NSObject, ObservableObject {
             self.currentAudioLevel = scale
         }
     }
-    
-    // MARK: - Calculate Nutrition with Realtime
+
     private func calculateNutritionWithRealtime(transcription: String) async {
         let trimmedText = transcription.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Validation
+
         guard !trimmedText.isEmpty, trimmedText.count >= 5 else {
             print("⚠️ Transcription too short")
             DispatchQueue.main.async {
@@ -240,19 +226,14 @@ class AudioRecorder: NSObject, ObservableObject {
             }
             return
         }
-        
-        // Create unique channel ID
+
         let channelId = "nutrition-\(UUID().uuidString)"
         print("📡 Created channel: \(channelId)")
-        
-        // Create Realtime channel - THIS IS THE CORRECT API
+
         let channel = SupabaseManager.client.channel(channelId)
-        
-        // Get broadcast streams for our events
         let deltaStream = channel.broadcastStream(event: "nutrition_delta")
         let completeStream = channel.broadcastStream(event: "nutrition_complete")
-        
-        // Subscribe to the channel
+
         do {
             try await channel.subscribeWithError()
             print("✅ Subscribed to channel: \(channelId)")
@@ -263,50 +244,23 @@ class AudioRecorder: NSObject, ObservableObject {
             }
             return
         }
-        
-        // Listen for delta messages
+
         channelTask = Task {
-            print("👂 Listening for nutrition_delta...")
             for await message in deltaStream {
-                print("📥 Delta message: \(message)")
-                
-                // Debug: Check what we get from message["payload"]
-                if let payloadAny = message["payload"] {
-                    print("🔍 payload type: \(type(of: payloadAny))")
-                    print("🔍 payload value: \(payloadAny)")
-                    
-                    // Try to get the object
-                    if let payload = payloadAny.objectValue {
-                        print("✅ Got payload object: \(payload)")
-                        
-                        if let fullText = payload["fullText"]?.stringValue {
-                            print("✅ Got fullText: \(fullText.prefix(50))...")
-                            DispatchQueue.main.async {
-                                self.state = .streamingNutrition(
-                                    transcription: trimmedText,
-                                    partialInfo: fullText
-                                )
-                            }
-                            print("📝 Updated UI with \(fullText.count) characters")
-                        } else {
-                            print("❌ Could not extract fullText from payload")
-                        }
-                    } else {
-                        print("❌ Could not get objectValue from payload")
+                if let payload = message["payload"]?.objectValue,
+                   let fullText = payload["fullText"]?.stringValue {
+                    DispatchQueue.main.async {
+                        self.state = .streamingNutrition(
+                            transcription: trimmedText,
+                            partialInfo: fullText
+                        )
                     }
-                } else {
-                    print("❌ No payload in message")
                 }
             }
         }
-        
-        // Listen for completion
+
         Task {
-            print("👂 Listening for nutrition_complete...")
             for await message in completeStream {
-                print("📥 Complete message: \(message)")
-                
-                // The actual data is inside message["payload"]
                 if let payload = message["payload"]?.objectValue,
                    let fullText = payload["fullText"]?.stringValue {
                     DispatchQueue.main.async {
@@ -314,16 +268,14 @@ class AudioRecorder: NSObject, ObservableObject {
                         HapticManager.shared.success()
                     }
                     print("✅ Nutrition complete!")
-                    
-                    // Cleanup
+
                     await channel.unsubscribe()
                     self.channelTask?.cancel()
                     self.channelTask = nil
                 }
             }
         }
-        
-        // Call edge function with channel ID
+
         do {
             print("🧮 Calling edge function...")
             
