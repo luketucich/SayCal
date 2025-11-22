@@ -12,21 +12,21 @@ struct UnitsPreferenceView: View {
                         subtitle: "Select your preferred measurement system"
                     )
 
-                    VStack(spacing: AppSpacing.sm) {
-                        UnitCard(
+                    HStack(spacing: AppSpacing.sm) {
+                        TogglePill(
                             title: "Metric",
-                            subtitle: "Kilograms • Centimeters",
-                            isSelected: state.unitsPreference == .metric
+                            isSelected: state.unitsPreference == .metric,
+                            style: .rounded
                         ) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 state.unitsPreference = .metric
                             }
                         }
-                        
-                        UnitCard(
+
+                        TogglePill(
                             title: "Imperial",
-                            subtitle: "Pounds • Feet & Inches",
-                            isSelected: state.unitsPreference == .imperial
+                            isSelected: state.unitsPreference == .imperial,
+                            style: .rounded
                         ) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 state.unitsPreference = .imperial

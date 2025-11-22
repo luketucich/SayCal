@@ -61,10 +61,10 @@ struct RecordingOverlay: View {
         }
         .padding(AppSpacing.lg)
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.md)
+            RoundedRectangle(cornerRadius: AppCornerRadius.lg)
                 .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                    RoundedRectangle(cornerRadius: AppCornerRadius.lg)
                         .stroke(Color(UIColor.separator).opacity(0.5), lineWidth: 1)
                 )
                 .shadow(color: AppShadow.large.color, radius: AppShadow.large.radius, x: AppShadow.large.x, y: AppShadow.large.y)

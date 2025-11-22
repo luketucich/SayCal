@@ -10,8 +10,8 @@ struct CaloriesPieChart: View {
     var fatsColor: Color = .orange
     var remainingCalories: Int = 1847
 
-    @State private var animateSegments: Bool = false
-    
+    @State private var animateProgress: Bool = false
+
     private var proteinPercent: Double {
         guard let profile = userManager.profile else { return 0.30 }
         return Double(profile.proteinPercent) / 100.0
@@ -30,150 +30,107 @@ struct CaloriesPieChart: View {
     private var totalCalories: Int {
         userManager.profile?.targetCalories ?? 2400
     }
-    
-    private var macroData: [(name: String, value: Double, color: Color)] {
-        [
-            ("Protein", proteinPercent, proteinColor),
-            ("Carbs", carbsPercent, carbsColor),
-            ("Fats", fatsPercent, fatsColor)
-        ]
-    }
-    
-    var body: some View {
-        GeometryReader { geometry in
-            let size = min(geometry.size.width, geometry.size.height)
-            
-            ZStack {
-                // Outer container circle
-                Circle()
-                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-                
-                // Macro segments
-                macroSegments(size: size)
-                
-                // Inner ring
-                innerRing(size: size)
-                
-                // Center content
-                centerContent(size: size)
-                
-                // Macro labels
-                macroLabels(size: size)
-            }
-            .frame(width: size, height: size)
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.75)) {
-                animateSegments = true
-            }
-        }
-    }
-    
-    // MARK: - Macro Segments
-    private func macroSegments(size: CGFloat) -> some View {
-        ZStack {
-            ForEach(Array(macroData.enumerated()), id: \.offset) { index, macro in
-                let start = startAngle(for: index)
-                let end = start + Angle.degrees(macro.value * 360)
-                
-                Circle()
-                    .trim(
-                        from: start.degrees / 360,
-                        to: animateSegments ? end.degrees / 360 : start.degrees / 360
-                    )
-                    .stroke(
-                        macro.color,
-                        style: StrokeStyle(
-                            lineWidth: size * 0.08,
-                            lineCap: .round
-                        )
-                    )
-                    .rotationEffect(.degrees(-90))
-            }
-        }
-        .padding(size * 0.12)
-    }
-    
-    // MARK: - Inner Ring
-    private func innerRing(size: CGFloat) -> some View {
-        Circle()
-            .stroke(
-                Color.primary.opacity(0.1),
-                style: StrokeStyle(
-                    lineWidth: 1,
-                    lineCap: .round
-                )
-            )
-            .padding(size * 0.21)
-    }
-    
-    // MARK: - Center Content
-    private func centerContent(size: CGFloat) -> some View {
-        VStack(spacing: size * 0.02) {
-            Text("\(remainingCalories)")
-                .font(.system(size: size * 0.18, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.primary)
-            
-            Text("calories left")
-                .font(.system(size: size * 0.055, weight: .medium))
-                .foregroundStyle(Color.primary.opacity(0.6))
-            
-            Text("of \(totalCalories)")
-                .font(.system(size: size * 0.045, weight: .medium))
-                .foregroundStyle(Color.primary.opacity(0.4))
-        }
-    }
-    
-    // MARK: - Macro Labels
-    private func macroLabels(size: CGFloat) -> some View {
-        ZStack {
-            ForEach(Array(macroData.enumerated()), id: \.offset) { index, macro in
-                let angle = midAngle(for: index)
-                let radius = size / 2 - size * 0.045
-                
-                HStack(spacing: size * 0.02) {
-                    Circle()
-                        .fill(macro.color)
-                        .frame(width: size * 0.025, height: size * 0.025)
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(macro.name)
-                            .font(.system(size: size * 0.04, weight: .medium))
-                            .foregroundStyle(Color.primary)
-                        
-                        Text("\(Int(macro.value * 100))%")
-                            .font(.system(size: size * 0.035, weight: .regular))
-                            .foregroundStyle(Color.primary.opacity(0.6))
-                    }
-                }
-                .padding(.horizontal, size * 0.025)
-                .padding(.vertical, size * 0.02)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(colorScheme == .dark ? Color.black : Color.white)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-                        )
-                )
-                .offset(
-                    x: cos(angle.radians - .pi / 2) * radius,
-                    y: sin(angle.radians - .pi / 2) * radius
-                )
-                .opacity(animateSegments ? 1 : 0)
-                .scaleEffect(animateSegments ? 1 : 0.8)
-            }
-        }
-    }
-    
-    // MARK: - Helpers
-    private func startAngle(for index: Int) -> Angle {
-        let previous = macroData.prefix(index).reduce(0.0) { $0 + $1.value }
-        return Angle.degrees(previous * 360)
+
+    private var consumedCalories: Int {
+        totalCalories - remainingCalories
     }
 
-    private func midAngle(for index: Int) -> Angle {
-        Angle.degrees(startAngle(for: index).degrees + macroData[index].value * 180)
+    private var progressPercent: Double {
+        guard totalCalories > 0 else { return 0 }
+        return Double(consumedCalories) / Double(totalCalories)
+    }
+
+    var body: some View {
+        VStack(spacing: AppSpacing.lg) {
+            // Circular progress indicator
+            ZStack {
+                // Background circle
+                Circle()
+                    .stroke(Color(UIColor.systemGray5), lineWidth: 20)
+
+                // Progress circle
+                Circle()
+                    .trim(from: 0, to: animateProgress ? progressPercent : 0)
+                    .stroke(
+                        AppColors.primaryText,
+                        style: StrokeStyle(lineWidth: 20, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .animation(.spring(response: 0.8, dampingFraction: 0.75), value: animateProgress)
+
+                // Center content
+                VStack(spacing: AppSpacing.xs) {
+                    Text("\(remainingCalories)")
+                        .font(AppTypography.displayLarge)
+                        .foregroundColor(AppColors.primaryText)
+
+                    Text("calories left")
+                        .font(AppTypography.caption)
+                        .foregroundColor(AppColors.secondaryText)
+
+                    Text("of \(totalCalories)")
+                        .font(AppTypography.smallCaption)
+                        .foregroundColor(AppColors.tertiaryText)
+                }
+            }
+            .frame(width: 220, height: 220)
+
+            // Macro breakdown
+            HStack(spacing: AppSpacing.sm) {
+                MacroIndicator(
+                    name: "Protein",
+                    percentage: Int(proteinPercent * 100),
+                    color: proteinColor
+                )
+
+                MacroIndicator(
+                    name: "Carbs",
+                    percentage: Int(carbsPercent * 100),
+                    color: carbsColor
+                )
+
+                MacroIndicator(
+                    name: "Fats",
+                    percentage: Int(fatsPercent * 100),
+                    color: fatsColor
+                )
+            }
+        }
+        .onAppear {
+            animateProgress = true
+        }
+    }
+}
+
+struct MacroIndicator: View {
+    let name: String
+    let percentage: Int
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: AppSpacing.xs) {
+            Circle()
+                .fill(color)
+                .frame(width: 10, height: 10)
+
+            Text("\(percentage)%")
+                .font(AppTypography.bodyMedium)
+                .foregroundColor(AppColors.primaryText)
+
+            Text(name)
+                .font(AppTypography.smallCaption)
+                .foregroundColor(AppColors.secondaryText)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, AppSpacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: AppCornerRadius.lg)
+                .fill(Color(UIColor.systemBackground))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppCornerRadius.lg)
+                        .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
+                )
+        )
     }
 }
 
@@ -181,6 +138,6 @@ struct CaloriesPieChart: View {
     CaloriesPieChart(
         remainingCalories: 1847
     )
-    .frame(width: 300, height: 300)
+    .environmentObject(UserManager.shared)
     .padding()
 }

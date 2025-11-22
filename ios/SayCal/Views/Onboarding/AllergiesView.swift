@@ -70,7 +70,8 @@ struct AllergiesView: View {
                         ForEach(allergies, id: \.self) { allergy in
                             TogglePill(
                                 title: allergy.replacingOccurrences(of: "_", with: " ").capitalized,
-                                isSelected: state.selectedAllergies.contains(allergy)
+                                isSelected: state.selectedAllergies.contains(allergy),
+                                style: .rounded
                             ) {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     if state.selectedAllergies.contains(allergy) {

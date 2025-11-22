@@ -36,9 +36,9 @@ struct GoalsView: View {
                                 .fill(Color(UIColor.systemGray6))
                         )
 
-                        HStack(spacing: AppSpacing.sm) {
-                            let macros = UserManager.calculateMacroPercentages(for: state.goal)
+                        let macros = UserManager.calculateMacroPercentages(for: state.goal)
 
+                        HStack(spacing: AppSpacing.md) {
                             OnboardingMacroCard(
                                 title: "Carbs",
                                 percentage: macros.carbs,
@@ -103,20 +103,28 @@ struct OnboardingMacroCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: AppSpacing.xxs) {
+        VStack(spacing: AppSpacing.xs) {
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+
+            Text("\(percentage)%")
+                .font(AppTypography.title2)
+                .foregroundColor(AppColors.primaryText)
+
             Text(title)
                 .font(AppTypography.smallCaptionMedium)
                 .foregroundColor(AppColors.secondaryText)
-
-            Text("\(percentage)%")
-                .font(AppTypography.title3)
-                .foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, AppSpacing.sm)
+        .padding(.vertical, AppSpacing.lg)
         .background(
-            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
-                .fill(color.opacity(0.1))
+            RoundedRectangle(cornerRadius: AppCornerRadius.lg)
+                .fill(Color(UIColor.systemBackground))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppCornerRadius.lg)
+                        .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
+                )
         )
     }
 }

@@ -55,20 +55,24 @@ struct PhysicalStatsView: View {
                             } label: {
                                 HStack {
                                     Text("\(state.age) years")
-                                        .font(AppTypography.body)
+                                        .font(AppTypography.bodyMedium)
                                         .foregroundColor(AppColors.primaryText)
 
                                     Spacer()
 
                                     Image(systemName: "chevron.down")
-                                        .font(AppTypography.smallCaption)
-                                        .foregroundColor(AppColors.tertiaryText)
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(AppColors.secondaryText)
                                 }
-                                .padding(.horizontal, AppSpacing.md)
+                                .padding(.horizontal, AppSpacing.lg)
                                 .padding(.vertical, AppSpacing.md)
                                 .background(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.sm)
-                                        .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                        .fill(Color(UIColor.systemBackground))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                                .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
+                                        )
                                 )
                             }
                         }
@@ -85,25 +89,29 @@ struct PhysicalStatsView: View {
                                 HStack {
                                     if state.unitsPreference == .metric {
                                         Text("\(state.heightCm) cm")
-                                            .font(AppTypography.body)
+                                            .font(AppTypography.bodyMedium)
                                             .foregroundColor(AppColors.primaryText)
                                     } else {
                                         Text("\(state.heightFeet)' \(state.heightInches)\"")
-                                            .font(AppTypography.body)
+                                            .font(AppTypography.bodyMedium)
                                             .foregroundColor(AppColors.primaryText)
                                     }
 
                                     Spacer()
 
                                     Image(systemName: "chevron.down")
-                                        .font(AppTypography.smallCaption)
-                                        .foregroundColor(AppColors.tertiaryText)
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(AppColors.secondaryText)
                                 }
-                                .padding(.horizontal, AppSpacing.md)
+                                .padding(.horizontal, AppSpacing.lg)
                                 .padding(.vertical, AppSpacing.md)
                                 .background(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.sm)
-                                        .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                        .fill(Color(UIColor.systemBackground))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                                .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
+                                        )
                                 )
                             }
                         }
@@ -120,25 +128,29 @@ struct PhysicalStatsView: View {
                                 HStack {
                                     if state.unitsPreference == .metric {
                                         Text(String(format: "%.1f kg", state.weightKg))
-                                            .font(AppTypography.body)
+                                            .font(AppTypography.bodyMedium)
                                             .foregroundColor(AppColors.primaryText)
                                     } else {
                                         Text("\(Int(state.weightLbs)) lbs")
-                                            .font(AppTypography.body)
+                                            .font(AppTypography.bodyMedium)
                                             .foregroundColor(AppColors.primaryText)
                                     }
 
                                     Spacer()
 
                                     Image(systemName: "chevron.down")
-                                        .font(AppTypography.smallCaption)
-                                        .foregroundColor(AppColors.tertiaryText)
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(AppColors.secondaryText)
                                 }
-                                .padding(.horizontal, AppSpacing.md)
+                                .padding(.horizontal, AppSpacing.lg)
                                 .padding(.vertical, AppSpacing.md)
                                 .background(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.sm)
-                                        .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                        .fill(Color(UIColor.systemBackground))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                                                .stroke(Color(UIColor.systemGray5), lineWidth: 1.5)
+                                        )
                                 )
                             }
                         }
