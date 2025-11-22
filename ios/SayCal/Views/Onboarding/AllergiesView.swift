@@ -115,7 +115,7 @@ struct AllergiesView: View {
                 }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(AppColors.lightBackground)
         .onAppear {
             let predefinedAllergies = Set(DietaryOptions.commonAllergies)
             let customAllergies = state.selectedAllergies.filter { !predefinedAllergies.contains($0) }

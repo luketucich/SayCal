@@ -20,7 +20,7 @@ struct AppleAuthButton: View {
         )
         .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
         .frame(height: 56)
-        .cornerRadius(8)
+        .cornerRadius(AppCornerRadius.pill)
             
             if let errorMessage {
                 Text(errorMessage)

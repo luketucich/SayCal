@@ -20,16 +20,16 @@ struct GoogleAuthButton: View {
                 HStack(spacing: 8) {
                     Text("G")
                         .font(.system(size: 20, weight: .semibold))
-                    
+
                     Text("Sign in with Google")
-                        .font(.system(size: 22, weight: .medium))
+                        .font(AppTypography.bodyMedium)
                 }
-                .foregroundColor(.primary)
+                .foregroundColor(AppColors.primaryText)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: AppCornerRadius.pill)
+                        .stroke(AppColors.primaryText, lineWidth: 1.5)
                 )
             }
             

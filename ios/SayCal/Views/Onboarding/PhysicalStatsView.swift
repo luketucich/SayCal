@@ -155,7 +155,7 @@ struct PhysicalStatsView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(AppColors.lightBackground)
         .sheet(isPresented: $showAgePicker) {
             PickerSheet(
                 title: "Select Age",

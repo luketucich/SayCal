@@ -57,29 +57,29 @@ struct RecordingButton: View {
     // MARK: - Computed Properties
     
     private var buttonSize: CGFloat {
-        audioRecorder.isRecording ? 80 : 64
+        audioRecorder.isRecording ? 88 : 72
     }
-    
+
     private var iconSize: CGFloat {
-        audioRecorder.isRecording ? 30 : 24
+        audioRecorder.isRecording ? 32 : 28
     }
-    
+
     private var iconName: String {
         audioRecorder.isRecording ? "mic.fill" : "mic.fill"
     }
-    
+
     private var gradientColors: [Color] {
         if audioRecorder.isRecording {
-            return [Color.red.opacity(0.9), Color.red]
+            return [Color.red, Color.red.opacity(0.8)]
         } else {
-            return [Color.blue.opacity(0.9), Color.blue]
+            return [Color(UIColor.label), Color(UIColor.label).opacity(0.9)]
         }
     }
-    
+
     private var shadowColor: Color {
         audioRecorder.isRecording
-            ? Color.red.opacity(0.4)
-            : Color.blue.opacity(0.3)
+            ? Color.red.opacity(0.3)
+            : Color.black.opacity(0.15)
     }
 }
 
