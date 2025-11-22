@@ -7,13 +7,14 @@ struct MacroCard: View {
     let onEdit: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Theme.Spacing.xs) {
             Text(title)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(Theme.Typography.caption)
+                .fontWeight(.medium)
+                .foregroundColor(Theme.Colors.secondaryLabel)
 
             Text("\(percentage)%")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(Theme.Typography.number(size: 24, weight: .bold))
                 .foregroundColor(color)
 
             Button(action: onEdit) {
@@ -23,10 +24,11 @@ struct MacroCard: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
+        .padding(.vertical, Theme.Spacing.md)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
                 .fill(color.opacity(0.1))
         )
+        .cardShadow()
     }
 }

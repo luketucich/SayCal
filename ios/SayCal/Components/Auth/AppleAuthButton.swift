@@ -19,14 +19,15 @@ struct AppleAuthButton: View {
             }
         )
         .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-        .frame(height: 56)
-        .cornerRadius(8)
-            
+        .frame(height: Theme.ButtonSize.large)
+        .cornerRadius(Theme.CornerRadius.medium)
+        .mediumShadow()
+
             if let errorMessage {
                 Text(errorMessage)
-                    .foregroundColor(.red)
-                    .font(.caption)
-                    .padding(.top, 4)
+                    .foregroundColor(Theme.Colors.error)
+                    .font(Theme.Typography.small)
+                    .padding(.top, Theme.Spacing.xxs)
             }
         }
     }

@@ -8,23 +8,24 @@ struct WelcomeView: View {
         ZStack {
             LinearGradient(
                 colors: colorScheme == .dark ? [
-                    Color(red: 0.15, green: 0.1, blue: 0.3),
-                    Color(red: 0.25, green: 0.15, blue: 0.35),
-                    Color(red: 0.1, green: 0.2, blue: 0.3)
+                    Theme.Colors.accent.opacity(0.3),
+                    Theme.Colors.accent.opacity(0.4),
+                    Theme.Colors.accent.opacity(0.2)
                 ] : [
-                    Color(red: 0.9, green: 0.7, blue: 0.95),
-                    Color(red: 0.7, green: 0.85, blue: 1.0),
-                    Color(red: 0.95, green: 0.8, blue: 0.7)
+                    Theme.Colors.accent.opacity(0.15),
+                    Theme.Colors.accent.opacity(0.1),
+                    Theme.Colors.accent.opacity(0.05)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            .background(Theme.Colors.background)
             .ignoresSafeArea()
-    
+
             VStack(spacing: 0) {
                 Spacer()
 
-                VStack(spacing: 16) {
+                VStack(spacing: Theme.Spacing.md) {
                     AppleAuthButton()
 
                     GoogleAuthButton()
@@ -34,13 +35,13 @@ struct WelcomeView: View {
                         showEmailAuth = true
                     } label: {
                         Text("Use email instead")
-                            .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .font(Theme.Typography.headline)
+                            .foregroundColor(Theme.Colors.label)
                     }
-                    .padding(.top, 4)
+                    .padding(.top, Theme.Spacing.xxs)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                .padding(.horizontal, Theme.Spacing.xl)
+                .padding(.bottom, Theme.Spacing.xxxl)
             }
         }
         .sheet(isPresented: $showEmailAuth) {

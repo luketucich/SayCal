@@ -23,28 +23,30 @@ struct SelectableCard: View {
             HapticManager.shared.light()
             action()
         } label: {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(Theme.Typography.body)
+                    .fontWeight(.medium)
+                    .foregroundColor(Theme.Colors.label)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(Theme.Typography.caption)
+                        .foregroundColor(Theme.Colors.secondaryLabel)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.vertical, Theme.Spacing.sm + 2)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(UIColor.systemBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
-                    )
+                RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                    .fill(isSelected ? Theme.Colors.accentLight : Theme.Colors.background)
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                    .stroke(isSelected ? Theme.Colors.accent : Theme.Colors.borderLight, lineWidth: isSelected ? Theme.BorderWidth.thick : Theme.BorderWidth.thin)
+            )
+            .cardShadow()
         }
         .buttonStyle(.plain)
     }
@@ -61,18 +63,20 @@ struct SelectablePill: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(Color(UIColor.label))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+                .font(Theme.Typography.callout)
+                .fontWeight(isSelected ? .semibold : .regular)
+                .foregroundColor(isSelected ? .white : Theme.Colors.label)
+                .padding(.horizontal, Theme.Spacing.lg)
+                .padding(.vertical, Theme.Spacing.xs + 2)
                 .background(
                     Capsule()
-                        .fill(Color(UIColor.systemBackground))
-                        .overlay(
-                            Capsule()
-                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
-                        )
+                        .fill(isSelected ? Theme.Colors.accent : Theme.Colors.background)
                 )
+                .overlay(
+                    Capsule()
+                        .stroke(isSelected ? Theme.Colors.accent : Theme.Colors.borderLight, lineWidth: isSelected ? 0 : Theme.BorderWidth.thin)
+                )
+                .cardShadow()
         }
         .buttonStyle(.plain)
     }
@@ -81,7 +85,7 @@ struct SelectablePill: View {
 struct TabSelector: View {
     let options: [String]
     @Binding var selectedOption: String
-    
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(options, id: \.self) { option in
@@ -90,21 +94,22 @@ struct TabSelector: View {
                     selectedOption = option
                 } label: {
                     Text(option)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(Theme.Typography.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(selectedOption == option ? Theme.Colors.accent : Theme.Colors.label)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, Theme.Spacing.xs)
                         .background(
                             VStack(spacing: 0) {
                                 Spacer()
                                 if selectedOption == option {
                                     Rectangle()
-                                        .fill(Color(UIColor.label))
-                                        .frame(height: 2)
+                                        .fill(Theme.Colors.accent)
+                                        .frame(height: 3)
                                 } else {
                                     Rectangle()
                                         .fill(Color.clear)
-                                        .frame(height: 2)
+                                        .frame(height: 3)
                                 }
                             }
                         )

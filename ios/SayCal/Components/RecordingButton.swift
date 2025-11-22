@@ -70,16 +70,16 @@ struct RecordingButton: View {
     
     private var gradientColors: [Color] {
         if audioRecorder.isRecording {
-            return [Color.red.opacity(0.9), Color.red]
+            return [Theme.Colors.error.opacity(0.9), Theme.Colors.error]
         } else {
-            return [Color.blue.opacity(0.9), Color.blue]
+            return [Theme.Colors.accent.opacity(0.9), Theme.Colors.accent]
         }
     }
-    
+
     private var shadowColor: Color {
         audioRecorder.isRecording
-            ? Color.red.opacity(0.4)
-            : Color.blue.opacity(0.3)
+            ? Theme.Colors.error.opacity(0.4)
+            : Theme.Colors.accent.opacity(0.35)
     }
 }
 

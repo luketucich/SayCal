@@ -25,25 +25,23 @@ struct PrimaryButton: View {
         } label: {
             if isLoading {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: Color(UIColor.systemBackground)))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 48)
+                    .frame(height: Theme.ButtonSize.standard)
             } else {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(isEnabled ? Color(UIColor.systemBackground) : Color(UIColor.systemGray3))
+                    .font(Theme.Typography.headline)
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 48)
+                    .frame(height: Theme.ButtonSize.standard)
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isEnabled ? Color(UIColor.label) : Color.clear)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(isEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: 1)
-                )
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                .fill(isEnabled ? Theme.Colors.accent : Theme.Colors.accent.opacity(0.5))
         )
+        .mediumShadow()
+        .opacity(isEnabled ? 1.0 : 0.6)
         .disabled(!isEnabled || isLoading)
     }
 }
@@ -58,15 +56,20 @@ struct SecondaryButton: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(Color(UIColor.label))
+                .font(Theme.Typography.headline)
+                .foregroundColor(Theme.Colors.label)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .frame(height: Theme.ButtonSize.standard)
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color(UIColor.separator), lineWidth: 1)
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                .fill(Theme.Colors.background)
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                .stroke(Theme.Colors.border, lineWidth: Theme.BorderWidth.standard)
+        )
+        .cardShadow()
     }
 }
 
@@ -80,8 +83,8 @@ struct TextButton: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: .regular))
-                .foregroundColor(Color(UIColor.label))
+                .font(Theme.Typography.callout)
+                .foregroundColor(Theme.Colors.secondaryLabel)
                 .underline()
         }
     }
