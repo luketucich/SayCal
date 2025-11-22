@@ -3,18 +3,28 @@ import SwiftUI
 struct OnboardingHeader: View {
     let title: String
     let subtitle: String
+    @State private var animate = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
             Text(title)
-                .font(.system(size: 26, weight: .semibold))
-                .foregroundColor(Color(UIColor.label))
+                .font(DesignSystem.Typography.title1(weight: .bold))
+                .foregroundColor(DesignSystem.Colors.textPrimary)
+                .opacity(animate ? 1 : 0)
+                .offset(y: animate ? 0 : -10)
 
             Text(subtitle)
-                .font(.system(size: 15))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DesignSystem.Typography.body(weight: .regular))
+                .foregroundColor(DesignSystem.Colors.textSecondary)
+                .opacity(animate ? 1 : 0)
+                .offset(y: animate ? 0 : -10)
         }
-        .padding(.top, 24)
+        .padding(.top, DesignSystem.Spacing.xl)
+        .onAppear {
+            withAnimation(DesignSystem.Animations.smooth) {
+                animate = true
+            }
+        }
     }
 }
 

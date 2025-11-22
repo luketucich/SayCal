@@ -6,37 +6,69 @@ struct ObserveProfileView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 32) {
-                OnboardingHeader(
-                    title: "Your Profile",
-                    subtitle: "View and manage your information"
-                )
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xl) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
+                    Text("Your Profile")
+                        .font(DesignSystem.Typography.largeTitle(weight: .bold))
+                        .foregroundColor(DesignSystem.Colors.textPrimary)
+
+                    Text("View and manage your information")
+                        .font(DesignSystem.Typography.body(weight: .regular))
+                        .foregroundColor(DesignSystem.Colors.textSecondary)
+                }
+                .padding(.top, DesignSystem.Spacing.lg)
 
                 VStack(spacing: 24) {
                     ProfileSection(title: "Goals") {
                         VStack(spacing: 12) {
                             HStack {
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                                     Text("Your Target Calories")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(Color(UIColor.secondaryLabel))
+                                        .font(DesignSystem.Typography.subheadline(weight: .medium))
+                                        .foregroundColor(DesignSystem.Colors.textSecondary)
 
                                     Text("\(profile.targetCalories)")
-                                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                                        .foregroundColor(Color(UIColor.label))
+                                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: DesignSystem.Colors.primaryGradient,
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
 
                                     Text("calories per day")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(Color(UIColor.tertiaryLabel))
+                                        .font(DesignSystem.Typography.footnote(weight: .regular))
+                                        .foregroundColor(DesignSystem.Colors.textTertiary)
                                 }
 
                                 Spacer()
                             }
-                            .padding(20)
+                            .padding(DesignSystem.Spacing.xl)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(UIColor.systemGray6))
+                                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.lg)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: DesignSystem.Colors.primaryGradient,
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                        .opacity(0.1)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.lg)
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: DesignSystem.Colors.primaryGradient,
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                                .opacity(0.3),
+                                                lineWidth: 1.5
+                                            )
+                                    )
                             )
+                            .shadow(color: DesignSystem.Colors.primary.opacity(0.1), radius: 12, x: 0, y: 6)
 
                             HStack(spacing: 12) {
                                 MacroDisplayCard(
@@ -150,15 +182,21 @@ struct ObserveProfileView: View {
                     }) {
                         HStack {
                             Spacer()
-                            Text("Sign Out")
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.red)
+                            Text("Sign Out")
+                                .font(DesignSystem.Typography.callout(weight: .semibold))
                             Spacer()
                         }
-                        .frame(height: 48)
+                        .foregroundColor(DesignSystem.Colors.error)
+                        .frame(height: 54)
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.red, lineWidth: 1)
+                            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                                .fill(DesignSystem.Colors.error.opacity(0.08))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                                        .stroke(DesignSystem.Colors.error.opacity(0.3), lineWidth: 1.5)
+                                )
                         )
                     }
                 }
@@ -181,10 +219,12 @@ struct ProfileSection<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
             Text(title)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DesignSystem.Typography.caption1(weight: .semibold))
+                .foregroundColor(DesignSystem.Colors.textSecondary)
+                .textCase(.uppercase)
+                .tracking(0.5)
 
             content
         }
@@ -198,21 +238,26 @@ struct ProfileInfoCard: View {
     var body: some View {
         HStack {
             Text(label)
-                .font(.system(size: 15))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DesignSystem.Typography.callout(weight: .medium))
+                .foregroundColor(DesignSystem.Colors.textSecondary)
 
             Spacer()
 
             Text(value)
-                .font(.system(size: 16))
-                .foregroundColor(Color(UIColor.label))
+                .font(DesignSystem.Typography.callout(weight: .semibold))
+                .foregroundColor(DesignSystem.Colors.textPrimary)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.horizontal, DesignSystem.Spacing.lg)
+        .padding(.vertical, DesignSystem.Spacing.lg)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                .fill(DesignSystem.Colors.surface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                        .stroke(DesignSystem.Colors.borderSubtle, lineWidth: 1)
+                )
         )
+        .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 2)
     }
 }
 
@@ -221,14 +266,18 @@ struct ProfilePillBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 14))
-            .foregroundColor(Color(UIColor.label))
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .font(DesignSystem.Typography.subheadline(weight: .medium))
+            .foregroundColor(DesignSystem.Colors.textPrimary)
+            .padding(.horizontal, DesignSystem.Spacing.lg)
+            .padding(.vertical, DesignSystem.Spacing.md)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                    .fill(DesignSystem.Colors.primary.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                            .stroke(DesignSystem.Colors.primary.opacity(0.2), lineWidth: 1)
+                    )
             )
     }
 }
@@ -239,20 +288,27 @@ struct MacroDisplayCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: DesignSystem.Spacing.sm) {
             Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DesignSystem.Typography.caption1(weight: .semibold))
+                .foregroundColor(DesignSystem.Colors.textSecondary)
+                .textCase(.uppercase)
+                .tracking(0.5)
 
             Text("\(percentage)%")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .padding(.vertical, DesignSystem.Spacing.lg)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(color.opacity(0.1))
+            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                .fill(color.opacity(0.12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                        .stroke(color.opacity(0.3), lineWidth: 1)
+                )
         )
+        .shadow(color: color.opacity(0.15), radius: 8, x: 0, y: 4)
     }
 }

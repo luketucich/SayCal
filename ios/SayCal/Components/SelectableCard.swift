@@ -5,6 +5,7 @@ struct SelectableCard: View {
     let subtitle: String?
     let isSelected: Bool
     let action: () -> Void
+    @State private var isPressed = false
 
     init(
         title: String,
@@ -23,30 +24,58 @@ struct SelectableCard: View {
             HapticManager.shared.light()
             action()
         } label: {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color(UIColor.label))
+            HStack(spacing: DesignSystem.Spacing.md) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title)
+                        .font(DesignSystem.Typography.callout(weight: .semibold))
+                        .foregroundColor(isSelected ? DesignSystem.Colors.primary : DesignSystem.Colors.textPrimary)
 
-                if let subtitle = subtitle {
-                    Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .font(DesignSystem.Typography.footnote(weight: .regular))
+                            .foregroundColor(DesignSystem.Colors.textSecondary)
+                    }
+                }
+
+                Spacer()
+
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(DesignSystem.Colors.primary)
+                        .transition(.scale.combined(with: .opacity))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, DesignSystem.Spacing.lg)
+            .padding(.vertical, DesignSystem.Spacing.lg)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(UIColor.systemBackground))
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.lg)
+                    .fill(isSelected ? DesignSystem.Colors.primary.opacity(0.08) : DesignSystem.Colors.surface)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                        RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.lg)
+                            .stroke(
+                                isSelected ? DesignSystem.Colors.primary : DesignSystem.Colors.borderSubtle,
+                                lineWidth: isSelected ? 2 : 1
+                            )
                     )
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .animation(DesignSystem.Animations.quick, value: isSelected)
+            .animation(DesignSystem.Animations.quick, value: isPressed)
+            .shadow(
+                color: isSelected ? DesignSystem.Colors.primary.opacity(0.15) : Color.black.opacity(0.05),
+                radius: isSelected ? 8 : 4,
+                x: 0,
+                y: isSelected ? 4 : 2
             )
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
     }
 }
 
@@ -54,6 +83,7 @@ struct SelectablePill: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
+    @State private var isPressed = false
 
     var body: some View {
         Button {
@@ -61,50 +91,89 @@ struct SelectablePill: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(Color(UIColor.label))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+                .font(DesignSystem.Typography.subheadline(weight: isSelected ? .semibold : .medium))
+                .foregroundColor(isSelected ? .white : DesignSystem.Colors.textPrimary)
+                .padding(.horizontal, DesignSystem.Spacing.lg)
+                .padding(.vertical, DesignSystem.Spacing.sm + 2)
                 .background(
                     Capsule()
-                        .fill(Color(UIColor.systemBackground))
+                        .fill(
+                            isSelected
+                                ? LinearGradient(
+                                    colors: DesignSystem.Colors.primaryGradient,
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                                : LinearGradient(
+                                    colors: [DesignSystem.Colors.surface, DesignSystem.Colors.surface],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                        )
                         .overlay(
                             Capsule()
-                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                                .stroke(
+                                    isSelected ? Color.clear : DesignSystem.Colors.borderSubtle,
+                                    lineWidth: 1.5
+                                )
                         )
+                )
+                .scaleEffect(isPressed ? 0.95 : 1.0)
+                .animation(DesignSystem.Animations.quick, value: isSelected)
+                .animation(DesignSystem.Animations.quick, value: isPressed)
+                .shadow(
+                    color: isSelected ? DesignSystem.Colors.primary.opacity(0.25) : Color.clear,
+                    radius: 8,
+                    x: 0,
+                    y: 4
                 )
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
     }
 }
 
 struct TabSelector: View {
     let options: [String]
     @Binding var selectedOption: String
-    
+    @Namespace private var animation
+
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: DesignSystem.Spacing.sm) {
             ForEach(options, id: \.self) { option in
                 Button {
                     HapticManager.shared.selection()
-                    selectedOption = option
+                    withAnimation(DesignSystem.Animations.smooth) {
+                        selectedOption = option
+                    }
                 } label: {
                     Text(option)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DesignSystem.Typography.callout(weight: selectedOption == option ? .semibold : .medium))
+                        .foregroundColor(selectedOption == option ? .white : DesignSystem.Colors.textSecondary)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, DesignSystem.Spacing.md)
                         .background(
-                            VStack(spacing: 0) {
-                                Spacer()
+                            ZStack {
                                 if selectedOption == option {
-                                    Rectangle()
-                                        .fill(Color(UIColor.label))
-                                        .frame(height: 2)
-                                } else {
-                                    Rectangle()
-                                        .fill(Color.clear)
-                                        .frame(height: 2)
+                                    RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: DesignSystem.Colors.primaryGradient,
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .matchedGeometryEffect(id: "tab", in: animation)
+                                        .shadow(
+                                            color: DesignSystem.Colors.primary.opacity(0.3),
+                                            radius: 8,
+                                            x: 0,
+                                            y: 4
+                                        )
                                 }
                             }
                         )
@@ -112,7 +181,11 @@ struct TabSelector: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal)
+        .padding(4)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md + 2)
+                .fill(DesignSystem.Colors.surfaceSecondary)
+        )
     }
 }
 

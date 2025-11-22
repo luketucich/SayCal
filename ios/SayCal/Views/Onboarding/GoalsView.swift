@@ -14,27 +14,53 @@ struct GoalsView: View {
 
                     VStack(spacing: 12) {
                         HStack {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                                 Text("Your Target Calories")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(Color(UIColor.secondaryLabel))
+                                    .font(DesignSystem.Typography.subheadline(weight: .medium))
+                                    .foregroundColor(DesignSystem.Colors.textSecondary)
 
                                 Text("\(state.targetCalories)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(UIColor.label))
+                                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: DesignSystem.Colors.primaryGradient,
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
 
                                 Text("calories per day")
-                                    .font(.system(size: 13))
-                                    .foregroundColor(Color(UIColor.tertiaryLabel))
+                                    .font(DesignSystem.Typography.footnote(weight: .regular))
+                                    .foregroundColor(DesignSystem.Colors.textTertiary)
                             }
 
                             Spacer()
                         }
-                        .padding(20)
+                        .padding(DesignSystem.Spacing.xl)
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(UIColor.systemGray6))
+                            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.lg)
+                                .fill(
+                                    LinearGradient(
+                                        colors: DesignSystem.Colors.primaryGradient,
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                    .opacity(0.1)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.lg)
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: DesignSystem.Colors.primaryGradient,
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                            .opacity(0.3),
+                                            lineWidth: 1.5
+                                        )
+                                )
                         )
+                        .shadow(color: DesignSystem.Colors.primary.opacity(0.1), radius: 12, x: 0, y: 6)
 
                         HStack(spacing: 12) {
                             let macros = UserManager.calculateMacroPercentages(for: state.goal)
@@ -103,21 +129,28 @@ struct OnboardingMacroCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: DesignSystem.Spacing.sm) {
             Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(DesignSystem.Typography.caption1(weight: .semibold))
+                .foregroundColor(DesignSystem.Colors.textSecondary)
+                .textCase(.uppercase)
+                .tracking(0.5)
 
             Text("\(percentage)%")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .padding(.vertical, DesignSystem.Spacing.lg)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(color.opacity(0.1))
+            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                .fill(color.opacity(0.12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                        .stroke(color.opacity(0.3), lineWidth: 1)
+                )
         )
+        .shadow(color: color.opacity(0.15), radius: 8, x: 0, y: 4)
     }
 }
 
