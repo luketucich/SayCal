@@ -2,43 +2,40 @@ import SwiftUI
 
 struct RecordingButton: View {
     @ObservedObject var audioRecorder: AudioRecorder
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Button(action: {}) {
-            if audioRecorder.isProcessing {
-                ProgressView()
-                    .tint(.white)
-                    .frame(width: buttonSize, height: buttonSize)
-            } else {
-                Image(systemName: "mic.fill")
-                    .font(.system(size: iconSize, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: buttonSize, height: buttonSize)
-            }
-        }
-        .disabled(audioRecorder.isProcessing)
-        .background(
-            Group {
-                if #available(iOS 26.0, *) {
-                    Circle()
-                        .fill(.blue.gradient)
-                        .glassEffect()
-                        .shadow(
-                            color: (audioRecorder.isRecording ? Color.blue : Color.gray).opacity(0.3),
-                            radius: audioRecorder.isRecording ? 20 : 12,
-                            y: 6
+            ZStack {
+                // Background gradient circle
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: gradientColors,
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
+                    )
+                    .frame(width: buttonSize, height: buttonSize)
+                    .shadow(
+                        color: shadowColor,
+                        radius: audioRecorder.isRecording ? 20 : 12,
+                        y: 6
+                    )
+                
+                // Icon or progress indicator
+                if audioRecorder.isProcessing && !audioRecorder.isRecording {
+                    ProgressView()
+                        .tint(.white)
+                        .scaleEffect(1.2)
                 } else {
-                    Circle()
-                        .fill(Color.blue)
-                        .shadow(
-                            color: (audioRecorder.isRecording ? Color.blue : Color.gray).opacity(0.3),
-                            radius: audioRecorder.isRecording ? 20 : 12,
-                            y: 6
-                        )
+                    Image(systemName: iconName)
+                        .font(.system(size: iconSize, weight: .semibold))
+                        .foregroundStyle(.white)
                 }
             }
-        )
+        }
+        .disabled(audioRecorder.isProcessing && !audioRecorder.isRecording)
         .scaleEffect(audioRecorder.isRecording ? audioRecorder.currentAudioLevel : 1.0)
         .animation(.easeInOut(duration: 0.1), value: audioRecorder.currentAudioLevel)
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: audioRecorder.isRecording)
@@ -57,13 +54,49 @@ struct RecordingButton: View {
         )
     }
     
-    // Dynamic button size - larger when recording
+    // MARK: - Computed Properties
+    
     private var buttonSize: CGFloat {
-        audioRecorder.isRecording ? 80 : 56
+        audioRecorder.isRecording ? 80 : 64
     }
     
-    // Dynamic icon size
     private var iconSize: CGFloat {
-        audioRecorder.isRecording ? 28 : 20
+        audioRecorder.isRecording ? 30 : 24
     }
+    
+    private var iconName: String {
+        audioRecorder.isRecording ? "mic.fill" : "mic.fill"
+    }
+    
+    private var gradientColors: [Color] {
+        if audioRecorder.isRecording {
+            return [Color.red.opacity(0.9), Color.red]
+        } else {
+            return [Color.blue.opacity(0.9), Color.blue]
+        }
+    }
+    
+    private var shadowColor: Color {
+        audioRecorder.isRecording
+            ? Color.red.opacity(0.4)
+            : Color.blue.opacity(0.3)
+    }
+}
+
+#Preview {
+    VStack(spacing: 40) {
+        RecordingButton(audioRecorder: {
+            let recorder = AudioRecorder()
+            recorder.state = .idle
+            return recorder
+        }())
+        
+        RecordingButton(audioRecorder: {
+            let recorder = AudioRecorder()
+            recorder.state = .recording
+            return recorder
+        }())
+    }
+    .padding()
+    .background(Color(UIColor.systemGray6))
 }

@@ -1,6 +1,5 @@
 import SwiftUI
 import AVFoundation
-import Combine
 
 struct MainAppView: View {
     @EnvironmentObject var userManager: UserManager
@@ -20,19 +19,7 @@ struct MainAppView: View {
         }
         .tint(.primary)
         .overlay(alignment: .top) {
-            // Transcription text display with scroll view
-            if !audioRecorder.displayText.isEmpty {
-                ScrollView {
-                    Text(audioRecorder.displayText)
-                        .font(.body)
-                        .padding()
-                }
-                .frame(maxHeight: 300)
-                .background(.ultraThinMaterial)
-                .cornerRadius(12)
-                .padding()
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
+            RecordingOverlay(audioRecorder: audioRecorder)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HStack {
@@ -49,7 +36,6 @@ struct MainAppView: View {
     }
 }
 
-// MARK: - Preview
 #Preview {
     MainAppView()
         .environmentObject({
