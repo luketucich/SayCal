@@ -38,10 +38,10 @@ struct SelectableCard: View {
             .padding(.horizontal, AppSpacing.lg)
             .padding(.vertical, AppSpacing.md)
             .background(
-                RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                RoundedRectangle(cornerRadius: AppCornerRadius.lg)
                     .fill(Color(UIColor.systemBackground))
                     .overlay(
-                        RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                        RoundedRectangle(cornerRadius: AppCornerRadius.lg)
                             .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
                     )
             )

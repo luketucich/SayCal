@@ -69,7 +69,8 @@ struct DietaryPreferencesView: View {
                         ForEach(dietaryPreferences, id: \.self) { preference in
                             TogglePill(
                                 title: preference.replacingOccurrences(of: "_", with: " ").capitalized,
-                                isSelected: state.selectedDietaryPreferences.contains(preference)
+                                isSelected: state.selectedDietaryPreferences.contains(preference),
+                                style: .rounded
                             ) {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     if state.selectedDietaryPreferences.contains(preference) {

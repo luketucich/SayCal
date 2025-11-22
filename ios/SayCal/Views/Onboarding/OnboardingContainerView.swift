@@ -131,26 +131,26 @@ struct OnboardingContainerView: View {
 struct ProgressBar: View {
     let currentStep: Int
     let totalSteps: Int
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 // Background track
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: 3)
                     .fill(Color(UIColor.systemGray5))
-                    .frame(height: 2)
-                
+                    .frame(height: 6)
+
                 // Progress fill
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: 3)
                     .fill(Color(UIColor.label))
                     .frame(
                         width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps),
-                        height: 2
+                        height: 6
                     )
                     .animation(.easeInOut(duration: 0.3), value: currentStep)
             }
         }
-        .frame(height: 2)
+        .frame(height: 6)
     }
 }
 
