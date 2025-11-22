@@ -85,6 +85,12 @@ struct CaloriesPieChart: View {
                     )
                 )
                 .rotationEffect(.degrees(-90))
+                .shadow(
+                    color: Theme.Colors.accent.opacity(0.3),
+                    radius: size * 0.03,
+                    x: 0,
+                    y: size * 0.01
+                )
             
             // Center content
             VStack(spacing: size * 0.01) {

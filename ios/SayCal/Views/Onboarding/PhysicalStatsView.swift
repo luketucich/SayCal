@@ -57,9 +57,9 @@ struct PhysicalStatsView: View {
                                     Text("\(state.age) years")
                                         .font(.system(size: 16))
                                         .foregroundColor(Color(UIColor.label))
-                                    
+
                                     Spacer()
-                                    
+
                                     Image(systemName: "chevron.down")
                                         .font(.system(size: 14))
                                         .foregroundColor(Color(UIColor.tertiaryLabel))
@@ -68,8 +68,13 @@ struct PhysicalStatsView: View {
                                 .padding(.vertical, 14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
+                                        .fill(Theme.Colors.background)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color(UIColor.systemGray5), lineWidth: 1)
                                 )
+                                .cardShadow()
                             }
                         }
 
@@ -92,9 +97,9 @@ struct PhysicalStatsView: View {
                                             .font(.system(size: 16))
                                             .foregroundColor(Color(UIColor.label))
                                     }
-                                    
+
                                     Spacer()
-                                    
+
                                     Image(systemName: "chevron.down")
                                         .font(.system(size: 14))
                                         .foregroundColor(Color(UIColor.tertiaryLabel))
@@ -103,8 +108,13 @@ struct PhysicalStatsView: View {
                                 .padding(.vertical, 14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
+                                        .fill(Theme.Colors.background)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color(UIColor.systemGray5), lineWidth: 1)
                                 )
+                                .cardShadow()
                             }
                         }
 
@@ -127,9 +137,9 @@ struct PhysicalStatsView: View {
                                             .font(.system(size: 16))
                                             .foregroundColor(Color(UIColor.label))
                                     }
-                                    
+
                                     Spacer()
-                                    
+
                                     Image(systemName: "chevron.down")
                                         .font(.system(size: 14))
                                         .foregroundColor(Color(UIColor.tertiaryLabel))
@@ -138,8 +148,13 @@ struct PhysicalStatsView: View {
                                 .padding(.vertical, 14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
+                                        .fill(Theme.Colors.background)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color(UIColor.systemGray5), lineWidth: 1)
                                 )
+                                .cardShadow()
                             }
                         }
                     }

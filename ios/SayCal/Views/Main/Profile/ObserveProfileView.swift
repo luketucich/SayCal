@@ -35,8 +35,9 @@ struct ObserveProfileView: View {
                             .padding(20)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(UIColor.systemGray6))
+                                    .fill(Theme.Colors.accentLight)
                             )
+                            .cardShadow()
 
                             HStack(spacing: 12) {
                                 MacroDisplayCard(
@@ -108,8 +109,13 @@ struct ObserveProfileView: View {
                                 .padding(.vertical, 14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
+                                        .fill(Theme.Colors.background)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color(UIColor.systemGray5), lineWidth: 1)
                                 )
+                                .cardShadow()
                         }
                     }
 
@@ -132,8 +138,13 @@ struct ObserveProfileView: View {
                                 .padding(.vertical, 14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
+                                        .fill(Theme.Colors.background)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color(UIColor.systemGray5), lineWidth: 1)
                                 )
+                                .cardShadow()
                         }
                     }
 
@@ -158,8 +169,13 @@ struct ObserveProfileView: View {
                         .frame(height: 48)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.red, lineWidth: 1)
+                                .fill(Theme.Colors.background)
                         )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.red, lineWidth: 1.5)
+                        )
+                        .cardShadow()
                     }
                 }
 
@@ -211,8 +227,13 @@ struct ProfileInfoCard: View {
         .padding(.vertical, 14)
         .background(
             RoundedRectangle(cornerRadius: 12)
+                .fill(Theme.Colors.background)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
                 .stroke(Color(UIColor.systemGray5), lineWidth: 1)
         )
+        .cardShadow()
     }
 }
 
@@ -228,8 +249,13 @@ struct ProfilePillBadge: View {
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 12)
+                    .fill(Theme.Colors.background)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
                     .stroke(Color(UIColor.systemGray5), lineWidth: 1)
             )
+            .cardShadow()
     }
 }
 
@@ -254,5 +280,6 @@ struct MacroDisplayCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(color.opacity(0.1))
         )
+        .cardShadow()
     }
 }
