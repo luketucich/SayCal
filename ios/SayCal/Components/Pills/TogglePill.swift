@@ -26,7 +26,9 @@ struct TogglePill: View {
     var body: some View {
         Button {
             HapticManager.shared.light()
-            action()
+            withAnimation(DesignSystem.Animation.spring) {
+                action()
+            }
         } label: {
             Group {
                 if style == .capsule {
@@ -41,25 +43,29 @@ struct TogglePill: View {
 
     @ViewBuilder
     private var capsuleContent: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 6) {
             if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(Color(UIColor.systemBackground))
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(DesignSystem.Colors.primaryText)
             }
 
             Text(title)
-                .font(.system(size: 14, weight: .regular))
-                .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color(UIColor.label))
+                .font(DesignSystem.Typography.bodySmall)
+                .foregroundColor(isSelected ? DesignSystem.Colors.primaryText : DesignSystem.Colors.textPrimary)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, DesignSystem.Spacing.xlarge)
+        .padding(.vertical, DesignSystem.Spacing.medium)
         .background(
             Capsule()
-                .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
+                .fill(isSelected ? DesignSystem.Colors.primary : DesignSystem.Colors.cardBackground)
+                .lightShadow()
                 .overlay(
                     Capsule()
-                        .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                        .strokeBorder(
+                            isSelected ? Color.clear : DesignSystem.Colors.borderLight,
+                            lineWidth: DesignSystem.BorderWidth.medium
+                        )
                 )
         )
     }
@@ -67,16 +73,20 @@ struct TogglePill: View {
     @ViewBuilder
     private var roundedContent: some View {
         Text(title)
-            .font(.system(size: 16, weight: .medium))
-            .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color(UIColor.label))
+            .font(DesignSystem.Typography.labelLarge)
+            .foregroundColor(isSelected ? DesignSystem.Colors.primaryText : DesignSystem.Colors.textPrimary)
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: DesignSystem.Dimensions.buttonHeightMedium)
             .background(
-                RoundedRectangle(cornerRadius: 22)
-                    .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
+                Capsule()
+                    .fill(isSelected ? DesignSystem.Colors.primary : DesignSystem.Colors.cardBackground)
+                    .lightShadow()
                     .overlay(
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: 1)
+                        Capsule()
+                            .strokeBorder(
+                                isSelected ? Color.clear : DesignSystem.Colors.borderLight,
+                                lineWidth: DesignSystem.BorderWidth.medium
+                            )
                     )
             )
     }

@@ -6,37 +6,33 @@ struct UnitsPreferenceView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.sectionSpacing) {
                     OnboardingHeader(
                         title: "Choose your units",
                         subtitle: "Select your preferred measurement system"
                     )
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: DesignSystem.Spacing.itemSpacing) {
                         UnitCard(
                             title: "Metric",
                             subtitle: "Kilograms • Centimeters",
                             isSelected: state.unitsPreference == .metric
                         ) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                state.unitsPreference = .metric
-                            }
+                            state.unitsPreference = .metric
                         }
-                        
+
                         UnitCard(
                             title: "Imperial",
                             subtitle: "Pounds • Feet & Inches",
                             isSelected: state.unitsPreference == .imperial
                         ) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                state.unitsPreference = .imperial
-                            }
+                            state.unitsPreference = .imperial
                         }
                     }
-                    
+
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .screenEdgePadding()
             }
 
             OnboardingBottomBar(
@@ -44,7 +40,7 @@ struct UnitsPreferenceView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(DesignSystem.Colors.background)
     }
 }
 

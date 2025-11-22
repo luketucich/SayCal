@@ -21,29 +21,52 @@ struct SelectableCard: View {
     var body: some View {
         Button {
             HapticManager.shared.light()
-            action()
-        } label: {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color(UIColor.label))
-
-                if let subtitle = subtitle {
-                    Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
-                }
+            withAnimation(DesignSystem.Animation.spring) {
+                action()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(UIColor.systemBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+        } label: {
+            HStack(alignment: .center, spacing: DesignSystem.Spacing.medium) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title)
+                        .font(DesignSystem.Typography.titleMedium)
+                        .foregroundColor(DesignSystem.Colors.textPrimary)
+
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .font(DesignSystem.Typography.captionLarge)
+                            .foregroundColor(DesignSystem.Colors.textSecondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Selection Indicator
+                Circle()
+                    .strokeBorder(
+                        isSelected ? DesignSystem.Colors.primary : DesignSystem.Colors.borderMedium,
+                        lineWidth: DesignSystem.BorderWidth.thick
                     )
+                    .background(
+                        Circle().fill(isSelected ? DesignSystem.Colors.primary : Color.clear)
+                    )
+                    .frame(
+                        width: DesignSystem.Dimensions.selectionIndicatorSize,
+                        height: DesignSystem.Dimensions.selectionIndicatorSize
+                    )
+                    .overlay(
+                        Group {
+                            if isSelected {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: DesignSystem.Dimensions.selectionCheckmarkSize, weight: .bold))
+                                    .foregroundColor(DesignSystem.Colors.primaryText)
+                            }
+                        }
+                    )
+            }
+            .cardPadding()
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.large)
+                    .fill(DesignSystem.Colors.cardBackground)
+                    .applyShadow(isSelected ? DesignSystem.Shadow.medium : DesignSystem.Shadow.light)
             )
         }
         .buttonStyle(.plain)
@@ -58,21 +81,35 @@ struct SelectablePill: View {
     var body: some View {
         Button {
             HapticManager.shared.light()
-            action()
+            withAnimation(DesignSystem.Animation.spring) {
+                action()
+            }
         } label: {
-            Text(title)
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(Color(UIColor.label))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(
-                    Capsule()
-                        .fill(Color(UIColor.systemBackground))
-                        .overlay(
-                            Capsule()
-                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
-                        )
-                )
+            HStack(spacing: 6) {
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(DesignSystem.Colors.primaryText)
+                }
+
+                Text(title)
+                    .font(DesignSystem.Typography.bodySmall)
+                    .foregroundColor(isSelected ? DesignSystem.Colors.primaryText : DesignSystem.Colors.textPrimary)
+            }
+            .padding(.horizontal, DesignSystem.Spacing.xlarge)
+            .padding(.vertical, DesignSystem.Spacing.medium)
+            .background(
+                Capsule()
+                    .fill(isSelected ? DesignSystem.Colors.primary : DesignSystem.Colors.cardBackground)
+                    .lightShadow()
+                    .overlay(
+                        Capsule()
+                            .strokeBorder(
+                                isSelected ? Color.clear : DesignSystem.Colors.borderLight,
+                                lineWidth: DesignSystem.BorderWidth.medium
+                            )
+                    )
+            )
         }
         .buttonStyle(.plain)
     }
@@ -81,30 +118,32 @@ struct SelectablePill: View {
 struct TabSelector: View {
     let options: [String]
     @Binding var selectedOption: String
-    
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(options, id: \.self) { option in
                 Button {
                     HapticManager.shared.selection()
-                    selectedOption = option
+                    withAnimation(DesignSystem.Animation.spring) {
+                        selectedOption = option
+                    }
                 } label: {
                     Text(option)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DesignSystem.Typography.labelLarge)
+                        .foregroundColor(selectedOption == option ? DesignSystem.Colors.textPrimary : DesignSystem.Colors.textSecondary)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, DesignSystem.Spacing.medium)
                         .background(
                             VStack(spacing: 0) {
                                 Spacer()
                                 if selectedOption == option {
-                                    Rectangle()
-                                        .fill(Color(UIColor.label))
-                                        .frame(height: 2)
+                                    Capsule()
+                                        .fill(DesignSystem.Colors.primary)
+                                        .frame(height: 3)
                                 } else {
                                     Rectangle()
                                         .fill(Color.clear)
-                                        .frame(height: 2)
+                                        .frame(height: 3)
                                 }
                             }
                         )
@@ -112,7 +151,7 @@ struct TabSelector: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, DesignSystem.Spacing.screenEdge)
     }
 }
 

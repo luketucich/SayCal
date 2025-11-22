@@ -6,28 +6,26 @@ struct ActivityLevelView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.sectionSpacing) {
                     OnboardingHeader(
                         title: "Activity level",
                         subtitle: "How active are you on a typical day?"
                     )
 
-                    VStack(spacing: 12) {
+                    VStack(spacing: DesignSystem.Spacing.itemSpacing) {
                         ForEach(ActivityLevel.allCases, id: \.self) { level in
                             SelectableCard(
                                 title: level.displayName,
                                 isSelected: state.activityLevel == level
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    state.activityLevel = level
-                                }
+                                state.activityLevel = level
                             }
                         }
                     }
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .screenEdgePadding()
             }
 
             OnboardingBottomBar(
@@ -35,7 +33,7 @@ struct ActivityLevelView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(DesignSystem.Colors.background)
     }
 }
 

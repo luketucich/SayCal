@@ -8,20 +8,25 @@ struct FormPickerButton: View {
         Button(action: action) {
             HStack {
                 Text(label)
-                    .font(.system(size: 16))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(DesignSystem.Typography.bodyLarge)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
 
                 Spacer()
 
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 14))
-                    .foregroundColor(Color(UIColor.tertiaryLabel))
+                    .font(.system(size: DesignSystem.Dimensions.iconSmall, weight: .medium))
+                    .foregroundColor(DesignSystem.Colors.textTertiary)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, DesignSystem.Spacing.large)
+            .padding(.vertical, DesignSystem.Spacing.componentSpacing)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(UIColor.systemGray5), lineWidth: 1)
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.medium)
+                    .fill(DesignSystem.Colors.cardBackground)
+                    .lightShadow()
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.medium)
+                            .strokeBorder(DesignSystem.Colors.borderLight, lineWidth: DesignSystem.BorderWidth.medium)
+                    )
             )
         }
     }

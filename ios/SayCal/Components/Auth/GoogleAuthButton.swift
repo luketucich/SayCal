@@ -17,19 +17,21 @@ struct GoogleAuthButton: View {
                     }
                 }
             } label: {
-                HStack(spacing: 8) {
+                HStack(spacing: DesignSystem.Spacing.small) {
                     Text("G")
-                        .font(.system(size: 20, weight: .semibold))
-                    
+                        .font(.system(size: 20, weight: .bold))
+
                     Text("Sign in with Google")
-                        .font(.system(size: 22, weight: .medium))
+                        .font(DesignSystem.Typography.buttonLarge)
                 }
-                .foregroundColor(.primary)
+                .foregroundColor(DesignSystem.Colors.textPrimary)
                 .frame(maxWidth: .infinity)
-                .frame(height: 56)
+                .frame(height: DesignSystem.Dimensions.buttonHeightLarge)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                    Capsule()
+                        .strokeBorder(DesignSystem.Colors.borderMedium, lineWidth: DesignSystem.BorderWidth.medium)
+                        .background(Capsule().fill(DesignSystem.Colors.cardBackground))
+                        .lightShadow()
                 )
             }
             

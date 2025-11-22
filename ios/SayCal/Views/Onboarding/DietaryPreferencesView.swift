@@ -10,7 +10,7 @@ struct DietaryPreferencesView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.sectionSpacing) {
                     OnboardingHeader(
                         title: "Dietary preferences",
                         subtitle: "Select any that apply (optional)"
@@ -27,7 +27,7 @@ struct DietaryPreferencesView: View {
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: 10) {
+                    ], spacing: DesignSystem.Spacing.small) {
                         
                         if isAddingPreference {
                             CustomInputField(
@@ -95,7 +95,7 @@ struct DietaryPreferencesView: View {
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
+                .screenEdgePadding()
             }
 
             OnboardingBottomBar(
@@ -105,7 +105,7 @@ struct DietaryPreferencesView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(DesignSystem.Colors.background)
         .onAppear {
             let predefinedPreferences = Set(DietaryOptions.dietaryPreferences)
             let customPreferences = state.selectedDietaryPreferences.filter { !predefinedPreferences.contains($0) }

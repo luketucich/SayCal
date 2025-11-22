@@ -6,24 +6,24 @@ struct AddOptionButton: View {
     var body: some View {
         Button {
             HapticManager.shared.light()
-            action()
+            withAnimation(DesignSystem.Animation.spring) {
+                action()
+            }
         } label: {
-            HStack(spacing: 4) {
+            HStack(spacing: 6) {
                 Image(systemName: "plus")
                     .font(.system(size: 12, weight: .medium))
                 Text("Add")
-                    .font(.system(size: 14))
+                    .font(DesignSystem.Typography.bodySmall)
             }
-            .foregroundColor(Color(UIColor.secondaryLabel))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .foregroundColor(DesignSystem.Colors.textSecondary)
+            .padding(.horizontal, DesignSystem.Spacing.large)
+            .padding(.vertical, DesignSystem.Spacing.small)
             .background(
                 Capsule()
-                    .stroke(Color(UIColor.systemGray4), lineWidth: 1)
-                    .background(
-                        Capsule()
-                            .fill(Color(UIColor.systemGray6))
-                    )
+                    .strokeBorder(DesignSystem.Colors.borderLight, lineWidth: DesignSystem.BorderWidth.medium)
+                    .background(Capsule().fill(DesignSystem.Colors.cardBackground))
+                    .lightShadow()
             )
         }
     }

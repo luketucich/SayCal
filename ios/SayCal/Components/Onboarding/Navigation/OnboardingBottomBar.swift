@@ -31,7 +31,7 @@ struct OnboardingBottomBar: View {
         if !hideWhenFocused {
             VStack(spacing: 0) {
                 Divider()
-                    .overlay(Color(UIColor.systemGray5))
+                    .overlay(DesignSystem.Colors.borderLight)
 
                 HStack {
                     if showBackButton {
@@ -40,9 +40,8 @@ struct OnboardingBottomBar: View {
                             onBack()
                         } label: {
                             Text("Back")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color(UIColor.label))
-                                .underline()
+                                .font(DesignSystem.Typography.labelMedium)
+                                .foregroundColor(DesignSystem.Colors.textSecondary)
                         }
                     }
 
@@ -52,25 +51,25 @@ struct OnboardingBottomBar: View {
                         HapticManager.shared.medium()
                         onNext()
                     } label: {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 6) {
                             Text(nextButtonText)
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(DesignSystem.Typography.buttonLarge)
                             Image(systemName: nextButtonIcon)
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: DesignSystem.Dimensions.iconSmall, weight: .semibold))
                         }
-                        .foregroundColor(isNextEnabled ? Color(UIColor.systemBackground) : Color(UIColor.secondaryLabel))
-                        .padding(.horizontal, 24)
-                        .frame(height: 48)
+                        .foregroundColor(isNextEnabled ? DesignSystem.Colors.primaryText : DesignSystem.Colors.textSecondary)
+                        .padding(.horizontal, DesignSystem.Spacing.xxlarge)
+                        .frame(height: DesignSystem.Dimensions.buttonHeightMedium)
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(isNextEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4))
+                            Capsule()
+                                .fill(isNextEnabled ? DesignSystem.Colors.primary : DesignSystem.Colors.borderLight)
                         )
                     }
                     .disabled(!isNextEnabled)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .background(Color(UIColor.systemBackground))
+                .padding(.horizontal, DesignSystem.Spacing.screenEdge)
+                .padding(.vertical, DesignSystem.Spacing.large)
+                .background(DesignSystem.Colors.cardBackground)
             }
         }
     }

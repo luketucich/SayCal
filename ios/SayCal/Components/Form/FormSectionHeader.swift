@@ -5,7 +5,8 @@ struct FormSectionHeader: View {
 
     var body: some View {
         Text(title)
-            .font(.system(size: 14, weight: .medium))
-            .foregroundColor(Color(UIColor.secondaryLabel))
+            .font(DesignSystem.Typography.captionLarge)
+            .foregroundColor(DesignSystem.Colors.textSecondary)
+            .textCase(.none)
     }
 }

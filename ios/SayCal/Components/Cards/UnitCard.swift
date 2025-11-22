@@ -9,35 +9,50 @@ struct UnitCard: View {
     var body: some View {
         Button {
             HapticManager.shared.light()
-            action()
+            withAnimation(DesignSystem.Animation.spring) {
+                action()
+            }
         } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: DesignSystem.Spacing.medium) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(title)
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(DesignSystem.Typography.titleMedium)
+                        .foregroundColor(DesignSystem.Colors.textPrimary)
 
                     Text(subtitle)
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(DesignSystem.Typography.captionLarge)
+                        .foregroundColor(DesignSystem.Colors.textSecondary)
                 }
 
                 Spacer()
 
                 Circle()
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: isSelected ? 2 : 1.5)
-                    .frame(width: 20, height: 20)
+                    .strokeBorder(
+                        isSelected ? DesignSystem.Colors.primary : DesignSystem.Colors.borderMedium,
+                        lineWidth: DesignSystem.BorderWidth.thick
+                    )
+                    .background(
+                        Circle().fill(isSelected ? DesignSystem.Colors.primary : Color.clear)
+                    )
+                    .frame(
+                        width: DesignSystem.Dimensions.selectionIndicatorSize,
+                        height: DesignSystem.Dimensions.selectionIndicatorSize
+                    )
                     .overlay(
-                        Circle()
-                            .fill(Color(UIColor.label))
-                            .frame(width: 8, height: 8)
-                            .opacity(isSelected ? 1 : 0)
+                        Group {
+                            if isSelected {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: DesignSystem.Dimensions.selectionCheckmarkSize, weight: .bold))
+                                    .foregroundColor(DesignSystem.Colors.primaryText)
+                            }
+                        }
                     )
             }
-            .padding(16)
+            .cardPadding()
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.large)
+                    .fill(DesignSystem.Colors.cardBackground)
+                    .applyShadow(isSelected ? DesignSystem.Shadow.medium : DesignSystem.Shadow.light)
             )
         }
         .buttonStyle(.plain)
