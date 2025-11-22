@@ -25,8 +25,13 @@ struct EmailInputView: View {
                     .frame(height: 52)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
+                            .fill(Theme.Colors.background)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
                             .stroke(Color.primary.opacity(0.3), lineWidth: 1)
                     )
+                    .cardShadow()
 
                 if let errorMessage {
                     Text(errorMessage)

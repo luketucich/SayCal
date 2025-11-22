@@ -22,7 +22,11 @@ struct CodeInputView: View {
                     ForEach(0..<6, id: \.self) { index in
                         ZStack {
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(code.count == index ? Color(UIColor.label) : Color.primary.opacity(0.3), lineWidth: 1)
+                                .fill(Theme.Colors.background)
+                                .frame(width: 48, height: 56)
+
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(code.count == index ? Theme.Colors.accent : Color.primary.opacity(0.3), lineWidth: code.count == index ? 2 : 1)
                                 .frame(width: 48, height: 56)
 
                             if index < code.count {
@@ -30,6 +34,7 @@ struct CodeInputView: View {
                                     .font(.system(size: 24, weight: .semibold))
                             }
                         }
+                        .cardShadow()
                     }
                 }
                 .overlay {

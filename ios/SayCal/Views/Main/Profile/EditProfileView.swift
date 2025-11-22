@@ -132,8 +132,9 @@ struct EditProfileView: View {
                             .padding(20)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(UIColor.systemGray6))
+                                    .fill(Theme.Colors.accentLight)
                             )
+                            .cardShadow()
                         }
 
                         VStack(spacing: 12) {
