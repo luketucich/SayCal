@@ -25,24 +25,24 @@ struct SelectableCard: View {
         } label: {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .medium))
                     .foregroundColor(Color(UIColor.label))
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(.system(size: 13))
+                        .font(.system(size: DesignTokens.FontSize.small))
                         .foregroundColor(Color(UIColor.secondaryLabel))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, DesignTokens.Spacing.md)
             .padding(.vertical, 14)
             .background(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
                     .fill(Color(UIColor.systemBackground))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                        RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? DesignTokens.StrokeWidth.thick : DesignTokens.StrokeWidth.thin)
                     )
             )
         }
@@ -61,16 +61,16 @@ struct SelectablePill: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
+                .font(.system(size: DesignTokens.FontSize.body, weight: isSelected ? .semibold : .regular))
                 .foregroundColor(Color(UIColor.label))
-                .padding(.horizontal, 20)
+                .padding(.horizontal, DesignTokens.Spacing.lg)
                 .padding(.vertical, 10)
                 .background(
                     Capsule()
                         .fill(Color(UIColor.systemBackground))
                         .overlay(
                             Capsule()
-                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? DesignTokens.StrokeWidth.thick : DesignTokens.StrokeWidth.thin)
                         )
                 )
         }
@@ -90,21 +90,21 @@ struct TabSelector: View {
                     selectedOption = option
                 } label: {
                     Text(option)
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .medium))
                         .foregroundColor(Color(UIColor.label))
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, DesignTokens.Spacing.xs)
                         .background(
                             VStack(spacing: 0) {
                                 Spacer()
                                 if selectedOption == option {
                                     Rectangle()
                                         .fill(Color(UIColor.label))
-                                        .frame(height: 2)
+                                        .frame(height: DesignTokens.StrokeWidth.thick)
                                 } else {
                                     Rectangle()
                                         .fill(Color.clear)
-                                        .frame(height: 2)
+                                        .frame(height: DesignTokens.StrokeWidth.thick)
                                 }
                             }
                         )

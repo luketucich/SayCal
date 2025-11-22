@@ -19,8 +19,8 @@ struct RecordingButton: View {
                     .frame(width: buttonSize, height: buttonSize)
                     .shadow(
                         color: shadowColor,
-                        radius: audioRecorder.isRecording ? 20 : 12,
-                        y: 6
+                        radius: audioRecorder.isRecording ? DesignTokens.Shadow.medium.radius : DesignTokens.Shadow.small.radius,
+                        y: DesignTokens.Shadow.small.y
                     )
                 
                 // Icon or progress indicator
@@ -38,7 +38,7 @@ struct RecordingButton: View {
         .disabled(audioRecorder.isProcessing && !audioRecorder.isRecording)
         .scaleEffect(audioRecorder.isRecording ? audioRecorder.currentAudioLevel : 1.0)
         .animation(.easeInOut(duration: 0.1), value: audioRecorder.currentAudioLevel)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: audioRecorder.isRecording)
+        .animation(.spring(response: DesignTokens.AnimationDuration.slow, dampingFraction: 0.6), value: audioRecorder.isRecording)
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
@@ -70,16 +70,16 @@ struct RecordingButton: View {
     
     private var gradientColors: [Color] {
         if audioRecorder.isRecording {
-            return [Color.red.opacity(0.9), Color.red]
+            return [Color.red.opacity(DesignTokens.Opacity.veryStrong), Color.red]
         } else {
-            return [Color.blue.opacity(0.9), Color.blue]
+            return [Color.blue.opacity(DesignTokens.Opacity.veryStrong), Color.blue]
         }
     }
-    
+
     private var shadowColor: Color {
         audioRecorder.isRecording
-            ? Color.red.opacity(0.4)
-            : Color.blue.opacity(0.3)
+            ? Color.red.opacity(DesignTokens.Opacity.medium)
+            : Color.blue.opacity(DesignTokens.Opacity.medium)
     }
 }
 

@@ -10,16 +10,16 @@ struct AddOptionButton: View {
         } label: {
             HStack(spacing: 4) {
                 Image(systemName: "plus")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: DesignTokens.FontSize.small, weight: .medium))
                 Text("Add")
-                    .font(.system(size: 14))
+                    .font(.system(size: DesignTokens.FontSize.label))
             }
             .foregroundColor(Color(UIColor.secondaryLabel))
-            .padding(.horizontal, 12)
+            .padding(.horizontal, DesignTokens.Spacing.sm)
             .padding(.vertical, 10)
             .background(
                 Capsule()
-                    .stroke(Color(UIColor.systemGray4), lineWidth: 1)
+                    .stroke(Color(UIColor.systemGray4), lineWidth: DesignTokens.StrokeWidth.thin)
                     .background(
                         Capsule()
                             .fill(Color(UIColor.systemGray6))

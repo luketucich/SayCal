@@ -7,9 +7,9 @@ struct MacroCard: View {
     let onEdit: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: DesignTokens.Spacing.xs) {
             Text(title)
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: DesignTokens.FontSize.small, weight: .medium))
                 .foregroundColor(Color(UIColor.secondaryLabel))
 
             Text("\(percentage)%")
@@ -23,10 +23,10 @@ struct MacroCard: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
+        .padding(.vertical, DesignTokens.Spacing.md)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(color.opacity(0.1))
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                .fill(color.opacity(DesignTokens.Opacity.veryLight))
         )
     }
 }

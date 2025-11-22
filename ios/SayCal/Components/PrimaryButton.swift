@@ -27,21 +27,21 @@ struct PrimaryButton: View {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: Color(UIColor.systemBackground)))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 48)
+                    .frame(height: DesignTokens.ButtonHeight.standard)
             } else {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .semibold))
                     .foregroundColor(isEnabled ? Color(UIColor.systemBackground) : Color(UIColor.systemGray3))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 48)
+                    .frame(height: DesignTokens.ButtonHeight.standard)
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small)
                 .fill(isEnabled ? Color(UIColor.label) : Color.clear)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(isEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small)
+                        .stroke(isEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: DesignTokens.StrokeWidth.thin)
                 )
         )
         .disabled(!isEnabled || isLoading)
@@ -58,14 +58,14 @@ struct SecondaryButton: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .semibold))
                 .foregroundColor(Color(UIColor.label))
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .frame(height: DesignTokens.ButtonHeight.standard)
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color(UIColor.separator), lineWidth: 1)
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small)
+                .stroke(Color(UIColor.separator), lineWidth: DesignTokens.StrokeWidth.thin)
         )
     }
 }
@@ -80,7 +80,7 @@ struct TextButton: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: .regular))
+                .font(.system(size: DesignTokens.FontSize.body, weight: .regular))
                 .foregroundColor(Color(UIColor.label))
                 .underline()
         }

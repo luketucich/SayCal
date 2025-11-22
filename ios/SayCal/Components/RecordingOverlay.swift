@@ -15,19 +15,19 @@ struct RecordingOverlay: View {
     }
     
     private var overlayContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
             // Header with status indicator
-            HStack(spacing: 12) {
+            HStack(spacing: DesignTokens.Spacing.sm) {
                 statusIndicator
                 statusText
                 Spacer()
             }
-            
+
             // Content area
             if case .streamingNutrition(_, let partialInfo) = audioRecorder.state, !partialInfo.isEmpty {
                 ScrollView {
                     Text(partialInfo)
-                        .font(.system(size: 15, weight: .regular))
+                        .font(.system(size: DesignTokens.FontSize.body, weight: .regular))
                         .foregroundColor(Color(UIColor.label))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -35,42 +35,42 @@ struct RecordingOverlay: View {
             } else if case .completed(let nutritionInfo) = audioRecorder.state {
                 ScrollView {
                     Text(nutritionInfo)
-                        .font(.system(size: 15, weight: .regular))
+                        .font(.system(size: DesignTokens.FontSize.body, weight: .regular))
                         .foregroundColor(Color(UIColor.label))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(maxHeight: 200)
             } else if case .calculatingNutrition(let transcription) = audioRecorder.state {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
                     Text(transcription)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.system(size: DesignTokens.FontSize.body, weight: .medium))
                         .foregroundColor(Color(UIColor.label))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else if case .error(let message) = audioRecorder.state {
-                HStack(spacing: 12) {
+                HStack(spacing: DesignTokens.Spacing.sm) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 20))
                         .foregroundColor(.red)
-                    
+
                     Text(message)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.system(size: DesignTokens.FontSize.body, weight: .medium))
                         .foregroundColor(.red)
                 }
             }
         }
-        .padding(20)
+        .padding(DesignTokens.Spacing.lg)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
                 .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color(UIColor.separator).opacity(0.5), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
+                        .stroke(Color(UIColor.separator).opacity(0.5), lineWidth: DesignTokens.StrokeWidth.thin)
                 )
-                .shadow(color: Color.black.opacity(0.1), radius: 20, y: 10)
+                .shadow(color: Color.black.opacity(DesignTokens.Opacity.veryLight), radius: DesignTokens.Shadow.medium.radius, y: DesignTokens.Shadow.medium.y)
         )
-        .padding(.horizontal, 20)
-        .padding(.top, 12)
+        .padding(.horizontal, DesignTokens.Spacing.lg)
+        .padding(.top, DesignTokens.Spacing.sm)
     }
     
     private var statusIndicator: some View {
@@ -79,9 +79,9 @@ struct RecordingOverlay: View {
             case .recording:
                 ZStack {
                     Circle()
-                        .fill(Color.red.opacity(0.2))
+                        .fill(Color.red.opacity(DesignTokens.Opacity.light))
                         .frame(width: 32, height: 32)
-                    
+
                     Circle()
                         .fill(Color.red)
                         .frame(width: 12, height: 12)
@@ -89,47 +89,47 @@ struct RecordingOverlay: View {
                         .scaleEffect(audioRecorder.isRecording ? 1.2 : 1.0)
                         .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: audioRecorder.isRecording)
                 }
-                
+
             case .transcribing, .calculatingNutrition:
                 ZStack {
                     Circle()
-                        .fill(Color.blue.opacity(0.2))
+                        .fill(Color.blue.opacity(DesignTokens.Opacity.light))
                         .frame(width: 32, height: 32)
-                    
+
                     ProgressView()
                         .tint(.blue)
                 }
-                
+
             case .streamingNutrition:
                 ZStack {
                     Circle()
-                        .fill(Color.green.opacity(0.2))
+                        .fill(Color.green.opacity(DesignTokens.Opacity.light))
                         .frame(width: 32, height: 32)
-                    
+
                     Image(systemName: "waveform")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: DesignTokens.FontSize.label, weight: .semibold))
                         .foregroundColor(.green)
                 }
-                
+
             case .completed:
                 ZStack {
                     Circle()
-                        .fill(Color.green.opacity(0.2))
+                        .fill(Color.green.opacity(DesignTokens.Opacity.light))
                         .frame(width: 32, height: 32)
-                    
+
                     Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: DesignTokens.FontSize.label, weight: .bold))
                         .foregroundColor(.green)
                 }
-                
+
             case .error:
                 ZStack {
                     Circle()
-                        .fill(Color.red.opacity(0.2))
+                        .fill(Color.red.opacity(DesignTokens.Opacity.light))
                         .frame(width: 32, height: 32)
-                    
+
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: DesignTokens.FontSize.label, weight: .bold))
                         .foregroundColor(.red)
                 }
                 
@@ -144,32 +144,32 @@ struct RecordingOverlay: View {
             switch audioRecorder.state {
             case .recording:
                 Text("Recording...")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .semibold))
                     .foregroundColor(Color(UIColor.label))
-                
+
             case .transcribing:
                 Text("Transcribing...")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .semibold))
                     .foregroundColor(Color(UIColor.label))
-                
+
             case .calculatingNutrition:
                 Text("Calculating nutrition...")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .semibold))
                     .foregroundColor(Color(UIColor.label))
-                
+
             case .streamingNutrition:
                 Text("Analyzing...")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .semibold))
                     .foregroundColor(Color(UIColor.label))
-                
+
             case .completed:
                 Text("Complete")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .semibold))
                     .foregroundColor(.green)
-                
+
             case .error:
                 Text("Error")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .semibold))
                     .foregroundColor(.red)
                 
             case .idle:

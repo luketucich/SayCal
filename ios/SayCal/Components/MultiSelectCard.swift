@@ -12,25 +12,25 @@ struct MultiSelectCard: View {
         } label: {
             HStack {
                 Text(title)
-                    .font(.system(size: 15, weight: .regular))
+                    .font(.system(size: DesignTokens.FontSize.body, weight: .regular))
                     .foregroundColor(Color(UIColor.label))
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: DesignTokens.FontSize.small, weight: .semibold))
                         .foregroundColor(Color(UIColor.label))
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .padding(.horizontal, DesignTokens.Spacing.sm)
+            .padding(.vertical, DesignTokens.Spacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
                     .fill(Color(UIColor.systemBackground))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                        RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? DesignTokens.StrokeWidth.medium : DesignTokens.StrokeWidth.thin)
                     )
             )
         }
@@ -50,23 +50,23 @@ struct MultiSelectPill: View {
         } label: {
             HStack(spacing: 6) {
                 Text(title)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.system(size: DesignTokens.FontSize.label, weight: .regular))
                     .foregroundColor(Color(UIColor.label))
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 14))
+                        .font(.system(size: DesignTokens.FontSize.label))
                         .foregroundColor(Color(UIColor.label))
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, DesignTokens.Spacing.sm)
+            .padding(.vertical, DesignTokens.Spacing.xs)
             .background(
                 Capsule()
                     .fill(Color(UIColor.systemBackground))
                     .overlay(
                         Capsule()
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? DesignTokens.StrokeWidth.medium : DesignTokens.StrokeWidth.thin)
                     )
             )
         }

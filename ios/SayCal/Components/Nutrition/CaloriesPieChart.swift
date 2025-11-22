@@ -46,17 +46,17 @@ struct CaloriesPieChart: View {
             ZStack {
                 // Outer container circle
                 Circle()
-                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-                
+                    .stroke(Color.primary.opacity(DesignTokens.Opacity.veryLight), lineWidth: DesignTokens.StrokeWidth.thin)
+
                 // Macro segments
                 macroSegments(size: size)
-                
+
                 // Inner ring
                 innerRing(size: size)
-                
+
                 // Center content
                 centerContent(size: size)
-                
+
                 // Macro labels
                 macroLabels(size: size)
             }
@@ -98,9 +98,9 @@ struct CaloriesPieChart: View {
     private func innerRing(size: CGFloat) -> some View {
         Circle()
             .stroke(
-                Color.primary.opacity(0.1),
+                Color.primary.opacity(DesignTokens.Opacity.veryLight),
                 style: StrokeStyle(
-                    lineWidth: 1,
+                    lineWidth: DesignTokens.StrokeWidth.thin,
                     lineCap: .round
                 )
             )
@@ -113,14 +113,14 @@ struct CaloriesPieChart: View {
             Text("\(remainingCalories)")
                 .font(.system(size: size * 0.18, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.primary)
-            
+
             Text("calories left")
                 .font(.system(size: size * 0.055, weight: .medium))
-                .foregroundStyle(Color.primary.opacity(0.6))
-            
+                .foregroundStyle(Color.primary.opacity(DesignTokens.Opacity.strong))
+
             Text("of \(totalCalories)")
                 .font(.system(size: size * 0.045, weight: .medium))
-                .foregroundStyle(Color.primary.opacity(0.4))
+                .foregroundStyle(Color.primary.opacity(DesignTokens.Opacity.medium))
         }
     }
     
@@ -140,20 +140,20 @@ struct CaloriesPieChart: View {
                         Text(macro.name)
                             .font(.system(size: size * 0.04, weight: .medium))
                             .foregroundStyle(Color.primary)
-                        
+
                         Text("\(Int(macro.value * 100))%")
                             .font(.system(size: size * 0.035, weight: .regular))
-                            .foregroundStyle(Color.primary.opacity(0.6))
+                            .foregroundStyle(Color.primary.opacity(DesignTokens.Opacity.strong))
                     }
                 }
                 .padding(.horizontal, size * 0.025)
                 .padding(.vertical, size * 0.02)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small)
                         .fill(colorScheme == .dark ? Color.black : Color.white)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small)
+                                .stroke(Color.primary.opacity(DesignTokens.Opacity.veryLight), lineWidth: DesignTokens.StrokeWidth.thin)
                         )
                 )
                 .offset(

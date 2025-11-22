@@ -18,14 +18,14 @@ struct UnitCard: View {
                         .foregroundColor(Color(UIColor.label))
 
                     Text(subtitle)
-                        .font(.system(size: 14))
+                        .font(.system(size: DesignTokens.FontSize.label))
                         .foregroundColor(Color(UIColor.secondaryLabel))
                 }
 
                 Spacer()
 
                 Circle()
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: isSelected ? 2 : 1.5)
+                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: isSelected ? DesignTokens.StrokeWidth.thick : DesignTokens.StrokeWidth.medium)
                     .frame(width: 20, height: 20)
                     .overlay(
                         Circle()
@@ -34,10 +34,10 @@ struct UnitCard: View {
                             .opacity(isSelected ? 1 : 0)
                     )
             }
-            .padding(16)
+            .padding(DesignTokens.Spacing.md)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? DesignTokens.StrokeWidth.thick : DesignTokens.StrokeWidth.thin)
             )
         }
         .buttonStyle(.plain)

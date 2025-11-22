@@ -9,9 +9,9 @@ struct CustomInputField: View {
 
     var body: some View {
         TextField(placeholder, text: $text)
-            .font(.system(size: 14))
+            .font(.system(size: DesignTokens.FontSize.label))
             .foregroundColor(Color(UIColor.label))
-            .padding(.horizontal, 12)
+            .padding(.horizontal, DesignTokens.Spacing.sm)
             .padding(.vertical, 10)
             .frame(maxWidth: 160)
             .background(
@@ -19,7 +19,7 @@ struct CustomInputField: View {
                     .fill(Color(UIColor.systemBackground))
                     .overlay(
                         Capsule()
-                            .stroke(Color(UIColor.label), lineWidth: 1.5)
+                            .stroke(Color(UIColor.label), lineWidth: DesignTokens.StrokeWidth.medium)
                     )
             )
             .focused($isFocused)

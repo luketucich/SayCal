@@ -49,17 +49,17 @@ struct TogglePill: View {
             }
 
             Text(title)
-                .font(.system(size: 14, weight: .regular))
+                .font(.system(size: DesignTokens.FontSize.label, weight: .regular))
                 .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color(UIColor.label))
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, DesignTokens.Spacing.sm)
         .padding(.vertical, 10)
         .background(
             Capsule()
                 .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
                 .overlay(
                     Capsule()
-                        .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 1.5 : 1)
+                        .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? DesignTokens.StrokeWidth.medium : DesignTokens.StrokeWidth.thin)
                 )
         )
     }
@@ -67,16 +67,16 @@ struct TogglePill: View {
     @ViewBuilder
     private var roundedContent: some View {
         Text(title)
-            .font(.system(size: 16, weight: .medium))
+            .font(.system(size: DesignTokens.FontSize.bodyLarge, weight: .medium))
             .foregroundColor(isSelected ? Color(UIColor.systemBackground) : Color(UIColor.label))
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: DesignTokens.ButtonHeight.pill)
             .background(
                 RoundedRectangle(cornerRadius: 22)
                     .fill(isSelected ? Color(UIColor.label) : Color(UIColor.systemBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 22)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: 1)
+                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: DesignTokens.StrokeWidth.thin)
                     )
             )
     }
