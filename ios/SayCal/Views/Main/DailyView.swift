@@ -7,7 +7,7 @@ struct DailyView: View {
 
     var body: some View {
         NavigationStack {
-            chart.frame(width: 250, height: 250)
+            chart.frame(width: 200, height: 200)
             Spacer()
         }
     }
