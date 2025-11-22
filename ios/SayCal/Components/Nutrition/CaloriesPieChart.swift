@@ -5,12 +5,7 @@ struct CaloriesPieChart: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @EnvironmentObject var userManager: UserManager
 
-    var proteinColor: Color = .blue
-    var carbsColor: Color = .green
-    var fatsColor: Color = .orange
     var remainingCalories: Int = 1847
-
-    @State private var animateSegments: Bool = false
     
     private var proteinPercent: Double {
         guard let profile = userManager.profile else { return 0.30 }
@@ -31,11 +26,19 @@ struct CaloriesPieChart: View {
         userManager.profile?.targetCalories ?? 2400
     }
     
+    private var consumedCalories: Int {
+        totalCalories - remainingCalories
+    }
+    
+    private var consumedPercent: Double {
+        Double(consumedCalories) / Double(totalCalories)
+    }
+    
     private var macroData: [(name: String, value: Double, color: Color)] {
         [
-            ("Protein", proteinPercent, proteinColor),
-            ("Carbs", carbsPercent, carbsColor),
-            ("Fats", fatsPercent, fatsColor)
+            ("Protein", proteinPercent, .blue),
+            ("Carbs", carbsPercent, .green),
+            ("Fats", fatsPercent, .orange)
         ]
     }
     
@@ -43,137 +46,113 @@ struct CaloriesPieChart: View {
         GeometryReader { geometry in
             let size = min(geometry.size.width, geometry.size.height)
             
-            ZStack {
-                // Outer container circle
-                Circle()
-                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+            VStack(spacing: size * 0.08) {
+                // Main ring
+                mainRing(size: size)
                 
-                // Macro segments
-                macroSegments(size: size)
-                
-                // Inner ring
-                innerRing(size: size)
-                
-                // Center content
-                centerContent(size: size)
-                
-                // Macro labels
-                macroLabels(size: size)
+                // Macro breakdown below
+                macroBreakdown(size: size)
             }
-            .frame(width: size, height: size)
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.75)) {
-                animateSegments = true
-            }
+            .frame(width: size, height: size * 1.25)
         }
     }
     
-    // MARK: - Macro Segments
-    private func macroSegments(size: CGFloat) -> some View {
+    // MARK: - Main Ring
+    private func mainRing(size: CGFloat) -> some View {
         ZStack {
-            ForEach(Array(macroData.enumerated()), id: \.offset) { index, macro in
-                let start = startAngle(for: index)
-                let end = start + Angle.degrees(macro.value * 360)
-                
-                Circle()
-                    .trim(
-                        from: start.degrees / 360,
-                        to: animateSegments ? end.degrees / 360 : start.degrees / 360
-                    )
-                    .stroke(
-                        macro.color,
-                        style: StrokeStyle(
-                            lineWidth: size * 0.08,
-                            lineCap: .round
-                        )
-                    )
-                    .rotationEffect(.degrees(-90))
-            }
-        }
-        .padding(size * 0.12)
-    }
-    
-    // MARK: - Inner Ring
-    private func innerRing(size: CGFloat) -> some View {
-        Circle()
-            .stroke(
-                Color.primary.opacity(0.1),
-                style: StrokeStyle(
-                    lineWidth: 1,
-                    lineCap: .round
+            // Background ring
+            Circle()
+                .stroke(
+                    Color.gray.tertiary,
+                    lineWidth: size * 0.06
                 )
-            )
-            .padding(size * 0.21)
-    }
-    
-    // MARK: - Center Content
-    private func centerContent(size: CGFloat) -> some View {
-        VStack(spacing: size * 0.02) {
-            Text("\(remainingCalories)")
-                .font(.system(size: size * 0.18, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.primary)
             
-            Text("calories left")
-                .font(.system(size: size * 0.055, weight: .medium))
-                .foregroundStyle(Color.primary.opacity(0.6))
+            // Progress ring
+            Circle()
+                .trim(from: 0, to: consumedPercent)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.blue,
+                            Color.purple
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    style: StrokeStyle(
+                        lineWidth: size * 0.06,
+                        lineCap: .round
+                    )
+                )
+                .rotationEffect(.degrees(-90))
             
-            Text("of \(totalCalories)")
-                .font(.system(size: size * 0.045, weight: .medium))
-                .foregroundStyle(Color.primary.opacity(0.4))
-        }
-    }
-    
-    // MARK: - Macro Labels
-    private func macroLabels(size: CGFloat) -> some View {
-        ZStack {
-            ForEach(Array(macroData.enumerated()), id: \.offset) { index, macro in
-                let angle = midAngle(for: index)
-                let radius = size / 2 - size * 0.045
+            // Center content
+            VStack(spacing: size * 0.01) {
+                Text("\(remainingCalories)")
+                    .font(.system(size: size * 0.14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.primary)
                 
-                HStack(spacing: size * 0.02) {
-                    Circle()
-                        .fill(macro.color)
-                        .frame(width: size * 0.025, height: size * 0.025)
+                Text("left")
+                    .font(.system(size: size * 0.045, weight: .regular))
+                    .foregroundStyle(Color.secondary)
+                
+                Text("of \(totalCalories)")
+                    .font(.system(size: size * 0.04, weight: .regular))
+                    .foregroundStyle(Color.secondary)
+            }
+        }
+        .frame(width: size * 0.7, height: size * 0.7)
+    }
+    
+    // MARK: - Macro Breakdown
+    private func macroBreakdown(size: CGFloat) -> some View {
+        HStack(spacing: size * 0.06) {
+            ForEach(Array(macroData.enumerated()), id: \.offset) { index, macro in
+                VStack(spacing: size * 0.015) {
+                    // Grams remaining
+                    Text("\(gramsRemaining(for: index))g")
+                        .font(.system(size: size * 0.06, weight: .semibold, design: .rounded))
+                        .foregroundStyle(macro.color)
                     
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(macro.name)
-                            .font(.system(size: size * 0.04, weight: .medium))
-                            .foregroundStyle(Color.primary)
-                        
-                        Text("\(Int(macro.value * 100))%")
-                            .font(.system(size: size * 0.035, weight: .regular))
-                            .foregroundStyle(Color.primary.opacity(0.6))
-                    }
+                    // Label
+                    Text(macro.name)
+                        .font(.system(size: size * 0.038, weight: .regular))
+                        .foregroundStyle(Color.secondary)
+                    
+                    // Small indicator bar
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(macro.color)
+                        .frame(width: size * 0.12, height: 3)
                 }
-                .padding(.horizontal, size * 0.025)
-                .padding(.vertical, size * 0.02)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, size * 0.04)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(colorScheme == .dark ? Color.black : Color.white)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-                        )
+                    RoundedRectangle(cornerRadius: size * 0.025)
+                        .fill(Color.gray.tertiary)
                 )
-                .offset(
-                    x: cos(angle.radians - .pi / 2) * radius,
-                    y: sin(angle.radians - .pi / 2) * radius
-                )
-                .opacity(animateSegments ? 1 : 0)
-                .scaleEffect(animateSegments ? 1 : 0.8)
             }
         }
+        .padding(.horizontal, size * 0.05)
     }
     
-    // MARK: - Helpers
-    private func startAngle(for index: Int) -> Angle {
-        let previous = macroData.prefix(index).reduce(0.0) { $0 + $1.value }
-        return Angle.degrees(previous * 360)
-    }
-
-    private func midAngle(for index: Int) -> Angle {
-        Angle.degrees(startAngle(for: index).degrees + macroData[index].value * 180)
+    // MARK: - Helper: Calculate grams remaining
+    private func gramsRemaining(for macroIndex: Int) -> Int {
+        let macro = macroData[macroIndex]
+        let caloriesForMacro = Double(remainingCalories) * macro.value
+        
+        // Convert calories to grams
+        // Protein: 4 cal/g, Carbs: 4 cal/g, Fats: 9 cal/g
+        let gramsPerCalorie: Double
+        switch macro.name {
+        case "Protein", "Carbs":
+            gramsPerCalorie = 4.0
+        case "Fats":
+            gramsPerCalorie = 9.0
+        default:
+            gramsPerCalorie = 4.0
+        }
+        
+        return Int(caloriesForMacro / gramsPerCalorie)
     }
 }
 
@@ -181,6 +160,8 @@ struct CaloriesPieChart: View {
     CaloriesPieChart(
         remainingCalories: 1847
     )
-    .frame(width: 300, height: 300)
+    .environmentObject(UserManager.shared)
+    .frame(width: 300, height: 375)
     .padding()
+    .background(Color(.systemBackground))
 }
