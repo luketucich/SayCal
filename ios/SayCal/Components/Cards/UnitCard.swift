@@ -12,32 +12,32 @@ struct UnitCard: View {
             action()
         } label: {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(title)
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(AppTypography.bodyMedium)
+                        .foregroundColor(AppColors.primaryText)
 
                     Text(subtitle)
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(AppTypography.smallCaption)
+                        .foregroundColor(AppColors.secondaryText)
                 }
 
                 Spacer()
 
                 Circle()
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: isSelected ? 2 : 1.5)
-                    .frame(width: 20, height: 20)
+                    .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray4), lineWidth: 2)
+                    .frame(width: 24, height: 24)
                     .overlay(
                         Circle()
-                            .fill(Color(UIColor.label))
-                            .frame(width: 8, height: 8)
+                            .fill(AppColors.primaryText)
+                            .frame(width: 12, height: 12)
                             .opacity(isSelected ? 1 : 0)
                     )
             }
-            .padding(16)
+            .padding(AppSpacing.lg)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                    .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(.plain)

@@ -27,22 +27,18 @@ struct PrimaryButton: View {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: Color(UIColor.systemBackground)))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 48)
+                    .frame(height: 56)
             } else {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(AppTypography.bodyMedium)
                     .foregroundColor(isEnabled ? Color(UIColor.systemBackground) : Color(UIColor.systemGray3))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 48)
+                    .frame(height: 56)
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isEnabled ? Color(UIColor.label) : Color.clear)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(isEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4), lineWidth: 1)
-                )
+            RoundedRectangle(cornerRadius: AppCornerRadius.pill)
+                .fill(isEnabled ? Color(UIColor.label) : Color(UIColor.systemGray5))
         )
         .disabled(!isEnabled || isLoading)
     }
@@ -58,14 +54,14 @@ struct SecondaryButton: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 16, weight: .medium))
+                .font(AppTypography.bodyMedium)
                 .foregroundColor(Color(UIColor.label))
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .frame(height: 56)
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color(UIColor.separator), lineWidth: 1)
+            RoundedRectangle(cornerRadius: AppCornerRadius.pill)
+                .stroke(Color(UIColor.label), lineWidth: 1.5)
         )
     }
 }
@@ -80,9 +76,8 @@ struct TextButton: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: .regular))
-                .foregroundColor(Color(UIColor.label))
-                .underline()
+                .font(AppTypography.caption)
+                .foregroundColor(AppColors.secondaryText)
         }
     }
 }

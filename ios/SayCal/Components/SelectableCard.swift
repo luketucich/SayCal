@@ -23,26 +23,26 @@ struct SelectableCard: View {
             HapticManager.shared.light()
             action()
         } label: {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color(UIColor.label))
+                    .font(AppTypography.bodyMedium)
+                    .foregroundColor(AppColors.primaryText)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(AppTypography.smallCaption)
+                        .foregroundColor(AppColors.secondaryText)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.vertical, AppSpacing.md)
             .background(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: AppCornerRadius.md)
                     .fill(Color(UIColor.systemBackground))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                        RoundedRectangle(cornerRadius: AppCornerRadius.md)
+                            .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
                     )
             )
         }
@@ -61,16 +61,16 @@ struct SelectablePill: View {
             action()
         } label: {
             Text(title)
-                .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(Color(UIColor.label))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+                .font(isSelected ? AppTypography.captionMedium : AppTypography.caption)
+                .foregroundColor(isSelected ? Color(UIColor.systemBackground) : AppColors.primaryText)
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.vertical, AppSpacing.sm)
                 .background(
                     Capsule()
-                        .fill(Color(UIColor.systemBackground))
+                        .fill(isSelected ? AppColors.primaryText : Color(UIColor.systemBackground))
                         .overlay(
                             Capsule()
-                                .stroke(isSelected ? Color(UIColor.label) : Color(UIColor.systemGray5), lineWidth: isSelected ? 2 : 1)
+                                .stroke(isSelected ? AppColors.primaryText : Color(UIColor.systemGray5), lineWidth: 1.5)
                         )
                 )
         }
@@ -81,7 +81,7 @@ struct SelectablePill: View {
 struct TabSelector: View {
     let options: [String]
     @Binding var selectedOption: String
-    
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(options, id: \.self) { option in
@@ -90,21 +90,21 @@ struct TabSelector: View {
                     selectedOption = option
                 } label: {
                     Text(option)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(UIColor.label))
+                        .font(AppTypography.bodyMedium)
+                        .foregroundColor(AppColors.primaryText)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, AppSpacing.sm)
                         .background(
                             VStack(spacing: 0) {
                                 Spacer()
                                 if selectedOption == option {
                                     Rectangle()
-                                        .fill(Color(UIColor.label))
-                                        .frame(height: 2)
+                                        .fill(AppColors.primaryText)
+                                        .frame(height: 3)
                                 } else {
                                     Rectangle()
                                         .fill(Color.clear)
-                                        .frame(height: 2)
+                                        .frame(height: 3)
                                 }
                             }
                         )
@@ -112,7 +112,7 @@ struct TabSelector: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, AppSpacing.lg)
     }
 }
 

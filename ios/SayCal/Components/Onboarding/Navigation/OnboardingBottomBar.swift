@@ -40,9 +40,8 @@ struct OnboardingBottomBar: View {
                             onBack()
                         } label: {
                             Text("Back")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color(UIColor.label))
-                                .underline()
+                                .font(AppTypography.captionMedium)
+                                .foregroundColor(AppColors.secondaryText)
                         }
                     }
 
@@ -52,24 +51,24 @@ struct OnboardingBottomBar: View {
                         HapticManager.shared.medium()
                         onNext()
                     } label: {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 6) {
                             Text(nextButtonText)
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(AppTypography.bodyMedium)
                             Image(systemName: nextButtonIcon)
                                 .font(.system(size: 14, weight: .semibold))
                         }
                         .foregroundColor(isNextEnabled ? Color(UIColor.systemBackground) : Color(UIColor.secondaryLabel))
-                        .padding(.horizontal, 24)
-                        .frame(height: 48)
+                        .padding(.horizontal, AppSpacing.xl)
+                        .frame(height: 56)
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(isNextEnabled ? Color(UIColor.label) : Color(UIColor.systemGray4))
+                            RoundedRectangle(cornerRadius: AppCornerRadius.pill)
+                                .fill(isNextEnabled ? AppColors.primaryText : Color(UIColor.systemGray4))
                         )
                     }
                     .disabled(!isNextEnabled)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.vertical, AppSpacing.md)
                 .background(Color(UIColor.systemBackground))
             }
         }

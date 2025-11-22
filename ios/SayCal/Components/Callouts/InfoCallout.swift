@@ -4,21 +4,21 @@ struct InfoCallout: View {
     let message: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .top, spacing: AppSpacing.sm) {
             Image(systemName: "info.circle")
                 .font(.system(size: 14))
-                .foregroundColor(Color(UIColor.tertiaryLabel))
+                .foregroundColor(AppColors.tertiaryText)
 
             Text(message)
-                .font(.system(size: 13))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(AppTypography.smallCaption)
+                .foregroundColor(AppColors.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
+        .padding(AppSpacing.md)
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(UIColor.systemGray6))
+            RoundedRectangle(cornerRadius: AppCornerRadius.sm)
+                .fill(Color(UIColor.secondarySystemBackground))
         )
     }
 }

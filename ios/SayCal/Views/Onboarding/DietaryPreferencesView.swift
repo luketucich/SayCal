@@ -105,7 +105,7 @@ struct DietaryPreferencesView: View {
                 onNext: { state.nextStep() }
             )
         }
-        .background(Color(UIColor.systemBackground))
+        .background(AppColors.lightBackground)
         .onAppear {
             let predefinedPreferences = Set(DietaryOptions.dietaryPreferences)
             let customPreferences = state.selectedDietaryPreferences.filter { !predefinedPreferences.contains($0) }

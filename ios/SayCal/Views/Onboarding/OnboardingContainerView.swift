@@ -102,7 +102,7 @@ struct OnboardingContainerView: View {
                     ))
                     .id(state.currentStep)
             }
-            .background(Color(UIColor.systemBackground))
+            .background(AppColors.lightBackground)
             .navigationBarTitleDisplayMode(.inline)
         }
     }

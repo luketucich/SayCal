@@ -3,28 +3,30 @@ import SwiftUI
 struct WelcomeView: View {
     @State private var showEmailAuth = false
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: colorScheme == .dark ? [
-                    Color(red: 0.15, green: 0.1, blue: 0.3),
-                    Color(red: 0.25, green: 0.15, blue: 0.35),
-                    Color(red: 0.1, green: 0.2, blue: 0.3)
-                ] : [
-                    Color(red: 0.9, green: 0.7, blue: 0.95),
-                    Color(red: 0.7, green: 0.85, blue: 1.0),
-                    Color(red: 0.95, green: 0.8, blue: 0.7)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-    
+            AppColors.lightBackground
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
                 Spacer()
 
-                VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: AppSpacing.lg) {
+                    Text("welcome.")
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(AppColors.primaryText)
+                        .padding(.bottom, AppSpacing.xs)
+
+                    Text("Track your nutrition, effortlessly.")
+                        .font(AppTypography.body)
+                        .foregroundColor(AppColors.secondaryText)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, AppSpacing.xl)
+                .padding(.bottom, AppSpacing.xxxl)
+
+                VStack(spacing: AppSpacing.md) {
                     AppleAuthButton()
 
                     GoogleAuthButton()
@@ -34,13 +36,13 @@ struct WelcomeView: View {
                         showEmailAuth = true
                     } label: {
                         Text("Use email instead")
-                            .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .font(AppTypography.caption)
+                            .foregroundColor(AppColors.secondaryText)
                     }
-                    .padding(.top, 4)
+                    .padding(.top, AppSpacing.xs)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                .padding(.horizontal, AppSpacing.xl)
+                .padding(.bottom, AppSpacing.xxxl)
             }
         }
         .sheet(isPresented: $showEmailAuth) {
