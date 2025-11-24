@@ -12,21 +12,28 @@ struct CodeInputView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            OnboardingHeader(
-                title: "Enter verification code",
-                subtitle: "We sent a 6-digit code to \(email)"
-            )
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Enter verification code")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.primary)
+
+                Text("We sent a 6-digit code to \(email)")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 24)
 
             VStack(spacing: 16) {
                 HStack(spacing: 12) {
                     ForEach(0..<6, id: \.self) { index in
                         ZStack {
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(Theme.Colors.background)
+                                .fill(Color(.systemBackground))
                                 .frame(width: 48, height: 56)
 
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(code.count == index ? Theme.Colors.accent : Color.primary.opacity(0.3), lineWidth: code.count == index ? 2 : 1)
+                                .stroke(code.count == index ? Color.blue : Color.primary.opacity(0.3), lineWidth: code.count == index ? 2 : 1)
                                 .frame(width: 48, height: 56)
 
                             if index < code.count {
@@ -34,7 +41,6 @@ struct CodeInputView: View {
                                     .font(.system(size: 24, weight: .semibold))
                             }
                         }
-                        .cardShadow()
                     }
                 }
                 .overlay {
@@ -66,7 +72,7 @@ struct CodeInputView: View {
 
                 if let errorMessage {
                     Text(errorMessage)
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                         .font(.caption)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

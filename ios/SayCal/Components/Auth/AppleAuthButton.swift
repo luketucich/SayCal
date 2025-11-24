@@ -5,7 +5,7 @@ import Supabase
 struct AppleAuthButton: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var errorMessage: String?
-    
+
     var body: some View {
         VStack {
             SignInWithAppleButton(
@@ -19,15 +19,14 @@ struct AppleAuthButton: View {
             }
         )
         .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-        .frame(height: Theme.ButtonSize.large)
-        .cornerRadius(Theme.CornerRadius.medium)
-        .mediumShadow()
+        .frame(height: 56)
+        .cornerRadius(12)
 
             if let errorMessage {
                 Text(errorMessage)
-                    .foregroundColor(Theme.Colors.error)
-                    .font(Theme.Typography.small)
-                    .padding(.top, Theme.Spacing.xxs)
+                    .foregroundStyle(.red)
+                    .font(.caption)
+                    .padding(.top, 4)
             }
         }
     }

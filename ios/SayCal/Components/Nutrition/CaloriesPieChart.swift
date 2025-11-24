@@ -2,173 +2,67 @@ import SwiftUI
 import Charts
 
 struct CaloriesPieChart: View {
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
     @EnvironmentObject var userManager: UserManager
-
     var remainingCalories: Int = 1847
-    
-    private var proteinPercent: Double {
-        guard let profile = userManager.profile else { return 0.30 }
-        return Double(profile.proteinPercent) / 100.0
-    }
-
-    private var carbsPercent: Double {
-        guard let profile = userManager.profile else { return 0.40 }
-        return Double(profile.carbsPercent) / 100.0
-    }
-
-    private var fatsPercent: Double {
-        guard let profile = userManager.profile else { return 0.30 }
-        return Double(profile.fatsPercent) / 100.0
-    }
 
     private var totalCalories: Int {
         userManager.profile?.targetCalories ?? 2400
     }
-    
+
     private var consumedCalories: Int {
         totalCalories - remainingCalories
     }
-    
+
     private var consumedPercent: Double {
-        Double(consumedCalories) / Double(totalCalories)
+        min(Double(consumedCalories) / Double(totalCalories), 1.0)
     }
-    
-    private var macroData: [(name: String, value: Double, color: Color)] {
-        [
-            ("Protein", proteinPercent, Theme.Colors.protein),
-            ("Carbs", carbsPercent, Theme.Colors.carbs),
-            ("Fats", fatsPercent, Theme.Colors.fats)
-        ]
-    }
-    
+
     var body: some View {
-        GeometryReader { geometry in
-            let size = min(geometry.size.width, geometry.size.height)
-            
-            VStack(spacing: size * 0.08) {
-                // Main ring
-                mainRing(size: size)
-                
-                // Macro breakdown below
-                macroBreakdown(size: size)
-            }
-            .frame(width: size, height: size * 1.25)
-        }
-    }
-    
-    // MARK: - Main Ring
-    private func mainRing(size: CGFloat) -> some View {
         ZStack {
             // Background ring
             Circle()
                 .stroke(
-                    Color.gray.tertiary,
-                    lineWidth: size * 0.06
+                    Color(.systemGray5),
+                    lineWidth: 20
                 )
-            
+
             // Progress ring
             Circle()
                 .trim(from: 0, to: consumedPercent)
                 .stroke(
-                    LinearGradient(
-                        colors: [
-                            Theme.Colors.accent.opacity(0.8),
-                            Theme.Colors.accent
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
+                    Color.blue,
                     style: StrokeStyle(
-                        lineWidth: size * 0.06,
+                        lineWidth: 20,
                         lineCap: .round
                     )
                 )
                 .rotationEffect(.degrees(-90))
-                .shadow(
-                    color: Theme.Colors.accent.opacity(0.3),
-                    radius: size * 0.03,
-                    x: 0,
-                    y: size * 0.01
-                )
-            
+                .animation(.easeInOut(duration: 0.5), value: consumedPercent)
+
             // Center content
-            VStack(spacing: size * 0.01) {
+            VStack(spacing: 2) {
                 Text("\(remainingCalories)")
-                    .font(.system(size: size * 0.14, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color.primary)
-                
-                Text("left")
-                    .font(.system(size: size * 0.045, weight: .regular))
-                    .foregroundStyle(Color.secondary)
-                
+                    .font(.system(size: 56, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .contentTransition(.numericText())
+
+                Text("remaining")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
                 Text("of \(totalCalories)")
-                    .font(.system(size: size * 0.04, weight: .regular))
-                    .foregroundStyle(Color.secondary)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
         }
-        .frame(width: size * 0.7, height: size * 0.7)
-    }
-    
-    // MARK: - Macro Breakdown
-    private func macroBreakdown(size: CGFloat) -> some View {
-        HStack(spacing: size * 0.06) {
-            ForEach(Array(macroData.enumerated()), id: \.offset) { index, macro in
-                VStack(spacing: size * 0.015) {
-                    // Grams remaining
-                    Text("\(gramsRemaining(for: index))g")
-                        .font(Theme.Typography.number(size: size * 0.06, weight: .semibold))
-                        .foregroundStyle(macro.color)
-
-                    // Label
-                    Text(macro.name)
-                        .font(.system(size: size * 0.038, weight: .regular))
-                        .foregroundStyle(Theme.Colors.secondaryLabel)
-
-                    // Small indicator bar
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(macro.color)
-                        .frame(width: size * 0.12, height: 3)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, size * 0.04)
-                .background(
-                    RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                        .fill(macro.color.opacity(0.1))
-                )
-                .cardShadow()
-            }
-        }
-        .padding(.horizontal, size * 0.05)
-    }
-    
-    // MARK: - Helper: Calculate grams remaining
-    private func gramsRemaining(for macroIndex: Int) -> Int {
-        let macro = macroData[macroIndex]
-        let caloriesForMacro = Double(remainingCalories) * macro.value
-        
-        // Convert calories to grams
-        // Protein: 4 cal/g, Carbs: 4 cal/g, Fats: 9 cal/g
-        let gramsPerCalorie: Double
-        switch macro.name {
-        case "Protein", "Carbs":
-            gramsPerCalorie = 4.0
-        case "Fats":
-            gramsPerCalorie = 9.0
-        default:
-            gramsPerCalorie = 4.0
-        }
-        
-        return Int(caloriesForMacro / gramsPerCalorie)
+        .aspectRatio(1, contentMode: .fit)
+        .padding(8)
     }
 }
 
 #Preview {
-    CaloriesPieChart(
-        remainingCalories: 1847
-    )
-    .environmentObject(UserManager.shared)
-    .frame(width: 300, height: 375)
-    .padding()
-    .background(Color(.systemBackground))
+    CaloriesPieChart(remainingCalories: 1847)
+        .environmentObject(UserManager.shared)
+        .frame(width: 280, height: 280)
+        .padding()
 }

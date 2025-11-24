@@ -3,7 +3,7 @@ import SwiftUI
 struct RecordingOverlay: View {
     @ObservedObject var audioRecorder: AudioRecorder
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         VStack(spacing: 0) {
             if !audioRecorder.displayText.isEmpty {
@@ -13,11 +13,11 @@ struct RecordingOverlay: View {
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: audioRecorder.displayText.isEmpty)
     }
-    
+
     private var overlayContent: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+        VStack(alignment: .leading, spacing: 16) {
             // Header with status indicator
-            HStack(spacing: Theme.Spacing.sm) {
+            HStack(spacing: 12) {
                 statusIndicator
                 statusText
                 Spacer()
@@ -27,65 +27,65 @@ struct RecordingOverlay: View {
             if case .streamingNutrition(_, let partialInfo) = audioRecorder.state, !partialInfo.isEmpty {
                 ScrollView {
                     Text(partialInfo)
-                        .font(Theme.Typography.callout)
-                        .foregroundColor(Theme.Colors.label)
+                        .font(.callout)
+                        .foregroundStyle(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(maxHeight: 200)
             } else if case .completed(let nutritionInfo) = audioRecorder.state {
                 ScrollView {
                     Text(nutritionInfo)
-                        .font(Theme.Typography.callout)
-                        .foregroundColor(Theme.Colors.label)
+                        .font(.callout)
+                        .foregroundStyle(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(maxHeight: 200)
             } else if case .calculatingNutrition(let transcription) = audioRecorder.state {
-                VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(transcription)
-                        .font(Theme.Typography.callout)
+                        .font(.callout)
                         .fontWeight(.medium)
-                        .foregroundColor(Theme.Colors.label)
+                        .foregroundStyle(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else if case .error(let message) = audioRecorder.state {
-                HStack(spacing: Theme.Spacing.sm) {
+                HStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(Theme.Colors.error)
+                        .foregroundStyle(.red)
 
                     Text(message)
-                        .font(Theme.Typography.callout)
+                        .font(.callout)
                         .fontWeight(.medium)
-                        .foregroundColor(Theme.Colors.error)
+                        .foregroundStyle(.red)
                 }
             }
         }
-        .padding(Theme.Spacing.lg)
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: Theme.CornerRadius.large)
+            RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: Theme.CornerRadius.large)
-                        .stroke(Theme.Colors.separator.opacity(0.5), lineWidth: Theme.BorderWidth.thin)
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
                 )
         )
-        .boldShadow()
-        .padding(.horizontal, Theme.Spacing.lg)
-        .padding(.top, Theme.Spacing.sm)
+        .shadow(color: .black.opacity(0.15), radius: 20, y: 8)
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
     }
-    
+
     private var statusIndicator: some View {
         Group {
             switch audioRecorder.state {
             case .recording:
                 ZStack {
                     Circle()
-                        .fill(Theme.Colors.errorLight)
+                        .fill(Color.red.opacity(0.15))
                         .frame(width: 32, height: 32)
 
                     Circle()
-                        .fill(Theme.Colors.error)
+                        .fill(Color.red)
                         .frame(width: 12, height: 12)
                         .opacity(audioRecorder.isRecording ? 1 : 0.5)
                         .scaleEffect(audioRecorder.isRecording ? 1.2 : 1.0)
@@ -95,44 +95,44 @@ struct RecordingOverlay: View {
             case .transcribing, .calculatingNutrition:
                 ZStack {
                     Circle()
-                        .fill(Theme.Colors.accentLight)
+                        .fill(Color.blue.opacity(0.15))
                         .frame(width: 32, height: 32)
 
                     ProgressView()
-                        .tint(Theme.Colors.accent)
+                        .tint(Color.blue)
                 }
 
             case .streamingNutrition:
                 ZStack {
                     Circle()
-                        .fill(Theme.Colors.successLight)
+                        .fill(Color.green.opacity(0.15))
                         .frame(width: 32, height: 32)
 
                     Image(systemName: "waveform")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Theme.Colors.success)
+                        .foregroundStyle(.green)
                 }
 
             case .completed:
                 ZStack {
                     Circle()
-                        .fill(Theme.Colors.successLight)
+                        .fill(Color.green.opacity(0.15))
                         .frame(width: 32, height: 32)
 
                     Image(systemName: "checkmark")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Theme.Colors.success)
+                        .foregroundStyle(.green)
                 }
 
             case .error:
                 ZStack {
                     Circle()
-                        .fill(Theme.Colors.errorLight)
+                        .fill(Color.red.opacity(0.15))
                         .frame(width: 32, height: 32)
 
                     Image(systemName: "xmark")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Theme.Colors.error)
+                        .foregroundStyle(.red)
                 }
 
             case .idle:
@@ -140,45 +140,45 @@ struct RecordingOverlay: View {
             }
         }
     }
-    
+
     private var statusText: some View {
         Group {
             switch audioRecorder.state {
             case .recording:
                 Text("Recording...")
-                    .font(Theme.Typography.body)
+                    .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Theme.Colors.label)
+                    .foregroundStyle(.primary)
 
             case .transcribing:
                 Text("Transcribing...")
-                    .font(Theme.Typography.body)
+                    .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Theme.Colors.label)
+                    .foregroundStyle(.primary)
 
             case .calculatingNutrition:
                 Text("Calculating nutrition...")
-                    .font(Theme.Typography.body)
+                    .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Theme.Colors.label)
+                    .foregroundStyle(.primary)
 
             case .streamingNutrition:
                 Text("Analyzing...")
-                    .font(Theme.Typography.body)
+                    .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Theme.Colors.label)
+                    .foregroundStyle(.primary)
 
             case .completed:
                 Text("Complete")
-                    .font(Theme.Typography.body)
+                    .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Theme.Colors.success)
+                    .foregroundStyle(.green)
 
             case .error:
                 Text("Error")
-                    .font(Theme.Typography.body)
+                    .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Theme.Colors.error)
+                    .foregroundStyle(.red)
 
             case .idle:
                 EmptyView()
@@ -190,7 +190,7 @@ struct RecordingOverlay: View {
 #Preview {
     VStack {
         Spacer()
-        
+
         RecordingOverlay(audioRecorder: {
             let recorder = AudioRecorder()
             recorder.state = .streamingNutrition(
@@ -199,8 +199,8 @@ struct RecordingOverlay: View {
             )
             return recorder
         }())
-        
+
         Spacer()
     }
-    .background(Color(UIColor.systemGray6))
+    .background(Color(.systemGray6))
 }

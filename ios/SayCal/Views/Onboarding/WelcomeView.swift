@@ -3,29 +3,16 @@ import SwiftUI
 struct WelcomeView: View {
     @State private var showEmailAuth = false
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: colorScheme == .dark ? [
-                    Theme.Colors.accent.opacity(0.3),
-                    Theme.Colors.accent.opacity(0.4),
-                    Theme.Colors.accent.opacity(0.2)
-                ] : [
-                    Theme.Colors.accent.opacity(0.15),
-                    Theme.Colors.accent.opacity(0.1),
-                    Theme.Colors.accent.opacity(0.05)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .background(Theme.Colors.background)
-            .ignoresSafeArea()
+            Color(.systemBackground)
+                .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer()
 
-                VStack(spacing: Theme.Spacing.md) {
+                VStack(spacing: 16) {
                     AppleAuthButton()
 
                     GoogleAuthButton()
@@ -35,13 +22,13 @@ struct WelcomeView: View {
                         showEmailAuth = true
                     } label: {
                         Text("Use email instead")
-                            .font(Theme.Typography.headline)
-                            .foregroundColor(Theme.Colors.label)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
                     }
-                    .padding(.top, Theme.Spacing.xxs)
+                    .padding(.top, 4)
                 }
-                .padding(.horizontal, Theme.Spacing.xl)
-                .padding(.bottom, Theme.Spacing.xxxl)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
             }
         }
         .sheet(isPresented: $showEmailAuth) {

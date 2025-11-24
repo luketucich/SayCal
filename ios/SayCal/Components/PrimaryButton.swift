@@ -27,20 +27,19 @@ struct PrimaryButton: View {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .frame(maxWidth: .infinity)
-                    .frame(height: Theme.ButtonSize.standard)
+                    .frame(height: 48)
             } else {
                 Text(title)
-                    .font(Theme.Typography.headline)
-                    .foregroundColor(.white)
+                    .font(.headline)
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .frame(height: Theme.ButtonSize.standard)
+                    .frame(height: 48)
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                .fill(isEnabled ? Theme.Colors.accent : Theme.Colors.accent.opacity(0.5))
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isEnabled ? Color.blue : Color.blue.opacity(0.5))
         )
-        .mediumShadow()
         .opacity(isEnabled ? 1.0 : 0.6)
         .disabled(!isEnabled || isLoading)
     }
@@ -56,20 +55,19 @@ struct SecondaryButton: View {
             action()
         } label: {
             Text(title)
-                .font(Theme.Typography.headline)
-                .foregroundColor(Theme.Colors.label)
+                .font(.headline)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
-                .frame(height: Theme.ButtonSize.standard)
+                .frame(height: 48)
         }
         .background(
-            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                .fill(Theme.Colors.background)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                .stroke(Theme.Colors.border, lineWidth: Theme.BorderWidth.standard)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(.systemGray4), lineWidth: 1.5)
         )
-        .cardShadow()
     }
 }
 
@@ -83,8 +81,8 @@ struct TextButton: View {
             action()
         } label: {
             Text(title)
-                .font(Theme.Typography.callout)
-                .foregroundColor(Theme.Colors.secondaryLabel)
+                .font(.callout)
+                .foregroundStyle(.secondary)
                 .underline()
         }
     }

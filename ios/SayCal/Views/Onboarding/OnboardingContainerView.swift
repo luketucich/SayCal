@@ -142,7 +142,7 @@ struct ProgressBar: View {
 
                 // Progress fill
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(Theme.Colors.accent)
+                    .fill(Color.blue)
                     .frame(
                         width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps),
                         height: 6

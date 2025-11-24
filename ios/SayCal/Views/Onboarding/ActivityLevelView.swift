@@ -5,37 +5,74 @@ struct ActivityLevelView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
-                    OnboardingHeader(
-                        title: "Activity level",
-                        subtitle: "How active are you on a typical day?"
-                    )
+            // Header
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Activity level")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.primary)
 
-                    VStack(spacing: 12) {
+                Text("How active are you on a typical day?")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            .padding(.bottom, 16)
+
+            Form {
+                Section {
+                    Picker("Activity Level", selection: $state.activityLevel) {
                         ForEach(ActivityLevel.allCases, id: \.self) { level in
-                            SelectableCard(
-                                title: level.displayName,
-                                isSelected: state.activityLevel == level
-                            ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    state.activityLevel = level
-                                }
-                            }
+                            Text(level.displayName).tag(level)
                         }
                     }
-
-                    Spacer(minLength: 100)
+                    .pickerStyle(.inline)
+                    .labelsHidden()
                 }
-                .padding(.horizontal, 20)
             }
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemBackground))
 
-            OnboardingBottomBar(
-                onBack: { state.previousStep() },
-                onNext: { state.nextStep() }
-            )
+            Spacer()
+
+            // Navigation buttons
+            VStack(spacing: 0) {
+                Divider()
+
+                HStack {
+                    Button {
+                        HapticManager.shared.light()
+                        state.previousStep()
+                    } label: {
+                        Text("Back")
+                            .foregroundStyle(.secondary)
+                            .underline()
+                    }
+
+                    Spacer()
+
+                    Button {
+                        HapticManager.shared.medium()
+                        state.nextStep()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Next")
+                                .fontWeight(.semibold)
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Color.blue, in: RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+            }
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color(.systemBackground))
     }
 }
 

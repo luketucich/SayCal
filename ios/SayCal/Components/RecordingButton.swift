@@ -3,7 +3,7 @@ import SwiftUI
 struct RecordingButton: View {
     @ObservedObject var audioRecorder: AudioRecorder
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         Button(action: {}) {
             ZStack {
@@ -22,7 +22,7 @@ struct RecordingButton: View {
                         radius: audioRecorder.isRecording ? 20 : 12,
                         y: 6
                     )
-                
+
                 // Icon or progress indicator
                 if audioRecorder.isProcessing && !audioRecorder.isRecording {
                     ProgressView()
@@ -53,33 +53,33 @@ struct RecordingButton: View {
                 }
         )
     }
-    
+
     // MARK: - Computed Properties
-    
+
     private var buttonSize: CGFloat {
         audioRecorder.isRecording ? 80 : 64
     }
-    
+
     private var iconSize: CGFloat {
         audioRecorder.isRecording ? 30 : 24
     }
-    
+
     private var iconName: String {
         audioRecorder.isRecording ? "mic.fill" : "mic.fill"
     }
-    
+
     private var gradientColors: [Color] {
         if audioRecorder.isRecording {
-            return [Theme.Colors.error.opacity(0.9), Theme.Colors.error]
+            return [Color.red.opacity(0.9), Color.red]
         } else {
-            return [Theme.Colors.accent.opacity(0.9), Theme.Colors.accent]
+            return [Color.blue.opacity(0.9), Color.blue]
         }
     }
 
     private var shadowColor: Color {
         audioRecorder.isRecording
-            ? Theme.Colors.error.opacity(0.4)
-            : Theme.Colors.accent.opacity(0.35)
+            ? Color.red.opacity(0.4)
+            : Color.blue.opacity(0.35)
     }
 }
 
@@ -90,7 +90,7 @@ struct RecordingButton: View {
             recorder.state = .idle
             return recorder
         }())
-        
+
         RecordingButton(audioRecorder: {
             let recorder = AudioRecorder()
             recorder.state = .recording
@@ -98,5 +98,5 @@ struct RecordingButton: View {
         }())
     }
     .padding()
-    .background(Color(UIColor.systemGray6))
+    .background(Color(.systemGray6))
 }

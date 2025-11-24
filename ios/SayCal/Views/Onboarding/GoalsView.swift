@@ -5,99 +5,114 @@ struct GoalsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
-                    OnboardingHeader(
-                        title: "Your goal",
-                        subtitle: "What are you trying to achieve?"
-                    )
+            // Header
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Your goal")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.primary)
 
-                    VStack(spacing: 12) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Your Target Calories")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(Color(UIColor.secondaryLabel))
-
-                                Text("\(state.targetCalories)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(UIColor.label))
-
-                                Text("calories per day")
-                                    .font(.system(size: 13))
-                                    .foregroundColor(Color(UIColor.tertiaryLabel))
-                            }
-
-                            Spacer()
-                        }
-                        .padding(20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(UIColor.systemGray6))
-                        )
-
-                        HStack(spacing: 12) {
-                            let macros = UserManager.calculateMacroPercentages(for: state.goal)
-
-                            OnboardingMacroCard(
-                                title: "Carbs",
-                                percentage: macros.carbs,
-                                color: .blue
-                            )
-
-                            OnboardingMacroCard(
-                                title: "Fats",
-                                percentage: macros.fats,
-                                color: .orange
-                            )
-
-                            OnboardingMacroCard(
-                                title: "Protein",
-                                percentage: macros.protein,
-                                color: .green
-                            )
-                        }
-
-                        HStack {
-                            Image(systemName: "info.circle")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color(UIColor.tertiaryLabel))
-
-                            Text("You can edit your target calories and macros anytime in your profile")
-                                .font(.system(size: 13))
-                                .foregroundColor(Color(UIColor.secondaryLabel))
-                        }
-                    }
-
-                    VStack(spacing: 12) {
-                        ForEach(Goal.allCases, id: \.self) { goal in
-                            SelectableCard(
-                                title: goal.displayName,
-                                subtitle: goal.calorieAdjustmentText,
-                                isSelected: state.goal == goal
-                            ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    state.goal = goal
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(minLength: 100)
-                }
-                .padding(.horizontal, 20)
+                Text("What are you trying to achieve?")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            .padding(.bottom, 16)
 
-            OnboardingBottomBar(
-                onBack: { state.previousStep() },
-                onNext: { state.nextStep() }
-            )
+            Form {
+                // Calories & Macros Display
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Your Target Calories")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+
+                        Text("\(state.targetCalories)")
+                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .foregroundStyle(.primary)
+
+                        Text("calories per day")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    let macros = UserManager.calculateMacroPercentages(for: state.goal)
+
+                    HStack(spacing: 12) {
+                        MacroCard(title: "Carbs", percentage: macros.carbs, color: .blue)
+                        MacroCard(title: "Fats", percentage: macros.fats, color: .orange)
+                        MacroCard(title: "Protein", percentage: macros.protein, color: .green)
+                    }
+                    .listRowInsets(EdgeInsets())
+                } footer: {
+                    Label("You can edit your target calories and macros anytime in your profile", systemImage: "info.circle")
+                }
+
+                // Goal Picker
+                Section {
+                    Picker("Goal", selection: $state.goal) {
+                        ForEach(Goal.allCases, id: \.self) { goal in
+                            VStack(alignment: .leading) {
+                                Text(goal.displayName)
+                                Text(goal.calorieAdjustmentText)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .tag(goal)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemBackground))
+
+            Spacer()
+
+            // Navigation buttons
+            VStack(spacing: 0) {
+                Divider()
+
+                HStack {
+                    Button {
+                        HapticManager.shared.light()
+                        state.previousStep()
+                    } label: {
+                        Text("Back")
+                            .foregroundStyle(.secondary)
+                            .underline()
+                    }
+
+                    Spacer()
+
+                    Button {
+                        HapticManager.shared.medium()
+                        state.nextStep()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Next")
+                                .fontWeight(.semibold)
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Color.blue, in: RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+                .padding(16)
+                .background(Color(.systemBackground))
+            }
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color(.systemBackground))
     }
 }
 
-struct OnboardingMacroCard: View {
+struct MacroCard: View {
     let title: String
     let percentage: Int
     let color: Color
@@ -105,19 +120,17 @@ struct OnboardingMacroCard: View {
     var body: some View {
         VStack(spacing: 6) {
             Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(UIColor.secondaryLabel))
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
 
             Text("\(percentage)%")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(color)
+                .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(color.opacity(0.1))
-        )
+        .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
     }
 }
 

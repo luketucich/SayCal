@@ -4,7 +4,7 @@ import Supabase
 
 struct GoogleAuthButton: View {
     @State private var errorMessage: String?
-    
+
     var body: some View {
         VStack {
             Button {
@@ -17,50 +17,49 @@ struct GoogleAuthButton: View {
                     }
                 }
             } label: {
-                HStack(spacing: Theme.Spacing.xs) {
+                HStack(spacing: 8) {
                     Text("G")
                         .font(.system(size: 20, weight: .semibold))
 
                     Text("Sign in with Google")
                         .font(.system(size: 22, weight: .medium))
                 }
-                .foregroundColor(Theme.Colors.label)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
-                .frame(height: Theme.ButtonSize.large)
+                .frame(height: 56)
                 .background(
-                    RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                        .fill(Theme.Colors.background)
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemBackground))
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                        .stroke(Theme.Colors.border, lineWidth: Theme.BorderWidth.standard)
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(.systemGray4), lineWidth: 1.5)
                 )
-                .mediumShadow()
             }
 
             if let errorMessage {
                 Text(errorMessage)
-                    .foregroundColor(Theme.Colors.error)
-                    .font(Theme.Typography.small)
-                    .padding(.top, Theme.Spacing.xxs)
+                    .foregroundStyle(.red)
+                    .font(.caption)
+                    .padding(.top, 4)
             }
         }
     }
-    
+
     private func googleSignIn() async throws {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else {
             throw NSError(domain: "GoogleSignIn", code: -1, userInfo: [NSLocalizedDescriptionKey: "No root view controller found"])
         }
-        
+
         let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
-        
+
         guard let idToken = result.user.idToken?.tokenString else {
             throw NSError(domain: "GoogleSignIn", code: -1, userInfo: [NSLocalizedDescriptionKey: "No idToken found"])
         }
-        
+
         let accessToken = result.user.accessToken.tokenString
-        
+
         try await SupabaseManager.client.auth.signInWithIdToken(
             credentials: OpenIDConnectCredentials(
                 provider: .google,

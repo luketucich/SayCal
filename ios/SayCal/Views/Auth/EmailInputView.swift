@@ -9,10 +9,17 @@ struct EmailInputView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            OnboardingHeader(
-                title: "Enter your email",
-                subtitle: "We'll send you a verification code"
-            )
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Enter your email")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.primary)
+
+                Text("We'll send you a verification code")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 24)
 
             VStack(spacing: 16) {
                 TextField("Email address", text: $email)
@@ -20,22 +27,18 @@ struct EmailInputView: View {
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
-                    .font(.system(size: 17))
+                    .font(.body)
                     .padding()
                     .frame(height: 52)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Theme.Colors.background)
-                    )
+                    .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 8))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(Color.primary.opacity(0.3), lineWidth: 1)
                     )
-                    .cardShadow()
 
                 if let errorMessage {
                     Text(errorMessage)
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                         .font(.caption)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
