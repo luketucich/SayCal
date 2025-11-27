@@ -1,16 +1,11 @@
 import SwiftUI
 
 struct DateSelectorView: View {
-    @State private var selectedDate: Date
+    @Binding var selectedDate: Date
     @State private var showCalendar = false
 
     private var today: Date {
         Calendar.current.startOfDay(for: Date())
-    }
-
-    init() {
-        let today = Calendar.current.startOfDay(for: Date())
-        _selectedDate = State(initialValue: today)
     }
 
     var body: some View {
@@ -155,6 +150,6 @@ struct CalendarPickerView: View {
 }
 
 #Preview {
-    DateSelectorView()
+    DateSelectorView(selectedDate: .constant(Date()))
         .padding()
 }

@@ -1,277 +1,225 @@
+// Types matching Swift models
+interface NutritionItem {
+  item: string;
+  portion: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  micros: string[];
+}
+
+interface NutritionAnalysis {
+  meal_type: string;
+  description: string;
+  total_calories: number;
+  total_protein: number;
+  total_carbs: number;
+  total_fats: number;
+  breakdown: NutritionItem[];
+}
+
+// In strict mode, all properties must be required
+// So we use a flat structure where success determines which fields are meaningful
+type NutritionResponse =
+  | {
+    success: true;
+    data: NutritionAnalysis;
+    error: null;
+    unparseable_meal: null;
+  }
+  | {
+    success: false;
+    data: null;
+    error: string;
+    unparseable_meal: string | null;
+  };
+
+// JSON Schema for OpenAI structured outputs (strict mode requires ALL props in required)
+const nutritionSchema = {
+  type: "object",
+  properties: {
+    success: { type: "boolean" },
+    data: {
+      type: ["object", "null"],
+      properties: {
+        meal_type: { type: "string" },
+        description: { type: "string" },
+        total_calories: { type: "number" },
+        total_protein: { type: "number" },
+        total_carbs: { type: "number" },
+        total_fats: { type: "number" },
+        breakdown: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              item: { type: "string" },
+              portion: { type: "string" },
+              calories: { type: "number" },
+              protein: { type: "number" },
+              carbs: { type: "number" },
+              fats: { type: "number" },
+              micros: { type: "array", items: { type: "string" } },
+            },
+            required: [
+              "item",
+              "portion",
+              "calories",
+              "protein",
+              "carbs",
+              "fats",
+              "micros",
+            ],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: [
+        "meal_type",
+        "description",
+        "total_calories",
+        "total_protein",
+        "total_carbs",
+        "total_fats",
+        "breakdown",
+      ],
+      additionalProperties: false,
+    },
+    error: { type: ["string", "null"] },
+    unparseable_meal: { type: ["string", "null"] },
+  },
+  required: ["success", "data", "error", "unparseable_meal"],
+  additionalProperties: false,
+};
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
 
   try {
-    const { transcribed_meal, channel_id } = await req.json();
+    const { transcribed_meal } = await req.json();
     console.log("🍽 Analyzing meal:", transcribed_meal);
 
-    const payload = {
-      model: "gpt-4.1-mini",
-      temperature: 0.1,
-      max_output_tokens: 800,
-      stream: true,
-      tools: [{ type: "web_search" }],
-      tool_choice: "auto",
-      input: [
-        {
-          role: "system",
-          content:
-            "You are a nutrition analysis engine for a calorie tracking app. " +
-            "You MUST respond ONLY with the final nutrition analysis as plain text " +
-            "in the exact format requested. Do not output JSON. Do not explain your reasoning. " +
-            "Use up-to-date nutrition label data when possible. " +
-            "ALWAYS respect serving sizes and user-described quantities by scaling calories and macros " +
-            "up or down based on the amount eaten.",
-        },
-        {
-          role: "user",
-          content: buildNutritionPrompt(transcribed_meal),
-        },
-      ],
-    };
-
-    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${Deno.env.get("OPEN_AI_TRANSCRIBE_API_KEY")}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        model: "gpt-4.1-mini",
+        temperature: 0.1,
+        max_output_tokens: 800,
+        tools: [{ type: "web_search" }],
+        tool_choice: "auto",
+        text: {
+          format: {
+            type: "json_schema",
+            name: "nutrition_analysis",
+            schema: nutritionSchema,
+            strict: true,
+          },
+        },
+        input: [
+          {
+            role: "system",
+            content:
+              "You are a nutrition analysis engine. Return structured JSON only. " +
+              "Use web search to find accurate nutrition label data for branded products. " +
+              "Always respect serving sizes and scale calories/macros based on the amount eaten. " +
+              "Always include the micros array (use empty array [] if no micronutrient data). " +
+              "When successful: set success=true, populate data, set error=null and unparseable_meal=null. " +
+              "When the meal cannot be parsed: set success=false, data=null, error='Could not parse meal', unparseable_meal=the original input.",
+          },
+          {
+            role: "user",
+            content: buildNutritionPrompt(transcribed_meal),
+          },
+        ],
+      }),
     });
 
-    if (!openaiResponse.ok) {
-      const errorText = await openaiResponse.text();
+    if (!response.ok) {
+      const errorText = await response.text();
       console.error("❌ OpenAI error:", errorText);
-      return new Response(JSON.stringify({ error: errorText }), {
-        status: openaiResponse.status,
+      const errorResponse: NutritionResponse = {
+        success: false,
+        data: null,
+        error: "Failed to analyze meal",
+        unparseable_meal: transcribed_meal,
+      };
+      return new Response(JSON.stringify(errorResponse), {
+        status: 200,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    await streamNutritionResponse(openaiResponse, channel_id);
+    const result = await response.json();
+    const outputText = result.output?.find((o: { type: string }) =>
+      o.type === "message"
+    )
+      ?.content?.[0]?.text;
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Nutrition info streamed successfully",
-      }),
-      {
+    if (!outputText) {
+      const errorResponse: NutritionResponse = {
+        success: false,
+        data: null,
+        error: "No response from AI",
+        unparseable_meal: transcribed_meal,
+      };
+      return new Response(JSON.stringify(errorResponse), {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      },
+      });
+    }
+
+    const nutritionData: NutritionResponse = JSON.parse(outputText);
+    console.log(
+      "✅ Analysis complete:",
+      nutritionData.success ? "success" : "failed",
     );
+
+    return new Response(JSON.stringify(nutritionData), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error("🔥 Server error:", err);
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
+    const errorResponse: NutritionResponse = {
+      success: false,
+      data: null,
+      error: err instanceof Error ? err.message : "Unknown error",
+      unparseable_meal: null,
+    };
+    return new Response(JSON.stringify(errorResponse), {
+      status: 200,
       headers: { "Content-Type": "application/json" },
     });
   }
 });
 
-async function broadcastToChannel(
-  channelId: string,
-  event: string,
-  payload: any,
-) {
-  try {
-    const response = await fetch(
-      `${Deno.env.get("SUPABASE_URL")}/realtime/v1/api/broadcast`,
-      {
-        method: "POST",
-        headers: {
-          apikey: "sb_publishable_3jmhHH_JX4KQcT-2i8MpzQ_XtTS9mWC",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              topic: channelId,
-              event,
-              payload,
-            },
-          ],
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      console.warn("⚠️ Broadcast failed:", await response.text());
-    }
-  } catch (e) {
-    console.warn("⚠️ Broadcast error:", e);
-  }
-}
-
-async function streamNutritionResponse(
-  openaiResponse: Response,
-  channelId: string,
-) {
-  const reader = openaiResponse.body!.getReader();
-  const decoder = new TextDecoder();
-  let fullText = "";
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split("\n");
-
-      for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-
-        const data = line.slice(6).trim();
-        if (data === "[DONE]") break;
-
-        try {
-          const json = JSON.parse(data);
-
-          if (json.type === "response.output_text.delta" && json.delta) {
-            fullText += json.delta;
-
-            await broadcastToChannel(channelId, "nutrition_delta", {
-              delta: json.delta,
-              fullText,
-            });
-          }
-        } catch {
-          // Skip non-JSON lines
-        }
-      }
-    }
-
-    await broadcastToChannel(channelId, "nutrition_complete", { fullText });
-  } finally {
-    reader.releaseLock();
-  }
-}
-
 function buildNutritionPrompt(meal: string): string {
   return `
 Analyze this meal: "${meal}"
 
-Your goal is to ALWAYS return a best-effort nutrition estimate.
+Return JSON with this exact structure:
+- If successful: { "success": true, "data": { meal analysis }, "error": null, "unparseable_meal": null }
+- If unparseable: { "success": false, "data": null, "error": "Could not parse meal", "unparseable_meal": "${meal}" }
 
-====================
-SERVING SIZE & QUANTITY (CRITICAL, FOLLOW EXACTLY)
+RULES:
+1. Web search branded products for accurate nutrition labels
+2. Scale all values based on quantity eaten vs label serving size
+3. Round calories to nearest 5, macros to 0.1g
+4. Fix typos in brand names (e.g., "Chock-ternal" → "Chocturnal")  
+5. Keep description brief: "Ice Cream for Bears Chocturnal (1/2 pint)"
+6. Always include micros array (empty [] if no data available)
+7. Only return success: false if text clearly isn't food
 
-1. Find label-based data:
-   - When the meal mentions a brand or product name (Aldi, Ben & Jerry's, Ice Cream for Bears, Costco, Trader Joe's, etc.), 
-     perform at least one web search to find that product's nutrition label or the closest precise match.
-   - Prefer sources in this order:
-     a) Official brand or retailer sites (e.g. aldi.us, benjerry.com, costco.com, traderjoes.com, etc.)
-     b) Major nutrition databases (e.g. MyFitnessPal, Nutritionix)
-     c) Large retailer sites with clear nutrition panels.
-
-2. From the label, extract:
-   - serving_size_description (e.g. "2 slices (64 g)", "2/3 cup (91 g)", "1 bar (60 g)")
-   - calories_per_serving
-   - protein_per_serving
-   - carbs_per_serving
-   - fats_per_serving
-   - servings_per_container (if available)
-
-3. Determine how many servings the user ate:
-   - If the label serving is 2 slices and the user says "1 slice" → number_of_servings_eaten = 0.5
-   - If the label serving is 1 slice and the user says "2 slices" → number_of_servings_eaten = 2
-   - If the label serving is 1/2 cup and the user says "1 cup" → number_of_servings_eaten = 2
-   - If the label shows something like "2/3 cup, 3 servings per container" and the user says:
-       • "one pint"
-       • "the whole pint"
-       • "the whole container"
-       • "the whole tub"
-     then number_of_servings_eaten = servings_per_container
-   - If the user says "half a pint", "half the container", "half the tub", etc.:
-       number_of_servings_eaten = servings_per_container / 2
-   - If the user says "a quarter of the pint/container":
-       number_of_servings_eaten = servings_per_container / 4
-
-4. SCALE calories and macros using math (do not skip this):
-   - actual_calories = calories_per_serving × number_of_servings_eaten
-   - actual_protein  = protein_per_serving × number_of_servings_eaten
-   - actual_carbs    = carbs_per_serving × number_of_servings_eaten
-   - actual_fats     = fats_per_serving × number_of_servings_eaten
-   - Round calories to the nearest 5 kcal and macros to 0.1 g when needed.
-   - NEVER just copy per-serving label values if the user ate more or less than exactly one serving.
-   - Sanity check:
-     • If the user eats half the container, the total calories MUST be approximately half of the full-container calories
-       (within about ±15–20%, not double).
-     • If the user eats the whole container, the total calories MUST be approximately:
-         full_container_calories = calories_per_serving × servings_per_container
-
-   Example logic for ice cream:
-   - Label: 2/3 cup, 3 servings per container, 270 calories per serving.
-     • Full pint calories ≈ 270 × 3 = 810 kcal.
-     • If user says "half a pint": use number_of_servings_eaten = 1.5 → ≈ 405 kcal.
-     • Your answer MUST be close to half of 810, not close to 810.
-
-5. If the quantity is unclear:
-   - Assume one reasonable standard serving (e.g. 1 slice of bread, 1 cup cooked pasta, 1 medium apple).
-   - Treat results as approximate but still scale if the wording implies more or less than one serving.
-
-====================
-BRAND / NAME CORRECTION
-
-- If the transcription slightly mis-spells a brand or product name 
-  (e.g. "Ice Cream for Bears Chock-ternal"), use web search and context to infer the correct official name 
-  (e.g. "Ice Cream for Bears Chocturnal").
-- In your FINAL output, always use the corrected / official product name in the Description and Breakdown.
-
-====================
-ACCURACY VS GENERIC ESTIMATES
-
-- If you CAN find a clear branded nutrition label, use those values as the basis for your calculations and scale.
-- If search results are conflicting or unclear, prefer a close generic equivalent with clean, consistent label data
-  instead of guessing from noisy or uncertain branded information.
-- If you truly cannot find a good branded match after a reasonable search:
-  - Use a close generic equivalent (e.g. "generic vanilla ice cream", "generic sourdough bread").
-  - Clearly treat the values as approximate but still apply the serving math.
-
-====================
-DESCRIPTION LINE
-
-- Keep the "Description" brief and label-like, not a full sentence, e.g.:
-  - "Ice Cream for Bears Chocturnal (1/2 pint)"
-  - "Aldi sourdough round, 1 slice"
-  - "Grilled chicken breast with rice"
-- Do NOT add extra explanation or notes to the Description.
-
-====================
-PARSING RULES
-
-- If part of the meal is understandable, analyze that part instead of failing.
-- Only when the text clearly does NOT describe any food at all
-  (e.g., random letters, just "test", or something like "hello there")
-  should you consider the meal unparseable.
-
-====================
-OUTPUT FORMAT (EXACT)
-
-Return exactly in this format (plain text, no extra commentary):
-
-Meal Type:
-Description:
-
-Total Calories:
-Total Protein:
-Total Carbs:
-Total Fats:
-
-Breakdown:
-- Item:
-  Portion:
-  Calories:
-  Protein:
-  Carbs:
-  Fats:
-  Micros:
-
-Only in the rare case where the text clearly does NOT describe any food and you cannot infer any meal at all, output exactly:
-"Could not parse meal: ${meal}"
+SERVING MATH:
+- Label says "2/3 cup, 3 servings per container" and user says "whole pint" → multiply by 3
+- Label says "1 slice" and user says "2 slices" → multiply by 2
+- Apply: actual_value = per_serving × servings_eaten
 `;
 }

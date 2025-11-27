@@ -22,7 +22,7 @@ struct MainAppView: View {
     @State private var showResultSheet = false
 
     @State private var transcriptionText: String?
-    @State private var nutritionInfo: String = ""
+    @State private var nutritionResponse: NutritionResponse?
     @State private var textInput: String = ""
     @State private var isCalculatingFromText = false
 
@@ -49,11 +49,11 @@ struct MainAppView: View {
 
     private var isLoadingNutrition: Bool {
         if isCalculatingFromText {
-            return nutritionInfo.isEmpty
+            return nutritionResponse == nil
         }
         switch audioRecorder.state {
-        case .calculatingNutrition, .streamingNutrition:
-            return nutritionInfo.isEmpty
+        case .analyzing, .transcribing:
+            return nutritionResponse == nil
         default:
             return false
         }
@@ -184,7 +184,7 @@ struct MainAppView: View {
         .sheet(isPresented: $showResultSheet) {
             CalorieResultSheet(
                 transcription: transcriptionText,
-                nutritionInfo: nutritionInfo,
+                nutritionResponse: nutritionResponse,
                 isLoading: isLoadingNutrition
             )
         }
@@ -224,7 +224,7 @@ struct MainAppView: View {
 
     private func startVoiceRecording() {
         transcriptionText = nil
-        nutritionInfo = ""
+        nutritionResponse = nil
         audioRecorder.requestPermission()
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
@@ -236,7 +236,7 @@ struct MainAppView: View {
 
     private func startTextInput() {
         transcriptionText = nil
-        nutritionInfo = ""
+        nutritionResponse = nil
         textInput = ""
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
@@ -268,7 +268,7 @@ struct MainAppView: View {
         }
 
         transcriptionText = mealText
-        nutritionInfo = ""
+        nutritionResponse = nil
         isCalculatingFromText = true
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -281,84 +281,47 @@ struct MainAppView: View {
     }
 
     private func calculateNutritionFromText(_ mealText: String) async {
-        let channelId = "nutrition-\(UUID().uuidString)"
-        let channel = SupabaseManager.client.channel(channelId)
-
-        let deltaStream = channel.broadcastStream(event: "nutrition_delta")
-        let completeStream = channel.broadcastStream(event: "nutrition_complete")
-
         do {
-            try await channel.subscribeWithError()
+            print("🧮 Analyzing nutrition...")
 
-            Task {
-                for await message in deltaStream {
-                    if let payload = message["payload"]?.objectValue,
-                       let fullText = payload["fullText"]?.stringValue {
-                        DispatchQueue.main.async {
-                            nutritionInfo = fullText
-                        }
-                    }
-                }
-            }
-
-            Task {
-                for await message in completeStream {
-                    if let payload = message["payload"]?.objectValue,
-                       let fullText = payload["fullText"]?.stringValue {
-                        DispatchQueue.main.async {
-                            nutritionInfo = fullText
-                            isCalculatingFromText = false
-                            HapticManager.shared.success()
-                        }
-                        await channel.unsubscribe()
-                    }
-                }
-            }
-
-            let requestBody: [String: Any] = [
-                "transcribed_meal": mealText,
-                "channel_id": channelId
-            ]
-
-            let jsonData = try JSONSerialization.data(withJSONObject: requestBody)
-
-            struct EdgeResponse: Codable {
-                let success: Bool
-                let message: String?
-            }
-
-            let _: EdgeResponse = try await SupabaseManager.client.functions.invoke(
+            let response: NutritionResponse = try await SupabaseManager.client.functions.invoke(
                 "calculate-calories",
-                options: FunctionInvokeOptions(body: jsonData)
+                options: FunctionInvokeOptions(
+                    body: ["transcribed_meal": mealText]
+                )
             )
+
+            DispatchQueue.main.async {
+                nutritionResponse = response
+                isCalculatingFromText = false
+                HapticManager.shared.success()
+            }
+            print("✅ Analysis complete")
+
         } catch {
-            print("❌ Failed to calculate nutrition: \(error)")
+            print("❌ Analysis failed: \(error)")
             DispatchQueue.main.async {
                 isCalculatingFromText = false
                 HapticManager.shared.error()
             }
-            await channel.unsubscribe()
         }
     }
 
     private func handleAudioRecorderStateChange(_ state: ProcessingState) {
         switch state {
-        case .calculatingNutrition(let transcription):
+        case .analyzing(let transcription):
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 showRecordingOverlay = false
             }
             transcriptionText = transcription
-            nutritionInfo = ""
+            nutritionResponse = nil
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                 showResultSheet = true
             }
 
-        case .streamingNutrition(let transcription, let partialInfo):
+        case .completed(let transcription, let response):
             transcriptionText = transcription
-            nutritionInfo = partialInfo
-
-        case .completed(let nutritionData):
-            nutritionInfo = nutritionData
+            nutritionResponse = response
 
         case .error(let message):
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {

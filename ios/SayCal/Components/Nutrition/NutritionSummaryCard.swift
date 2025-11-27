@@ -2,58 +2,34 @@ import SwiftUI
 
 struct NutritionSummaryCard: View {
     @EnvironmentObject var userManager: UserManager
-    var remainingCalories: Int = 1847
+    @ObservedObject var mealLogger = MealLogger.shared
 
-    private var totalCalories: Int {
-        userManager.profile?.targetCalories ?? 2400
+    private var goalCalories: Int {
+        Int(mealLogger.dailyTotals.goalCalories)
     }
 
     private var consumedCalories: Int {
-        totalCalories - remainingCalories
+        Int(mealLogger.dailyTotals.totalCalories)
+    }
+
+    private var remainingCalories: Int {
+        Int(mealLogger.dailyTotals.remainingCalories)
     }
 
     private var progress: Double {
-        min(max(Double(consumedCalories) / Double(totalCalories), 0), 1.0)
-    }
-
-    private var profile: UserProfile? {
-        userManager.profile
+        min(max(Double(consumedCalories) / Double(goalCalories), 0), 1.0)
     }
 
     private var carbsConsumed: Int {
-        guard let profile = profile else { return 0 }
-        let totalCarbs = (totalCalories * profile.carbsPercent) / 400
-        let remainingCarbs = (remainingCalories * profile.carbsPercent) / 400
-        return totalCarbs - remainingCarbs
-    }
-
-    private var carbsTotal: Int {
-        guard let profile = profile else { return 0 }
-        return (totalCalories * profile.carbsPercent) / 400
+        Int(mealLogger.dailyTotals.totalCarbs)
     }
 
     private var fatConsumed: Int {
-        guard let profile = profile else { return 0 }
-        let totalFat = (totalCalories * profile.fatsPercent) / 900
-        let remainingFat = (remainingCalories * profile.fatsPercent) / 900
-        return totalFat - remainingFat
-    }
-
-    private var fatTotal: Int {
-        guard let profile = profile else { return 0 }
-        return (totalCalories * profile.fatsPercent) / 900
+        Int(mealLogger.dailyTotals.totalFats)
     }
 
     private var proteinConsumed: Int {
-        guard let profile = profile else { return 0 }
-        let totalProtein = (totalCalories * profile.proteinPercent) / 400
-        let remainingProtein = (remainingCalories * profile.proteinPercent) / 400
-        return totalProtein - remainingProtein
-    }
-
-    private var proteinTotal: Int {
-        guard let profile = profile else { return 0 }
-        return (totalCalories * profile.proteinPercent) / 400
+        Int(mealLogger.dailyTotals.totalProtein)
     }
 
     var body: some View {
@@ -70,7 +46,7 @@ struct NutritionSummaryCard: View {
 
                 Spacer()
 
-                Text("of \(totalCalories)")
+                Text("of \(goalCalories)")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
@@ -131,7 +107,7 @@ struct MacroStat: View {
 }
 
 #Preview {
-    NutritionSummaryCard(remainingCalories: 1847)
+    NutritionSummaryCard()
         .environmentObject(UserManager.shared)
         .padding()
         .background(Color(.systemGroupedBackground))

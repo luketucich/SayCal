@@ -18,8 +18,6 @@ struct AudioRecordingOverlay: View {
                     HapticManager.shared.medium()
                     // Cancel recording without processing
                     if audioRecorder.isRecording {
-                        audioRecorder.audioRecorder?.stop()
-                        audioRecorder.timer?.invalidate()
                         audioRecorder.state = .idle
                     }
                     onDismiss()
