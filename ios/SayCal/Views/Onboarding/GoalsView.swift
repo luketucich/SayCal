@@ -2,135 +2,126 @@ import SwiftUI
 
 struct GoalsView: View {
     @ObservedObject var state: OnboardingState
+    @State private var showMacrosAsGrams = false
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             VStack(alignment: .leading, spacing: 8) {
                 Text("Your goal")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 28, weight: .bold))
 
                 Text("What are you trying to achieve?")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.top, 24)
-            .padding(.bottom, 16)
 
-            Form {
-                // Calories & Macros Display
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Your Target Calories")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
+            CaloriesCard(calories: state.targetCalories, showMacrosAsGrams: $showMacrosAsGrams, goal: state.goal)
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
 
-                        Text("\(state.targetCalories)")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
-                            .foregroundStyle(.primary)
-
-                        Text("calories per day")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    let macros = UserManager.calculateMacroPercentages(for: state.goal)
-
-                    HStack(spacing: 12) {
-                        MacroCard(title: "Carbs", percentage: macros.carbs, color: .blue)
-                        MacroCard(title: "Fats", percentage: macros.fats, color: .orange)
-                        MacroCard(title: "Protein", percentage: macros.protein, color: .green)
-                    }
-                    .listRowInsets(EdgeInsets())
-                } footer: {
-                    Label("You can edit your target calories and macros anytime in your profile", systemImage: "info.circle")
-                }
-
-                // Goal Picker
+            List {
                 Section {
                     Picker("Goal", selection: $state.goal) {
                         ForEach(Goal.allCases, id: \.self) { goal in
-                            VStack(alignment: .leading) {
-                                Text(goal.displayName)
-                                Text(goal.calorieAdjustmentText)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .tag(goal)
+                            Text(goal.displayName).tag(goal)
                         }
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
-
-            Spacer()
-
-            // Navigation buttons
-            VStack(spacing: 0) {
-                Divider()
-
-                HStack {
-                    Button {
+                    .onChange(of: state.goal) { _, _ in
                         HapticManager.shared.light()
-                        state.previousStep()
-                    } label: {
-                        Text("Back")
-                            .foregroundStyle(.secondary)
-                            .underline()
-                    }
-
-                    Spacer()
-
-                    Button {
-                        HapticManager.shared.medium()
-                        state.nextStep()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Next")
-                                .fontWeight(.semibold)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.blue, in: RoundedRectangle(cornerRadius: 12))
                     }
                 }
-                .padding(16)
-                .background(Color(.systemBackground))
+                .listRowBackground(Color.clear)
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+
+            OnboardingFooter(onBack: { state.previousStep() }) {
+                state.nextStep()
             }
         }
-        .background(Color(.systemBackground))
     }
 }
 
-struct MacroCard: View {
-    let title: String
-    let percentage: Int
-    let color: Color
+struct CaloriesCard: View {
+    let calories: Int
+    @Binding var showMacrosAsGrams: Bool
+    let goal: Goal
+
+    private var macros: (carbs: Int, fats: Int, protein: Int) {
+        UserManager.calculateMacroPercentages(for: goal)
+    }
+
+    private var carbsGrams: Int { (calories * macros.carbs) / 400 }
+    private var fatsGrams: Int { (calories * macros.fats) / 900 }
+    private var proteinGrams: Int { (calories * macros.protein) / 400 }
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 16) {
+            VStack(spacing: 4) {
+                Text("\(calories)")
+                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                    .contentTransition(.numericText())
+
+                Text("calories per day")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider()
+
+            Button {
+                HapticManager.shared.light()
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showMacrosAsGrams.toggle()
+                }
+            } label: {
+                HStack(spacing: 0) {
+                    MacroDisplayItem(
+                        title: "Carbs",
+                        value: showMacrosAsGrams ? "\(carbsGrams)g" : "\(macros.carbs)%"
+                    )
+                    MacroDisplayItem(
+                        title: "Fat",
+                        value: showMacrosAsGrams ? "\(fatsGrams)g" : "\(macros.fats)%"
+                    )
+                    MacroDisplayItem(
+                        title: "Protein",
+                        value: showMacrosAsGrams ? "\(proteinGrams)g" : "\(macros.protein)%"
+                    )
+                }
+            }
+            .buttonStyle(.plain)
+
+            Text("Tap to toggle grams/percentages")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity)
+        .background(RoundedRectangle(cornerRadius: 18).fill(Color(.tertiarySystemGroupedBackground)))
+    }
+}
+
+struct MacroDisplayItem: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(value)
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .contentTransition(.numericText())
+
             Text(title)
                 .font(.caption)
-                .fontWeight(.medium)
                 .foregroundStyle(.secondary)
-
-            Text("\(percentage)%")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
     }
 }
 

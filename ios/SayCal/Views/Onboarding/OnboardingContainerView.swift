@@ -23,6 +23,7 @@ class OnboardingState: ObservableObject {
     @Published var selectedAllergies: Set<String> = []
 
     let totalSteps = 6
+
     var canProceed: Bool {
         switch currentStep {
         case 0:
@@ -39,6 +40,7 @@ class OnboardingState: ObservableObject {
             return false
         }
     }
+
     func nextStep() {
         if currentStep < totalSteps - 1 {
             navigationDirection = .forward
@@ -47,6 +49,7 @@ class OnboardingState: ObservableObject {
             }
         }
     }
+
     func previousStep() {
         if currentStep > 0 {
             navigationDirection = .backward
@@ -55,6 +58,7 @@ class OnboardingState: ObservableObject {
             }
         }
     }
+
     var targetCalories: Int {
         let weightKg: Double
         if unitsPreference == .imperial {
@@ -91,9 +95,6 @@ struct OnboardingContainerView: View {
                 ProgressBar(currentStep: state.currentStep, totalSteps: state.totalSteps)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                
-                Divider()
-                    .overlay(Color(UIColor.systemGray5))
 
                 currentStepView
                     .transition(.asymmetric(
@@ -102,7 +103,7 @@ struct OnboardingContainerView: View {
                     ))
                     .id(state.currentStep)
             }
-            .background(Color(UIColor.systemBackground))
+            .background(Color(.systemBackground))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -135,22 +136,84 @@ struct ProgressBar: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                // Background track
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(UIColor.systemGray5))
+                Capsule()
+                    .fill(Color.primary.opacity(0.1))
                     .frame(height: 6)
 
-                // Progress fill
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.blue)
+                Capsule()
+                    .fill(Color.primary)
                     .frame(
                         width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps),
                         height: 6
                     )
-                    .animation(.easeInOut(duration: 0.3), value: currentStep)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentStep)
             }
         }
         .frame(height: 6)
+    }
+}
+
+// MARK: - Onboarding Navigation Footer
+struct OnboardingFooter: View {
+    let showBack: Bool
+    let nextLabel: String
+    let nextIcon: String
+    let onBack: () -> Void
+    let onNext: () -> Void
+
+    init(
+        showBack: Bool = true,
+        nextLabel: String = "Next",
+        nextIcon: String = "arrow.right",
+        onBack: @escaping () -> Void = {},
+        onNext: @escaping () -> Void
+    ) {
+        self.showBack = showBack
+        self.nextLabel = nextLabel
+        self.nextIcon = nextIcon
+        self.onBack = onBack
+        self.onNext = onNext
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Divider()
+
+            HStack {
+                if showBack {
+                    Button {
+                        HapticManager.shared.light()
+                        onBack()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("Back")
+                        }
+                    }
+                }
+
+                Spacer()
+
+                Button {
+                    HapticManager.shared.medium()
+                    onNext()
+                } label: {
+                    HStack(spacing: 6) {
+                        Text(nextLabel)
+                        Image(systemName: nextIcon)
+                    }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color(.systemBackground))
+                    .frame(minWidth: 100)
+                    .frame(height: 44)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.roundedRectangle(radius: 14))
+                .tint(.primary)
+            }
+            .padding(16)
+        }
+        .background(Color(.systemBackground))
     }
 }
 

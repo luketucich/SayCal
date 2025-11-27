@@ -8,38 +8,19 @@ struct AllergiesView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             VStack(alignment: .leading, spacing: 8) {
                 Text("Food allergies")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 28, weight: .bold))
 
                 Text("Select any allergies you have (optional)")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.top, 24)
-            .padding(.bottom, 16)
 
-            if state.selectedAllergies.isEmpty {
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "info.circle")
-                        .foregroundStyle(.blue)
-
-                    Text("You can skip this step and update allergies later")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.blue.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
-            }
-
-            Form {
+            List {
                 Section {
                     TextField("Add custom allergy", text: $newAllergy)
                         .onSubmit {
@@ -52,17 +33,16 @@ struct AllergiesView: View {
                         }
                     }
                 }
+                .listRowBackground(Color.clear)
 
                 Section {
                     ForEach(allergies, id: \.self) { allergy in
                         Button {
                             HapticManager.shared.light()
-                            withAnimation {
-                                if state.selectedAllergies.contains(allergy) {
-                                    state.selectedAllergies.remove(allergy)
-                                } else {
-                                    state.selectedAllergies.insert(allergy)
-                                }
+                            if state.selectedAllergies.contains(allergy) {
+                                state.selectedAllergies.remove(allergy)
+                            } else {
+                                state.selectedAllergies.insert(allergy)
                             }
                         } label: {
                             HStack {
@@ -71,62 +51,32 @@ struct AllergiesView: View {
                                 Spacer()
                                 if state.selectedAllergies.contains(allergy) {
                                     Image(systemName: "checkmark")
-                                        .foregroundStyle(.blue)
                                         .fontWeight(.semibold)
+                                        .foregroundStyle(.primary)
                                 }
                             }
                         }
                     }
                 }
+                .listRowBackground(Color.clear)
             }
+            .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
 
-            Spacer()
-
-            // Navigation buttons
-            VStack(spacing: 0) {
-                Divider()
-
-                HStack {
-                    Button {
-                        HapticManager.shared.light()
-                        state.previousStep()
-                    } label: {
-                        Text("Back")
-                            .foregroundStyle(.secondary)
-                            .underline()
-                    }
-
-                    Spacer()
-
-                    Button {
-                        HapticManager.shared.medium()
-                        Task {
-                            do {
-                                try await userManager.completeOnboarding(with: state)
-                            } catch {
-                                print("❌ Failed to complete onboarding: \(error.localizedDescription)")
-                            }
-                        }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Complete Setup")
-                                .fontWeight(.semibold)
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.blue, in: RoundedRectangle(cornerRadius: 12))
+            OnboardingFooter(
+                nextLabel: "Complete Setup",
+                nextIcon: "checkmark",
+                onBack: { state.previousStep() }
+            ) {
+                Task {
+                    do {
+                        try await userManager.completeOnboarding(with: state)
+                    } catch {
+                        print("Failed to complete onboarding: \(error.localizedDescription)")
                     }
                 }
-                .padding(16)
-                .background(Color(.systemBackground))
             }
         }
-        .background(Color(.systemBackground))
         .onAppear {
             let predefinedAllergies = Set(DietaryOptions.commonAllergies)
             let customAllergies = state.selectedAllergies.filter { !predefinedAllergies.contains($0) }

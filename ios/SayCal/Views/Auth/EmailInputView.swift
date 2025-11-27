@@ -1,5 +1,4 @@
 import SwiftUI
-import Supabase
 
 struct EmailInputView: View {
     @Binding var email: String
@@ -9,49 +8,63 @@ struct EmailInputView: View {
 
     var body: some View {
         VStack(spacing: 24) {
+            // Header
             VStack(alignment: .leading, spacing: 8) {
-                Text("Enter your email")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
+                Label("Enter your email", systemImage: "envelope.fill")
+                    .font(.system(size: 28, weight: .bold))
 
                 Text("We'll send you a verification code")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 24)
 
             VStack(spacing: 16) {
-                TextField("Email address", text: $email)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-                    .font(.body)
-                    .padding()
-                    .frame(height: 52)
-                    .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.primary.opacity(0.3), lineWidth: 1)
-                    )
+                // Email field
+                HStack(spacing: 12) {
+                    Image(systemName: "envelope")
+                        .foregroundStyle(.secondary)
+
+                    TextField("Email address", text: $email)
+                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                }
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 12).fill(.background))
 
                 if let errorMessage {
-                    Text(errorMessage)
-                        .foregroundStyle(.red)
-                        .font(.caption)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                        Text(errorMessage)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                PrimaryButton(
-                    title: "Continue",
-                    isEnabled: !email.isEmpty,
-                    isLoading: isLoading
-                ) {
-                    Task {
-                        await onContinue()
+                Button {
+                    HapticManager.shared.medium()
+                    Task { await onContinue() }
+                } label: {
+                    HStack(spacing: 8) {
+                        if isLoading {
+                            ProgressView()
+                                .tint(Color(.systemBackground))
+                        } else {
+                            Text("Continue")
+                            Image(systemName: "arrow.right")
+                        }
                     }
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.primary)
+                .disabled(email.isEmpty || isLoading)
             }
 
             Spacer()

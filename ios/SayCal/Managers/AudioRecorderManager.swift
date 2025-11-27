@@ -7,7 +7,7 @@ struct TranscriptionResponse: Codable {
     let text: String
 }
 
-enum ProcessingState {
+enum ProcessingState: Equatable {
     case idle
     case recording
     case transcribing
@@ -29,11 +29,13 @@ enum ProcessingState {
 class AudioRecorder: NSObject, ObservableObject {
     @Published var state: ProcessingState = .idle
     @Published var currentAudioLevel: CGFloat = 1.0
-    
-    private var audioRecorder: AVAudioRecorder?
-    private var timer: Timer?
+
+    var audioRecorder: AVAudioRecorder?
+    var timer: Timer?
     private var recordingURL: URL?
     private var channelTask: Task<Void, Never>?
+    private var maxAudioLevel: Float = -160.0 // Track peak audio level
+    private var hasSignificantAudio = false
 
     var displayText: String {
         switch state {
@@ -91,26 +93,28 @@ class AudioRecorder: NSObject, ObservableObject {
     func startRecording() {
         HapticManager.shared.medium()
         state = .recording
-        
+        maxAudioLevel = -160.0
+        hasSignificantAudio = false
+
         let tempDir = FileManager.default.temporaryDirectory
         recordingURL = tempDir.appendingPathComponent(UUID().uuidString + ".m4a")
-        
+
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 44100.0,
             AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
-        
+
         do {
             audioRecorder = try AVAudioRecorder(url: recordingURL!, settings: settings)
             audioRecorder?.isMeteringEnabled = true
             audioRecorder?.record()
-            
+
             timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
                 self?.updateAudioLevel()
             }
-            
+
             print("🎙️ Recording started")
         } catch {
             print("❌ Failed to start recording: \(error)")
@@ -120,14 +124,25 @@ class AudioRecorder: NSObject, ObservableObject {
 
     func stopRecording() {
         HapticManager.shared.medium()
-        
+
         audioRecorder?.stop()
         timer?.invalidate()
         timer = nil
         currentAudioLevel = 1.0
-        
+
+        // Check if there was significant audio
+        if !hasSignificantAudio || maxAudioLevel < -50.0 {
+            print("⚠️ No significant audio detected (max level: \(maxAudioLevel) dB)")
+            state = .error(message: "No audio detected. Please speak clearly into the microphone.")
+            HapticManager.shared.error()
+            if let url = recordingURL {
+                try? FileManager.default.removeItem(at: url)
+            }
+            return
+        }
+
         if let url = recordingURL {
-            print("💾 Recording stopped, transcribing...")
+            print("💾 Recording stopped, transcribing... (max level: \(maxAudioLevel) dB)")
             state = .transcribing
             Task {
                 await uploadAudioToSupabase(url)
@@ -188,41 +203,52 @@ class AudioRecorder: NSObject, ObservableObject {
 
     private func updateAudioLevel() {
         guard let recorder = audioRecorder else { return }
-        
+
         recorder.updateMeters()
         let averagePower = recorder.averagePower(forChannel: 0)
-        let normalized = max(0.0, (averagePower + 60) / 60)
-        let scale = 0.85 + (CGFloat(normalized) * 0.5)
-        
+        let peakPower = recorder.peakPower(forChannel: 0)
+
+        // Track max audio level
+        maxAudioLevel = max(maxAudioLevel, peakPower)
+
+        // Check if there's significant audio (above -40 dB is typically human speech)
+        if peakPower > -40.0 {
+            hasSignificantAudio = true
+        }
+
+        // Improved audio level calculation with better sensitivity
+        // averagePower ranges from -160 (silence) to 0 (max)
+        // Map -50 to 0 dB to our 0 to 1 range for better visual response
+        let dbRange: Float = 50.0
+        let minDb: Float = -50.0
+
+        let normalized = max(0.0, min(1.0, (averagePower - minDb) / dbRange))
+
+        // Apply smoothing with exponential curve for more natural movement
+        let targetLevel = CGFloat(pow(normalized, 0.7))
+
         DispatchQueue.main.async {
-            self.currentAudioLevel = scale
+            // Apply faster decay when audio is dropping
+            let decayRate: CGFloat = 0.3  // Higher = faster decay
+            let riseRate: CGFloat = 0.8    // Lower = slower rise
+
+            if targetLevel < self.currentAudioLevel {
+                // Audio is dropping - apply fast decay
+                self.currentAudioLevel = self.currentAudioLevel * (1 - decayRate) + targetLevel * decayRate
+            } else {
+                // Audio is rising - apply slower rise for smooth animation
+                self.currentAudioLevel = self.currentAudioLevel * (1 - riseRate) + targetLevel * riseRate
+            }
         }
     }
 
     private func calculateNutritionWithRealtime(transcription: String) async {
         let trimmedText = transcription.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !trimmedText.isEmpty, trimmedText.count >= 5 else {
-            print("⚠️ Transcription too short")
+        guard !trimmedText.isEmpty else {
+            print("⚠️ Transcription empty")
             DispatchQueue.main.async {
-                self.state = .error(message: "Transcription too short")
-            }
-            return
-        }
-        
-        let invalidPhrases = ["you", "um", "uh", "hmm", "ah", "okay", "ok", "test"]
-        if invalidPhrases.contains(trimmedText.lowercased()) {
-            print("⚠️ Invalid transcription")
-            DispatchQueue.main.async {
-                self.state = .error(message: "Invalid transcription")
-            }
-            return
-        }
-        
-        guard trimmedText.split(separator: " ").count >= 2 else {
-            print("⚠️ Needs more words")
-            DispatchQueue.main.async {
-                self.state = .error(message: "Transcription needs more words")
+                self.state = .error(message: "No transcription received")
             }
             return
         }

@@ -5,74 +5,58 @@ struct ActivityLevelView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             VStack(alignment: .leading, spacing: 8) {
                 Text("Activity level")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 28, weight: .bold))
 
                 Text("How active are you on a typical day?")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.top, 24)
-            .padding(.bottom, 16)
 
-            Form {
+            List {
                 Section {
                     Picker("Activity Level", selection: $state.activityLevel) {
                         ForEach(ActivityLevel.allCases, id: \.self) { level in
-                            Text(level.displayName).tag(level)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(level.displayName)
+                                Text(level.description)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .tag(level)
                         }
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
-
-            Spacer()
-
-            // Navigation buttons
-            VStack(spacing: 0) {
-                Divider()
-
-                HStack {
-                    Button {
+                    .onChange(of: state.activityLevel) { _, _ in
                         HapticManager.shared.light()
-                        state.previousStep()
-                    } label: {
-                        Text("Back")
-                            .foregroundStyle(.secondary)
-                            .underline()
-                    }
-
-                    Spacer()
-
-                    Button {
-                        HapticManager.shared.medium()
-                        state.nextStep()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Next")
-                                .fontWeight(.semibold)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.blue, in: RoundedRectangle(cornerRadius: 12))
                     }
                 }
-                .padding(16)
-                .background(Color(.systemBackground))
+                .listRowBackground(Color.clear)
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+
+            OnboardingFooter(onBack: { state.previousStep() }) {
+                state.nextStep()
             }
         }
-        .background(Color(.systemBackground))
+    }
+}
+
+extension ActivityLevel {
+    var description: String {
+        switch self {
+        case .sedentary: return "Little to no exercise"
+        case .lightlyActive: return "Light exercise 1-3 days/week"
+        case .moderatelyActive: return "Moderate exercise 3-5 days/week"
+        case .veryActive: return "Hard exercise 6-7 days/week"
+        case .extremelyActive: return "Very hard exercise, physical job"
+        }
     }
 }
 

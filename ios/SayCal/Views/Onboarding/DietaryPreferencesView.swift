@@ -7,38 +7,19 @@ struct DietaryPreferencesView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             VStack(alignment: .leading, spacing: 8) {
                 Text("Dietary preferences")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 28, weight: .bold))
 
                 Text("Select any that apply (optional)")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.top, 24)
-            .padding(.bottom, 16)
 
-            if state.selectedDietaryPreferences.isEmpty {
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "info.circle")
-                        .foregroundStyle(.blue)
-
-                    Text("You can skip this step and update preferences later")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.blue.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
-            }
-
-            Form {
+            List {
                 Section {
                     TextField("Add custom preference", text: $newPreference)
                         .onSubmit {
@@ -51,17 +32,16 @@ struct DietaryPreferencesView: View {
                         }
                     }
                 }
+                .listRowBackground(Color.clear)
 
                 Section {
                     ForEach(dietaryPreferences, id: \.self) { preference in
                         Button {
                             HapticManager.shared.light()
-                            withAnimation {
-                                if state.selectedDietaryPreferences.contains(preference) {
-                                    state.selectedDietaryPreferences.remove(preference)
-                                } else {
-                                    state.selectedDietaryPreferences.insert(preference)
-                                }
+                            if state.selectedDietaryPreferences.contains(preference) {
+                                state.selectedDietaryPreferences.remove(preference)
+                            } else {
+                                state.selectedDietaryPreferences.insert(preference)
                             }
                         } label: {
                             HStack {
@@ -70,56 +50,25 @@ struct DietaryPreferencesView: View {
                                 Spacer()
                                 if state.selectedDietaryPreferences.contains(preference) {
                                     Image(systemName: "checkmark")
-                                        .foregroundStyle(.blue)
                                         .fontWeight(.semibold)
+                                        .foregroundStyle(.primary)
                                 }
                             }
                         }
                     }
                 }
+                .listRowBackground(Color.clear)
             }
+            .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
 
-            Spacer()
-
-            // Navigation buttons
-            VStack(spacing: 0) {
-                Divider()
-
-                HStack {
-                    Button {
-                        HapticManager.shared.light()
-                        state.previousStep()
-                    } label: {
-                        Text("Back")
-                            .foregroundStyle(.secondary)
-                            .underline()
-                    }
-
-                    Spacer()
-
-                    Button {
-                        HapticManager.shared.medium()
-                        state.nextStep()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text(state.selectedDietaryPreferences.isEmpty ? "Skip" : "Next")
-                                .fontWeight(.semibold)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.blue, in: RoundedRectangle(cornerRadius: 12))
-                    }
-                }
-                .padding(16)
-                .background(Color(.systemBackground))
+            OnboardingFooter(
+                nextLabel: state.selectedDietaryPreferences.isEmpty ? "Skip" : "Next",
+                onBack: { state.previousStep() }
+            ) {
+                state.nextStep()
             }
         }
-        .background(Color(.systemBackground))
         .onAppear {
             let predefinedPreferences = Set(DietaryOptions.dietaryPreferences)
             let customPreferences = state.selectedDietaryPreferences.filter { !predefinedPreferences.contains($0) }

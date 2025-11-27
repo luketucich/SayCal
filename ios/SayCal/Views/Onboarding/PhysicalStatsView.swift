@@ -5,101 +5,136 @@ struct PhysicalStatsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             VStack(alignment: .leading, spacing: 8) {
                 Text("Your physical stats")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 28, weight: .bold))
 
                 Text("We'll use this to calculate your caloric needs")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.top, 24)
-            .padding(.bottom, 16)
 
-            Form {
+            List {
                 Section {
-                    Picker("Sex", selection: $state.sex) {
-                        Text("Male").tag(Sex.male)
-                        Text("Female").tag(Sex.female)
-                    }
-                    .pickerStyle(.segmented)
-                }
+                    HStack(spacing: 16) {
+                        Text("Sex")
+                            .frame(width: 80, alignment: .leading)
 
-                Section {
-                    Picker("Age", selection: $state.age) {
-                        ForEach(13..<121, id: \.self) { age in
-                            Text("\(age) years").tag(age)
+                        Picker("Sex", selection: $state.sex) {
+                            Text("Male").tag(Sex.male)
+                            Text("Female").tag(Sex.female)
                         }
+                        .pickerStyle(.segmented)
+                        .frame(maxWidth: .infinity)
                     }
+                    .onChange(of: state.sex) { _, _ in
+                        HapticManager.shared.light()
+                    }
+                } footer: {
+                    Text("Required for accurate calorie calculations based on metabolic differences")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+                .listRowBackground(Color.clear)
+
+                Section {
+                    HStack(spacing: 16) {
+                        Text("Age")
+                            .frame(width: 80, alignment: .leading)
+
+                        Picker("Age", selection: $state.age) {
+                            ForEach(13..<121, id: \.self) { age in
+                                Text("\(age)").tag(age)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity)
+                    }
+                    .frame(height: 100)
+                }.listRowBackground(Color.clear)
 
                 Section {
                     if state.unitsPreference == .metric {
-                        Picker("Height", selection: $state.heightCm) {
-                            ForEach(100..<251, id: \.self) { cm in
-                                Text("\(cm) cm").tag(cm)
-                            }
-                        }
+                        HStack(spacing: 16) {
+                            Text("Height")
+                                .frame(width: 80, alignment: .leading)
 
-                        Stepper("Weight: \(String(format: "%.1f", state.weightKg)) kg", value: $state.weightKg, in: 30...300, step: 0.5)
+                            Picker("Height", selection: $state.heightCm) {
+                                ForEach(100..<251, id: \.self) { cm in
+                                    Text("\(cm) cm").tag(cm)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .labelsHidden()
+                            .frame(maxWidth: .infinity)
+                        }
+                        .frame(height: 100)
                     } else {
-                        Picker("Height", selection: $state.heightCm) {
-                            ForEach(100..<251, id: \.self) { cm in
-                                let (ft, inch) = cm.cmToFeetAndInches
-                                Text("\(ft)' \(inch)\"").tag(cm)
+                        HStack(spacing: 16) {
+                            Text("Height")
+                                .frame(width: 80, alignment: .leading)
+
+                            Picker("Height", selection: $state.heightCm) {
+                                ForEach(100..<251, id: \.self) { cm in
+                                    let (ft, inch) = cm.cmToFeetAndInches
+                                    Text("\(ft)' \(inch)\"").tag(cm)
+                                }
                             }
+                            .pickerStyle(.wheel)
+                            .labelsHidden()
+                            .frame(maxWidth: .infinity)
                         }
-
-                        Stepper("Weight: \(Int(state.weightKg.kgToLbs)) lbs", value: $state.weightKg, in: 30...300, step: 0.5)
+                        .frame(height: 100)
                     }
-                }
+                }.listRowBackground(Color.clear)
+
+                Section {
+                    if state.unitsPreference == .metric {
+                        HStack(spacing: 16) {
+                            Text("Weight")
+                                .frame(width: 80, alignment: .leading)
+
+                            Picker("Weight", selection: $state.weightKg) {
+                                ForEach(Array(stride(from: 30.0, through: 300.0, by: 0.5)), id: \.self) { weight in
+                                    Text(String(format: "%.1f kg", weight)).tag(weight)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .labelsHidden()
+                            .frame(maxWidth: .infinity)
+                        }
+                        .frame(height: 100)
+                    } else {
+                        HStack(spacing: 16) {
+                            Text("Weight")
+                                .frame(width: 80, alignment: .leading)
+
+                            Picker("Weight", selection: $state.weightKg) {
+                                ForEach(Array(stride(from: 30.0, through: 300.0, by: 0.5)), id: \.self) { weightKg in
+                                    let lbs = Int(weightKg.kgToLbs)
+                                    Text("\(lbs) lbs").tag(weightKg)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .labelsHidden()
+                            .frame(maxWidth: .infinity)
+                        }
+                        .frame(height: 100)
+                    }
+                }.listRowBackground(Color.clear)
             }
+            .listStyle(.insetGrouped)
+            .listSectionSpacing(0)
             .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
 
-            Spacer()
-
-            // Navigation buttons
-            VStack(spacing: 0) {
-                Divider()
-
-                HStack {
-                    Button {
-                        HapticManager.shared.light()
-                        state.previousStep()
-                    } label: {
-                        Text("Back")
-                            .foregroundStyle(.secondary)
-                            .underline()
-                    }
-
-                    Spacer()
-
-                    Button {
-                        HapticManager.shared.medium()
-                        state.nextStep()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Next")
-                                .fontWeight(.semibold)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.blue, in: RoundedRectangle(cornerRadius: 12))
-                    }
-                }
-                .padding(16)
-                .background(Color(.systemBackground))
+            OnboardingFooter(onBack: { state.previousStep() }) {
+                state.nextStep()
             }
         }
-        .background(Color(.systemBackground))
     }
 }
 

@@ -12,35 +12,26 @@ struct CodeInputView: View {
 
     var body: some View {
         VStack(spacing: 24) {
+            // Header
             VStack(alignment: .leading, spacing: 8) {
-                Text("Enter verification code")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
+                Label("Enter verification code", systemImage: "number.circle.fill")
+                    .font(.system(size: 28, weight: .bold))
 
                 Text("We sent a 6-digit code to \(email)")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 24)
 
             VStack(spacing: 16) {
-                HStack(spacing: 12) {
+                // Code input boxes
+                HStack(spacing: 8) {
                     ForEach(0..<6, id: \.self) { index in
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color(.systemBackground))
-                                .frame(width: 48, height: 56)
-
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(code.count == index ? Color.blue : Color.primary.opacity(0.3), lineWidth: code.count == index ? 2 : 1)
-                                .frame(width: 48, height: 56)
-
-                            if index < code.count {
-                                Text(String(code[code.index(code.startIndex, offsetBy: index)]))
-                                    .font(.system(size: 24, weight: .semibold))
-                            }
-                        }
+                        CodeDigitBox(
+                            digit: index < code.count ? String(code[code.index(code.startIndex, offsetBy: index)]) : "",
+                            isActive: code.count == index
+                        )
                     }
                 }
                 .overlay {
@@ -57,40 +48,53 @@ struct CodeInputView: View {
                             code = code.filter { $0.isNumber }
 
                             if code.count == 6 && !isLoading {
-                                Task {
-                                    await onVerify()
-                                }
+                                Task { await onVerify() }
                             }
                         }
                 }
-                .onTapGesture {
-                    isFocused = true
-                }
-                .onAppear {
-                    isFocused = true
-                }
+                .onTapGesture { isFocused = true }
+                .onAppear { isFocused = true }
 
                 if let errorMessage {
-                    Text(errorMessage)
-                        .foregroundStyle(.red)
-                        .font(.caption)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                        Text(errorMessage)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                PrimaryButton(
-                    title: "Verify Code",
-                    isEnabled: code.count == 6,
-                    isLoading: isLoading
-                ) {
-                    Task {
-                        await onVerify()
+                Button {
+                    HapticManager.shared.medium()
+                    Task { await onVerify() }
+                } label: {
+                    HStack(spacing: 8) {
+                        if isLoading {
+                            ProgressView()
+                                .tint(Color(.systemBackground))
+                        } else {
+                            Text("Verify Code")
+                            Image(systemName: "checkmark")
+                        }
                     }
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.primary)
+                .disabled(code.count != 6 || isLoading)
 
-                TextButton(title: "Resend code") {
-                    Task {
-                        await onResend()
+                Button {
+                    HapticManager.shared.light()
+                    Task { await onResend() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.clockwise")
+                        Text("Resend code")
                     }
+                    .font(.subheadline)
                 }
                 .disabled(isLoading)
                 .padding(.top, 8)
@@ -99,6 +103,22 @@ struct CodeInputView: View {
             Spacer()
         }
         .padding(24)
+    }
+}
+
+struct CodeDigitBox: View {
+    let digit: String
+    let isActive: Bool
+
+    var body: some View {
+        Text(digit)
+            .font(.system(size: 24, weight: .semibold, design: .rounded))
+            .frame(width: 48, height: 56)
+            .background(RoundedRectangle(cornerRadius: 12).fill(.background))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isActive ? Color.primary : Color.primary.opacity(0.2), lineWidth: isActive ? 2 : 1)
+            )
     }
 }
 
