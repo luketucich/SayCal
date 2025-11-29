@@ -3,10 +3,6 @@ import AVFoundation
 import Supabase
 import Combine
 
-struct TranscriptionResponse: Codable {
-    let text: String
-}
-
 enum ProcessingState: Equatable {
     case idle
     case recording
@@ -92,8 +88,13 @@ class AudioRecorder: NSObject, ObservableObject {
     }
 
     func requestPermission() {
-        AVAudioApplication.requestRecordPermission { granted in
+        AVAudioApplication.requestRecordPermission { [weak self] granted in
             print(granted ? "✅ Microphone access granted" : "❌ Microphone access denied")
+            if !granted {
+                Task { @MainActor [weak self] in
+                    self?.state = .error(message: "Microphone access denied. Please enable in Settings.")
+                }
+            }
         }
     }
 
@@ -118,9 +119,10 @@ class AudioRecorder: NSObject, ObservableObject {
         do {
             audioRecorder = try AVAudioRecorder(url: recordingURL!, settings: settings)
             audioRecorder?.isMeteringEnabled = true
-            audioRecorder?.record()
+            let didStart = audioRecorder?.record() ?? false
             startLevelMonitoring()
-            print("🎙️ Recording started")
+            print("🎙️ Recording started: \(didStart)")
+            print("🎙️ Recording URL: \(recordingURL?.path ?? "unknown")")
         } catch {
             print("❌ Failed to start recording: \(error)")
             state = .error(message: "Failed to start recording")
@@ -175,7 +177,15 @@ class AudioRecorder: NSObject, ObservableObject {
     }
 
     private func updateAudioLevel() {
-        guard let recorder = audioRecorder else { return }
+        guard let recorder = audioRecorder else {
+            print("⚠️ No recorder in updateAudioLevel")
+            return
+        }
+
+        guard recorder.isRecording else {
+            print("⚠️ Recorder not recording")
+            return
+        }
 
         recorder.updateMeters()
         let averagePower = recorder.averagePower(forChannel: 0)
@@ -183,6 +193,10 @@ class AudioRecorder: NSObject, ObservableObject {
 
         maxAudioLevel = max(maxAudioLevel, peakPower)
         if peakPower > -40.0 { hasSignificantAudio = true }
+
+        if Int.random(in: 0..<100) == 0 {
+            print("🎤 Audio levels - avg: \(averagePower) dB, peak: \(peakPower) dB, max: \(maxAudioLevel) dB")
+        }
 
         // Normalize -50dB to 0dB range
         let normalized = max(0, min(1, (averagePower + 50) / 50))
@@ -208,39 +222,32 @@ class AudioRecorder: NSObject, ObservableObject {
         await analyzeNutrition(transcription: transcription)
     }
     
+    // MARK: - Local Transcription (On-Device)
+
     private func transcribe(_ fileURL: URL) async -> String? {
         do {
-            let audioData = try Data(contentsOf: fileURL)
-            
-            let response: TranscriptionResponse = try await SupabaseManager.client.functions.invoke(
-                "transcribe",
-                options: FunctionInvokeOptions(
-                    body: [
-                        "audio": audioData.base64EncodedString(),
-                        "format": "m4a",
-                        "timestamp": ISO8601DateFormatter().string(from: Date())
-                    ]
-                )
-            )
-            
-            let text = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !text.isEmpty else {
-                state = .error(message: "No speech detected")
-                HapticManager.shared.error()
-                return nil
-            }
-            
-            print("✅ Transcription: \(text)")
-            return text
-            
+            let transcription = try await LocalTranscriptionManager.shared.transcribe(audioFileURL: fileURL)
+            print("✅ Local transcription: \(transcription)")
+            return transcription
+
+        } catch TranscriptionError.modelNotLoaded {
+            state = .error(message: "Loading speech model... Please try again in a moment.")
+            HapticManager.shared.error()
+            return nil
+
+        } catch TranscriptionError.noSpeechDetected {
+            state = .error(message: "No speech detected")
+            HapticManager.shared.error()
+            return nil
+
         } catch {
-            print("❌ Transcription failed: \(error)")
+            print("❌ Local transcription failed: \(error)")
             state = .error(message: "Failed to transcribe audio")
             HapticManager.shared.error()
             return nil
         }
     }
-    
+
     private func analyzeNutrition(transcription: String) async {
         do {
             print("🧮 Analyzing nutrition...")
@@ -254,6 +261,7 @@ class AudioRecorder: NSObject, ObservableObject {
             
             state = .completed(transcription: transcription, response: response)
             HapticManager.shared.success()
+            print(response)
             print("✅ Analysis complete")
             
         } catch {

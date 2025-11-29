@@ -21,10 +21,8 @@ struct ProfileView: View {
                             Task { try? await userManager.signOut() }
                         }
                     }
-                    .listRowBackground(Color.clear)
                 }
                 .listStyle(.insetGrouped)
-                .scrollContentBackground(.hidden)
                 .navigationTitle("Profile")
                 .navigationBarTitleDisplayMode(.inline)
             } else {
@@ -176,7 +174,6 @@ struct InteractiveProfileContent: View {
         } header: {
             Label("Goals", systemImage: "flag.checkered")
         }
-        .listRowBackground(Color.clear)
 
         Section {
             Button {
@@ -229,7 +226,6 @@ struct InteractiveProfileContent: View {
         } header: {
             Label("Basic Info", systemImage: "person.text.rectangle.fill")
         }
-        .listRowBackground(Color.clear)
 
         Section {
             Button {
@@ -277,7 +273,6 @@ struct InteractiveProfileContent: View {
         } header: {
             Label("Physical Stats", systemImage: "scalemass.fill")
         }
-        .listRowBackground(Color.clear)
 
         Section {
             Button {
@@ -296,7 +291,6 @@ struct InteractiveProfileContent: View {
         } header: {
             Label("Dietary Preferences", systemImage: "leaf.fill")
         }
-        .listRowBackground(Color.clear)
 
         Section {
             Button {
@@ -315,7 +309,6 @@ struct InteractiveProfileContent: View {
         } header: {
             Label("Allergies", systemImage: "allergens.fill")
         }
-        .listRowBackground(Color.clear)
 
         // MARK: - Sheets
         .sheet(isPresented: $showCalorieSheet) {
@@ -746,7 +739,6 @@ struct CalorieSheet: View {
                             .frame(maxWidth: .infinity)
                         Spacer()
                     }
-                    .listRowBackground(Color.clear)
 
                     // Quick adjustment buttons
                     HStack(spacing: 12) {

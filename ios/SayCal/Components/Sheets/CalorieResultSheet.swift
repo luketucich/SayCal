@@ -1,27 +1,57 @@
 import SwiftUI
 
 struct CalorieResultSheet: View {
-    let transcription: String?
-    let nutritionResponse: NutritionResponse?
-    let isLoading: Bool
+    let mealId: String
 
+    @ObservedObject var mealLogger = MealManager.shared
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var mealLogger = MealLogger.shared
     @State private var hasAppeared = false
     @State private var shimmerPhase: CGFloat = 0
     @State private var contentRevealed = false
-    @State private var isSaved = false
-    
+    @State private var selectedDetent: PresentationDetent = .medium
+    @State private var showDeleteConfirmation = false
+
+    private var meal: LoggedMeal? {
+        mealLogger.loggedMeals.first(where: { $0.id == mealId })
+    }
+
+    private var transcription: String? {
+        meal?.transcription
+    }
+
+    private var nutritionResponse: NutritionResponse? {
+        meal?.nutritionResponse
+    }
+
+    private var isLoading: Bool {
+        meal?.isLoading ?? false
+    }
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    if let transcription = transcription {
-                        transcriptionCard(transcription)
+            VStack(spacing: 0) {
+                if meal == nil {
+                    // Meal not found
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.secondary)
+                        Text("Meal not found")
+                            .font(.headline)
+                        Text("This meal may have been deleted")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
-                    nutritionCard
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            actionButtons
+                            nutritionCard
+                        }
+                        .padding(16)
+                    }
                 }
-                .padding(16)
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Meal Summary")
@@ -39,11 +69,27 @@ struct CalorieResultSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.medium, .large], selection: $selectedDetent)
         .presentationDragIndicator(.visible)
+        .presentationBackgroundInteraction(.enabled(upThrough: .large))
+        .presentationContentInteraction(.scrolls)
         .onAppear {
+            print("📋 CalorieResultSheet appeared")
+            print("   mealId: \(mealId)")
+            print("   meal found: \(meal != nil)")
+            print("   isLoading: \(isLoading)")
+            print("   has nutritionResponse: \(nutritionResponse != nil)")
+            print("   total meals in manager: \(mealLogger.loggedMeals.count)")
+
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8).delay(0.1)) {
                 hasAppeared = true
+            }
+
+            // If data already exists, reveal content immediately
+            if nutritionResponse != nil {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.2)) {
+                    contentRevealed = true
+                }
             }
         }
         .onChange(of: nutritionResponse != nil) { _, hasResponse in
@@ -53,85 +99,89 @@ struct CalorieResultSheet: View {
                 }
             }
         }
-    }
-    
-    // MARK: - Transcription Card
-    
-    private func transcriptionCard(_ transcription: String) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("What you said", systemImage: "mic.fill")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-
-            Text(transcription)
-                .font(.system(size: 15))
-                .foregroundStyle(.primary)
-                .lineSpacing(3)
+        .confirmationDialog("Delete this meal?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                if let meal = meal {
+                    HapticManager.shared.medium()
+                    mealLogger.deleteMeal(meal)
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.tertiarySystemGroupedBackground))
-        )
+    }
+
+    // MARK: - Action Buttons
+
+    private var actionButtons: some View {
+        HStack(spacing: 12) {
+            Button {
+                HapticManager.shared.light()
+                // TODO: Implement edit functionality
+            } label: {
+                HStack {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("Edit")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.secondarySystemGroupedBackground))
+                )
+                .foregroundStyle(.primary)
+            }
+
+            Button {
+                HapticManager.shared.light()
+                showDeleteConfirmation = true
+            } label: {
+                HStack {
+                    Image(systemName: "trash")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("Delete")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.secondarySystemGroupedBackground))
+                )
+                .foregroundStyle(.red)
+            }
+        }
         .opacity(hasAppeared ? 1 : 0)
         .offset(y: hasAppeared ? 0 : 10)
     }
-    
+
     // MARK: - Nutrition Card
     
     private var nutritionCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label("Nutrition Information", systemImage: "chart.bar.fill")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-
             if let response = nutritionResponse {
                 switch response {
                 case .success(let analysis):
-                    VStack(spacing: 14) {
-                        nutritionContent(analysis)
-
-                        Button {
-                            HapticManager.shared.medium()
-                            mealLogger.logMeal(transcription: transcription, nutritionResponse: response)
-                            isSaved = true
-
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                dismiss()
-                            }
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: isSaved ? "checkmark.circle.fill" : "plus.circle.fill")
-                                    .font(.system(size: 16, weight: .semibold))
-
-                                Text(isSaved ? "Added to Diary" : "Add to Meal Diary")
-                                    .font(.system(size: 16, weight: .semibold))
-                            }
-                            .foregroundStyle(isSaved ? .green : .white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(isSaved ? Color.green.opacity(0.2) : Color.accentColor)
-                            )
-                        }
-                        .disabled(isSaved)
-                    }
+                    nutritionContent(analysis)
                 case .failure(let error, _):
                     errorContent(error)
                 }
             } else if isLoading {
                 loadingSkeleton
+            } else {
+                Text("No nutrition data available")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 32)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.tertiarySystemGroupedBackground))
+                .fill(Color(.secondarySystemGroupedBackground))
         )
         .opacity(hasAppeared ? 1 : 0)
         .offset(y: hasAppeared ? 0 : 10)
@@ -171,7 +221,7 @@ struct CalorieResultSheet: View {
                             .foregroundStyle(.primary)
                             .contentTransition(.numericText())
 
-                        Text("kcal")
+                        Text(" cal")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.secondary)
                     }
@@ -184,7 +234,7 @@ struct CalorieResultSheet: View {
                 HStack(spacing: 10) {
                     macroPill(label: "P", value: analysis.totalProtein, color: .blue)
                     macroPill(label: "C", value: analysis.totalCarbs, color: .orange)
-                    macroPill(label: "F", value: analysis.totalFats, color: .purple)
+                    macroPill(label: "F", value: analysis.totalFats, color: .pink)
                 }
                 .modifier(RevealModifier(delay: 0.15, revealed: contentRevealed))
             }
@@ -216,7 +266,7 @@ struct CalorieResultSheet: View {
 
             Text("\(Int(value))g")
                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
+                .foregroundStyle(color)
                 .contentTransition(.numericText())
         }
         .frame(width: 44)
@@ -246,33 +296,24 @@ struct CalorieResultSheet: View {
                 Text("\(Int(item.calories))")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
-                + Text(" kcal")
+                + Text(" cal")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
             }
 
-            // Macros + Micros in same row
-            HStack(spacing: 0) {
-                // Macros
-                HStack(spacing: 12) {
-                    miniMacro(label: "P", value: item.protein, color: .blue)
-                    miniMacro(label: "C", value: item.carbs, color: .orange)
-                    miniMacro(label: "F", value: item.fats, color: .purple)
-                }
+            // Macros
+            HStack(spacing: 12) {
+                miniMacro(label: "P", value: item.protein, color: .blue)
+                miniMacro(label: "C", value: item.carbs, color: .orange)
+                miniMacro(label: "F", value: item.fats, color: .pink)
+            }
 
-                if !item.micros.isEmpty {
-                    Text(" • ")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 4)
-
-                    Text(item.micros.joined(separator: " • "))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
-                }
-
-                Spacer(minLength: 0)
+            // Micros (if available, on separate line)
+            if !item.micros.isEmpty {
+                Text(item.micros.joined(separator: " • "))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(12)
@@ -290,7 +331,7 @@ struct CalorieResultSheet: View {
 
             Text("\(Int(value))g")
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(color)
         }
     }
     
@@ -300,12 +341,12 @@ struct CalorieResultSheet: View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 36))
-                .foregroundStyle(.orange)
-            
+                .foregroundStyle(.secondary)
+
             Text("Couldn't analyze meal")
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.primary)
-            
+
             Text(message)
                 .font(.system(size: 15))
                 .foregroundStyle(.secondary)
@@ -357,11 +398,6 @@ struct CalorieResultSheet: View {
                 }
             }
         }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                shimmerPhase = 1
-            }
-        }
     }
     
     private var skeletonBreakdownRow: some View {
@@ -390,21 +426,34 @@ struct CalorieResultSheet: View {
     }
     
     // MARK: - Shimmer Effect
-    
+
     private func shimmer(width: CGFloat, height: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: height / 3)
-            .fill(
-                LinearGradient(
-                    colors: [
-                        Color(.systemGray5),
-                        Color(.systemGray4).opacity(0.7 + shimmerPhase * 0.3),
-                        Color(.systemGray5)
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
+        ZStack {
+            RoundedRectangle(cornerRadius: height / 3)
+                .fill(Color(.systemGray5))
+                .frame(width: width, height: height)
+
+            RoundedRectangle(cornerRadius: height / 3)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.clear,
+                            Color(.systemGray4).opacity(0.5),
+                            Color.clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
                 )
-            )
-            .frame(width: width, height: height)
+                .frame(width: width, height: height)
+                .offset(x: shimmerPhase * width * 2 - width)
+                .onAppear {
+                    withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
+                        shimmerPhase = 1
+                    }
+                }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: height / 3))
     }
 }
 
@@ -424,50 +473,21 @@ private struct RevealModifier: ViewModifier {
 
 // MARK: - Previews
 
-#Preview("Success") {
-    CalorieResultSheet(
-        transcription: "I had a chicken breast with rice and broccoli",
-        nutritionResponse: .success(.preview),
-        isLoading: false
-    )
-}
+#Preview("Meal Sheet") {
+    // Create a preview meal
+    let previewMealId = "preview-meal"
+    let logger = MealManager.shared
 
-#Preview("Loading") {
-    CalorieResultSheet(
-        transcription: "I had a chicken breast with rice and broccoli",
-        nutritionResponse: nil,
-        isLoading: true
-    )
-}
-
-#Preview("Error") {
-    CalorieResultSheet(
-        transcription: "asdfghjkl",
-        nutritionResponse: .failure(error: "Could not parse meal", unparseableMeal: "asdfghjkl"),
-        isLoading: false
-    )
-}
-
-// Interactive preview to test loading → success transition
-#Preview("Loading → Success") {
-    struct TransitionDemo: View {
-        @State private var response: NutritionResponse? = nil
-        @State private var isLoading = true
-        
-        var body: some View {
-            CalorieResultSheet(
-                transcription: "I had a chicken breast with rice and broccoli",
-                nutritionResponse: response,
-                isLoading: isLoading
-            )
-            .onAppear {
-                // Simulate API delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    response = .success(.preview)
-                    isLoading = false
-                }
-            }
-        }
+    // Add preview meal if it doesn't exist
+    if !logger.loggedMeals.contains(where: { $0.id == previewMealId }) {
+        let meal = LoggedMeal(
+            id: previewMealId,
+            transcription: "I had a chicken breast with rice and broccoli",
+            nutritionResponse: .success(.preview),
+            isLoading: false
+        )
+        logger.loggedMeals.append(meal)
     }
-    return TransitionDemo()
+
+    return CalorieResultSheet(mealId: previewMealId)
 }

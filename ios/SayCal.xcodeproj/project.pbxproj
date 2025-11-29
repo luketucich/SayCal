@@ -10,6 +10,7 @@
 		A32B9E7B2ED1281200F03568 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = A32B9E7A2ED1281200F03568 /* Realtime */; };
 		A367C5D32EC950FD00D3CD6B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = A367C5D22EC950FD00D3CD6B /* GoogleSignIn */; };
 		A367C5D52EC950FD00D3CD6B /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A367C5D42EC950FD00D3CD6B /* GoogleSignInSwift */; };
+		A381086B2EDAC5D9004EF207 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = A381086A2EDAC5D9004EF207 /* WhisperKit */; };
 		A3B1F8E82EC6FA6B000612F8 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = A3B1F8E72EC6FA6B000612F8 /* Auth */; };
 		A3B1F8EA2EC6FA6B000612F8 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = A3B1F8E92EC6FA6B000612F8 /* Functions */; };
 		A3B1F8EC2EC6FA6B000612F8 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = A3B1F8EB2EC6FA6B000612F8 /* PostgREST */; };
@@ -50,6 +51,7 @@
 				A3B1F9282EC7102F000612F8 /* Supabase in Frameworks */,
 				A3B1F8EE2EC6FA6B000612F8 /* Storage in Frameworks */,
 				A367C5D52EC950FD00D3CD6B /* GoogleSignInSwift in Frameworks */,
+				A381086B2EDAC5D9004EF207 /* WhisperKit in Frameworks */,
 				A32B9E7B2ED1281200F03568 /* Realtime in Frameworks */,
 				A3B1F8EC2EC6FA6B000612F8 /* PostgREST in Frameworks */,
 				A3B1F8EA2EC6FA6B000612F8 /* Functions in Frameworks */,
@@ -113,6 +115,7 @@
 				A367C5D22EC950FD00D3CD6B /* GoogleSignIn */,
 				A367C5D42EC950FD00D3CD6B /* GoogleSignInSwift */,
 				A32B9E7A2ED1281200F03568 /* Realtime */,
+				A381086A2EDAC5D9004EF207 /* WhisperKit */,
 			);
 			productName = SayCal;
 			productReference = A3B1F8D22EC6F824000612F8 /* SayCal.app */;
@@ -145,6 +148,7 @@
 			packageReferences = (
 				A3B1F8E62EC6FA6B000612F8 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				A367C5D12EC950FD00D3CD6B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				A38108692EDAC5D9004EF207 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A3B1F8D32EC6F824000612F8 /* Products */;
@@ -315,7 +319,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -350,7 +354,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -400,6 +404,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		A38108692EDAC5D9004EF207 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		A3B1F8E62EC6FA6B000612F8 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase-community/supabase-swift.git";
@@ -425,6 +437,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A367C5D12EC950FD00D3CD6B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		A381086A2EDAC5D9004EF207 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A38108692EDAC5D9004EF207 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
 		};
 		A3B1F8E72EC6FA6B000612F8 /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -4,6 +4,11 @@ import SwiftUI
 struct SayCalApp: App {
     @StateObject private var userManager = UserManager.shared
 
+    init() {
+        // Start loading WhisperKit model immediately on app launch
+        _ = LocalTranscriptionManager.shared
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {

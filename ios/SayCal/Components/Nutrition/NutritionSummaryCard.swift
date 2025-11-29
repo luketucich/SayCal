@@ -2,18 +2,23 @@ import SwiftUI
 
 struct NutritionSummaryCard: View {
     @EnvironmentObject var userManager: UserManager
-    @ObservedObject var mealLogger = MealLogger.shared
+    @ObservedObject var mealLogger = MealManager.shared
+    let date: Date
+
+    private var totals: DailyNutritionTotals {
+        mealLogger.getTotalsForDate(date)
+    }
 
     private var goalCalories: Int {
-        Int(mealLogger.dailyTotals.goalCalories)
+        Int(totals.goalCalories)
     }
 
     private var consumedCalories: Int {
-        Int(mealLogger.dailyTotals.totalCalories)
+        Int(totals.totalCalories)
     }
 
     private var remainingCalories: Int {
-        Int(mealLogger.dailyTotals.remainingCalories)
+        Int(totals.remainingCalories)
     }
 
     private var progress: Double {
@@ -21,15 +26,15 @@ struct NutritionSummaryCard: View {
     }
 
     private var carbsConsumed: Int {
-        Int(mealLogger.dailyTotals.totalCarbs)
+        Int(totals.totalCarbs)
     }
 
     private var fatConsumed: Int {
-        Int(mealLogger.dailyTotals.totalFats)
+        Int(totals.totalFats)
     }
 
     private var proteinConsumed: Int {
-        Int(mealLogger.dailyTotals.totalProtein)
+        Int(totals.totalProtein)
     }
 
     var body: some View {
@@ -67,19 +72,19 @@ struct NutritionSummaryCard: View {
 
             // Macros row
             HStack(spacing: 8) {
-                MacroStat(label: "Carbs", consumed: carbsConsumed)
+                MacroStat(label: "Carbs", consumed: carbsConsumed, color: .orange)
 
                 Text("•")
                     .foregroundStyle(.secondary)
                     .font(.system(size: 12))
 
-                MacroStat(label: "Fat", consumed: fatConsumed)
+                MacroStat(label: "Fat", consumed: fatConsumed, color: .pink)
 
                 Text("•")
                     .foregroundStyle(.secondary)
                     .font(.system(size: 12))
 
-                MacroStat(label: "Protein", consumed: proteinConsumed)
+                MacroStat(label: "Protein", consumed: proteinConsumed, color: .blue)
             }
             .frame(maxWidth: .infinity)
         }
@@ -92,22 +97,24 @@ struct NutritionSummaryCard: View {
 struct MacroStat: View {
     let label: String
     let consumed: Int
+    let color: Color
 
     var body: some View {
         VStack(spacing: 2) {
             Text("\(consumed)g")
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(color)
                 .contentTransition(.numericText())
 
             Text(label)
                 .font(.system(size: 11))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(color.opacity(0.8))
         }
     }
 }
 
 #Preview {
-    NutritionSummaryCard()
+    NutritionSummaryCard(date: Date())
         .environmentObject(UserManager.shared)
         .padding()
         .background(Color(.systemGroupedBackground))

@@ -2,32 +2,25 @@ import SwiftUI
 
 struct DailyView: View {
     @EnvironmentObject var userManager: UserManager
-    @StateObject private var mealLogger = MealLogger.shared
-    @State private var selectedDate = Calendar.current.startOfDay(for: Date())
+    @StateObject private var mealLogger = MealManager.shared
     @Binding var showSettings: Bool
+    @Binding var selectedDate: Date
+    let onMealTap: (LoggedMeal) -> Void
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: true) {
                 VStack(spacing: 20) {
                     // Date selector
                     DateSelectorView(selectedDate: $selectedDate)
                         .padding(.top, 8)
 
                     // Nutrition Summary Card
-                    NutritionSummaryCard()
+                    NutritionSummaryCard(date: selectedDate)
                         .environmentObject(userManager)
 
                     // Meals List
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Meals")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.primary)
-                            .padding(.horizontal, 4)
-
-                        MealsList(date: selectedDate)
-                    }
-                    .padding(.horizontal, 16)
+                    MealsList(date: selectedDate, onMealTap: onMealTap)
 
                     Spacer()
                 }
@@ -35,6 +28,9 @@ struct DailyView: View {
             }
             .navigationTitle("Daily")
             .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: userManager.profile?.targetCalories) { _, _ in
+                mealLogger.syncGoalCaloriesFromProfile()
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -60,6 +56,6 @@ struct DailyView: View {
 }
 
 #Preview {
-    DailyView(showSettings: .constant(false))
+    DailyView(showSettings: .constant(false), selectedDate: .constant(Date()), onMealTap: { _ in })
         .environmentObject(UserManager.shared)
 }

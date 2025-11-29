@@ -5,6 +5,7 @@ struct AudioRecordingOverlay: View {
     @ObservedObject var audioRecorder: AudioRecorder
     @Binding var isPresented: Bool
     var onDismiss: () -> Void
+    var onSend: () -> Void
 
     @State private var animationPhase: CGFloat = 0
 
@@ -23,7 +24,7 @@ struct AudioRecordingOverlay: View {
                     onDismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(.primary)
                         .frame(width: 40, height: 40)
                         .background(
@@ -34,7 +35,7 @@ struct AudioRecordingOverlay: View {
                 .disabled(audioRecorder.state == .transcribing)
                 .opacity(audioRecorder.state == .transcribing ? 0.5 : 1.0)
 
-                // Middle section - visualizer or loading state
+                // Middle section - visualizer, loading, or error state
                 ZStack {
                     if audioRecorder.state == .recording {
                         // Audio visualizer - fills available space
@@ -49,14 +50,43 @@ struct AudioRecordingOverlay: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
                     } else if audioRecorder.state == .transcribing {
-                        // Loading state with spinner
+                        // Loading state with bouncing dots
                         HStack(spacing: 10) {
-                            ProgressView()
-                                .tint(.primary)
-
-                            Text("Uploading...")
+                            Text("Transcribing")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+
+                            HStack(spacing: 4) {
+                                ForEach(0..<3, id: \.self) { index in
+                                    Circle()
+                                        .fill(Color.primary)
+                                        .frame(width: 6, height: 6)
+                                        .offset(y: animationPhase == 0 ? 0 : bounceOffset(for: index))
+                                }
+                            }
+                        }
+                    } else if case .error(let message) = audioRecorder.state {
+                        // Error state with message and retry button
+                        HStack(spacing: 10) {
+                            Text(message)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.center)
+
+                            Button {
+                                HapticManager.shared.medium()
+                                audioRecorder.startRecording()
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(.primary)
+                                    .frame(width: 32, height: 32)
+                                    .background(
+                                        Circle()
+                                            .fill(Color(.quaternarySystemFill))
+                                    )
+                            }
                         }
                     }
                 }
@@ -66,20 +96,16 @@ struct AudioRecordingOverlay: View {
                 // Send button on the right
                 Button {
                     HapticManager.shared.medium()
+                    onSend()
                     audioRecorder.stopRecording()
                 } label: {
                     Image(systemName: "paperplane.fill")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color(.systemBackground))
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(audioRecorder.isRecording ? Color.primary : Color.secondary)
                         .frame(width: 40, height: 40)
-                        .background(
-                            Circle()
-                                .fill(audioRecorder.isRecording ? Color.primary : Color.secondary)
-                        )
                 }
                 .disabled(!audioRecorder.isRecording)
                 .opacity(audioRecorder.isRecording ? 1.0 : 0.5)
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: audioRecorder.isRecording)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 11)
@@ -106,6 +132,22 @@ struct AudioRecordingOverlay: View {
                 animationPhase = .pi * 2
             }
         }
+        .onChange(of: audioRecorder.state) { _, newState in
+            if newState == .transcribing {
+                // Reset and start bouncing animation
+                animationPhase = 0
+                withAnimation(.easeInOut(duration: 0.6).repeatForever()) {
+                    animationPhase = 1
+                }
+            }
+        }
+    }
+
+    private func bounceOffset(for index: Int) -> CGFloat {
+        let delay = Double(index) * 0.2
+        let phase = (animationPhase - delay).truncatingRemainder(dividingBy: 1.0)
+        let bounce = sin(phase * .pi) * -8
+        return bounce
     }
 
     private func barHeight(for index: Int, totalBars: Int) -> CGFloat {
@@ -147,7 +189,8 @@ struct AudioRecordingOverlay: View {
                 return recorder
             }(),
             isPresented: .constant(true),
-            onDismiss: {}
+            onDismiss: {},
+            onSend: {}
         )
     }
     .background(Color(.systemGray6))

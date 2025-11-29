@@ -10,25 +10,31 @@ enum AppTab: Hashable {
 struct MainAppView: View {
     @EnvironmentObject var userManager: UserManager
     @StateObject private var audioRecorder = AudioRecorder()
+    @Environment(\.colorScheme) private var colorScheme
+    @AppStorage("appTheme") private var selectedAppTheme: AppTheme = .device
 
     @State private var showSettings = false
     @State private var showInputMenu = false
     @State private var isMenuClosing = false
     @State private var selectedTab: AppTab = .daily
     @State private var previousTab: AppTab = .daily
+    @State private var selectedDate = Calendar.current.startOfDay(for: Date())
+
+    @StateObject private var mealLogger = MealManager.shared
 
     @State private var showRecordingOverlay = false
     @State private var showTextInput = false
     @State private var showResultSheet = false
-
-    @State private var transcriptionText: String?
-    @State private var nutritionResponse: NutritionResponse?
+    @State private var currentMealId: String?
+    @State private var selectedMealId: String?
     @State private var textInput: String = ""
-    @State private var isCalculatingFromText = false
 
     @FocusState private var isTextInputFocused: Bool
 
-    // Custom binding to intercept .add selection without flickering
+    private var isViewingToday: Bool {
+        Calendar.current.isDateInToday(selectedDate)
+    }
+
     private var tabSelection: Binding<AppTab> {
         Binding(
             get: { selectedTab },
@@ -47,23 +53,18 @@ struct MainAppView: View {
         )
     }
 
-    private var isLoadingNutrition: Bool {
-        if isCalculatingFromText {
-            return nutritionResponse == nil
-        }
-        switch audioRecorder.state {
-        case .analyzing, .transcribing:
-            return nutritionResponse == nil
-        default:
-            return false
-        }
-    }
-
     var body: some View {
         ZStack {
             TabView(selection: tabSelection) {
                 Tab(value: .daily) {
-                    DailyView(showSettings: $showSettings)
+                    DailyView(
+                        showSettings: $showSettings,
+                        selectedDate: $selectedDate,
+                        onMealTap: { meal in
+                            selectedMealId = meal.id
+                            showResultSheet = true
+                        }
+                    )
                 } label: {
                     Image(systemName: selectedTab == .daily ? "house.fill" : "house")
                 }
@@ -74,48 +75,71 @@ struct MainAppView: View {
                     Image(systemName: selectedTab == .recipes ? "book.closed.fill" : "book.closed")
                 }
 
-                Tab(value: .add, role: .search) {
-                    Color.clear
-                } label: {
-                    Image(systemName: "plus")
+                if isViewingToday {
+                    Tab(value: .add, role: .search) {
+                        Color.clear
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
             }
             .tabViewStyle(.tabBarOnly)
 
-            // Floating menu
+            // Floating menu with backdrop
             if showInputMenu || isMenuClosing {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: 12) {
-                            MenuOption(
-                                icon: "mic.fill",
-                                label: "Voice",
-                                appearDelay: 0.06,
-                                disappearDelay: 0.06,
-                                isClosing: isMenuClosing
-                            ) {
-                                HapticManager.shared.light()
-                                closeMenu()
-                                startVoiceRecording()
-                            }
-
-                            MenuOption(
-                                icon: "keyboard",
-                                label: "Type",
-                                appearDelay: 0,
-                                disappearDelay: 0,
-                                isClosing: isMenuClosing
-                            ) {
-                                HapticManager.shared.light()
-                                closeMenu()
-                                startTextInput()
-                            }
-                        }
-                        .padding(.trailing, 16)
+                ZStack {
+                    RadialGradient(
+                        colors: [
+                            (colorScheme == .dark ? Color.black : Color.white).opacity(0.8),
+                            (colorScheme == .dark ? Color.black : Color.white).opacity(0.6),
+                            (colorScheme == .dark ? Color.black : Color.white).opacity(0.3)
+                        ],
+                        center: .bottomTrailing,
+                        startRadius: 50,
+                        endRadius: 500
+                    )
+                    .blur(radius: showInputMenu && !isMenuClosing ? 20 : 0)
+                    .opacity(showInputMenu && !isMenuClosing ? 1 : 0)
+                    .ignoresSafeArea()
+                    .animation(.easeInOut(duration: 0.25), value: showInputMenu)
+                    .animation(.easeInOut(duration: 0.25), value: isMenuClosing)
+                    .onTapGesture {
+                        closeMenu()
                     }
-                    .padding(.bottom, 70)
+
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 12) {
+                                MenuOption(
+                                    icon: "mic.fill",
+                                    label: "Voice",
+                                    appearDelay: 0.06,
+                                    disappearDelay: 0.06,
+                                    isClosing: isMenuClosing
+                                ) {
+                                    HapticManager.shared.light()
+                                    closeMenu()
+                                    startVoiceRecording()
+                                }
+
+                                MenuOption(
+                                    icon: "keyboard",
+                                    label: "Type",
+                                    appearDelay: 0,
+                                    disappearDelay: 0,
+                                    isClosing: isMenuClosing
+                                ) {
+                                    HapticManager.shared.light()
+                                    closeMenu()
+                                    startTextInput()
+                                }
+                            }
+                            .padding(.trailing, 16)
+                        }
+                        .padding(.bottom, 70)
+                    }
                 }
             }
 
@@ -128,15 +152,22 @@ struct MainAppView: View {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             showRecordingOverlay = false
                         }
+                    },
+                    onSend: {
+                        // Create loading meal immediately
+                        let mealId = MealManager.shared.createLoadingMeal(transcription: nil)
+                        currentMealId = mealId
+
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            showRecordingOverlay = false
+                        }
                     }
                 )
             }
         }
-
-        // *** UPDATED SECTION — input bar removed ***
         .safeAreaInset(edge: .bottom) {
             if showTextInput {
-                TextField("What did you eat?", text: $textInput, axis: .vertical)
+                TextField("", text: $textInput, axis: .vertical)
                     .focused($isTextInputFocused)
                     .submitLabel(.send)
                     .onSubmit {
@@ -144,30 +175,41 @@ struct MainAppView: View {
                     }
                     .toolbar {
                         ToolbarItemGroup(placement: .keyboard) {
-                            TextField("Enter your meal", text: $textInput)
-                            
-                            Spacer()
-
-                            Button("Cancel") {
-                                HapticManager.shared.light()
-                                handleTextInputCancel()
-                            }
-                            .foregroundStyle(.secondary)
-
-                            Button {
-                                HapticManager.shared.medium()
-                                handleTextInputSend()
-                            } label: {
-                                Image(systemName: "paperplane.fill")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(Color(.systemBackground))
-                                    .frame(width: 32, height: 32)
+                            HStack(spacing: 12) {
+                                TextField("What did you eat?", text: $textInput, axis: .vertical)
+                                    .lineLimit(1...4)
+                                    .submitLabel(.return)
+                                    .onSubmit {
+                                        if !textInput.isEmpty { handleTextInputSend() }
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 10)
                                     .background(
-                                        Circle()
-                                            .fill(textInput.isEmpty ? Color.secondary : Color.primary)
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1)
                                     )
+
+                                Button {
+                                    HapticManager.shared.light()
+                                    handleTextInputCancel()
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Button {
+                                    HapticManager.shared.medium()
+                                    handleTextInputSend()
+                                } label: {
+                                    Image(systemName: "paperplane.fill")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundStyle(textInput.isEmpty ? Color.secondary : Color.primary)
+                                }
+                                .disabled(textInput.isEmpty)
                             }
-                            .disabled(textInput.isEmpty)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
                         }
                     }
                     // Make invisible & non-intrusive
@@ -179,14 +221,19 @@ struct MainAppView: View {
         .sheet(isPresented: $showSettings) {
             SettingsSheet()
                 .environmentObject(userManager)
+                .preferredColorScheme(selectedAppTheme.colorScheme)
+                .tint(selectedAppTheme.accentColor)
         }
 
         .sheet(isPresented: $showResultSheet) {
-            CalorieResultSheet(
-                transcription: transcriptionText,
-                nutritionResponse: nutritionResponse,
-                isLoading: isLoadingNutrition
-            )
+            if let mealId = selectedMealId {
+                CalorieResultSheet(mealId: mealId)
+            }
+        }
+        .onChange(of: showResultSheet) { _, isShowing in
+            if !isShowing {
+                selectedMealId = nil
+            }
         }
 
         .onChange(of: showSettings) { _, isShowing in
@@ -198,9 +245,12 @@ struct MainAppView: View {
         .onChange(of: audioRecorder.state) { _, newState in
             handleAudioRecorderStateChange(newState)
         }
+        .preferredColorScheme(selectedAppTheme.colorScheme)
+        .tint(selectedAppTheme.accentColor)
     }
 
-    // MARK: - Menu Controls
+    // MARK: - Menu
+
     private func toggleMenu() {
         if showInputMenu {
             closeMenu()
@@ -222,11 +272,10 @@ struct MainAppView: View {
         }
     }
 
-    private func startVoiceRecording() {
-        transcriptionText = nil
-        nutritionResponse = nil
-        audioRecorder.requestPermission()
+    // MARK: - Voice Recording
 
+    private func startVoiceRecording() {
+        audioRecorder.requestPermission()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 showRecordingOverlay = true
@@ -234,11 +283,32 @@ struct MainAppView: View {
         }
     }
 
-    private func startTextInput() {
-        transcriptionText = nil
-        nutritionResponse = nil
-        textInput = ""
+    private func handleAudioRecorderStateChange(_ state: ProcessingState) {
+        guard let mealId = currentMealId else { return }
 
+        switch state {
+        case .analyzing(let transcription):
+            MealManager.shared.updateMealTranscription(id: mealId, transcription: transcription)
+
+        case .completed(_, let response):
+            MealManager.shared.updateMeal(id: mealId, nutritionResponse: response)
+            currentMealId = nil
+
+        case .error:
+            if let meal = MealManager.shared.loggedMeals.first(where: { $0.id == mealId }) {
+                MealManager.shared.deleteMeal(meal)
+            }
+            currentMealId = nil
+
+        case .idle, .recording, .transcribing:
+            break
+        }
+    }
+
+    // MARK: - Text Input
+
+    private func startTextInput() {
+        textInput = ""
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 showTextInput = true
@@ -259,78 +329,45 @@ struct MainAppView: View {
 
     private func handleTextInputSend() {
         guard !textInput.isEmpty else { return }
-        isTextInputFocused = false
+
         let mealText = textInput
         textInput = ""
+        isTextInputFocused = false
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             showTextInput = false
         }
 
-        transcriptionText = mealText
-        nutritionResponse = nil
-        isCalculatingFromText = true
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            showResultSheet = true
-        }
+        let mealId = MealManager.shared.createLoadingMeal(transcription: mealText)
+        currentMealId = mealId
 
         Task {
-            await calculateNutritionFromText(mealText)
+            await calculateNutrition(for: mealText)
         }
     }
 
-    private func calculateNutritionFromText(_ mealText: String) async {
-        do {
-            print("🧮 Analyzing nutrition...")
+    private func calculateNutrition(for mealText: String) async {
+        guard let mealId = currentMealId else { return }
 
+        do {
             let response: NutritionResponse = try await SupabaseManager.client.functions.invoke(
                 "calculate-calories",
-                options: FunctionInvokeOptions(
-                    body: ["transcribed_meal": mealText]
-                )
+                options: FunctionInvokeOptions(body: ["transcribed_meal": mealText])
             )
 
-            DispatchQueue.main.async {
-                nutritionResponse = response
-                isCalculatingFromText = false
+            await MainActor.run {
+                MealManager.shared.updateMeal(id: mealId, nutritionResponse: response)
+                currentMealId = nil
                 HapticManager.shared.success()
             }
-            print("✅ Analysis complete")
-
         } catch {
-            print("❌ Analysis failed: \(error)")
-            DispatchQueue.main.async {
-                isCalculatingFromText = false
+            await MainActor.run {
+                if let meal = MealManager.shared.loggedMeals.first(where: { $0.id == mealId }) {
+                    MealManager.shared.deleteMeal(meal)
+                }
+                currentMealId = nil
                 HapticManager.shared.error()
             }
-        }
-    }
-
-    private func handleAudioRecorderStateChange(_ state: ProcessingState) {
-        switch state {
-        case .analyzing(let transcription):
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                showRecordingOverlay = false
-            }
-            transcriptionText = transcription
-            nutritionResponse = nil
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                showResultSheet = true
-            }
-
-        case .completed(let transcription, let response):
-            transcriptionText = transcription
-            nutritionResponse = response
-
-        case .error(let message):
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                showRecordingOverlay = false
-            }
-            print("Error: \(message)")
-
-        case .idle, .recording, .transcribing:
-            break
         }
     }
 }
