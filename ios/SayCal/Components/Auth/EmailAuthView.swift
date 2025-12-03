@@ -4,7 +4,7 @@ import Supabase
 struct EmailAuthView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var userManager: UserManager
+    @EnvironmentObject var userManager: UserManager
 
     @State private var email = ""
     @State private var code = ""
@@ -15,9 +15,9 @@ struct EmailAuthView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                (colorScheme == .dark ? Color.black : Color.white)
+                Color(.systemGroupedBackground)
                     .ignoresSafeArea()
-                
+
                 if showCodeInput {
                     CodeInputView(
                         code: $code,

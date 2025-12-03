@@ -6,14 +6,101 @@ struct AudioRecordingOverlay: View {
     @Binding var isPresented: Bool
     var onDismiss: () -> Void
     var onSend: () -> Void
+    var onConfirm: (String) -> Void
+    var onRetry: () -> Void
 
     @State private var animationPhase: CGFloat = 0
+    @State private var editableTranscription: String = ""
+    @FocusState private var isTextFieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
-            HStack(spacing: 12) {
+            if case .awaitingConfirmation(let transcription) = audioRecorder.state {
+                // Confirmation UI - expanded vertically
+                VStack(spacing: 16) {
+                    Text("Does this look right?")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+
+                    TextField("Your meal description", text: $editableTranscription, axis: .vertical)
+                        .focused($isTextFieldFocused)
+                        .lineLimit(3...6)
+                        .padding(12)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        )
+
+                    Text("Tap the input box to manually make changes or retry to send a new voice message.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+
+                    HStack(spacing: 12) {
+                        Button {
+                            HapticManager.shared.medium()
+                            onDismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.primary)
+                                .frame(width: 44, height: 44)
+                                .background(.ultraThinMaterial, in: Circle())
+                                .overlay(
+                                    Circle()
+                                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                                )
+                        }
+
+                        Button {
+                            HapticManager.shared.medium()
+                            onRetry()
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.primary)
+                                .frame(width: 44, height: 44)
+                                .background(.ultraThinMaterial, in: Circle())
+                                .overlay(
+                                    Circle()
+                                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                                )
+                        }
+
+                        Spacer()
+
+                        Button {
+                            HapticManager.shared.medium()
+                            onConfirm(editableTranscription)
+                        } label: {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    Circle()
+                                        .fill(Color.blue)
+                                )
+                        }
+                    }
+                }
+                .padding(16)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 30)
+                .onAppear {
+                    editableTranscription = transcription
+                }
+            } else {
+                // Original recording UI
+                HStack(spacing: 12) {
                 // Stop button on the left
                 Button {
                     HapticManager.shared.medium()
@@ -24,14 +111,16 @@ struct AudioRecordingOverlay: View {
                     onDismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.primary)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.secondary)
                         .frame(width: 40, height: 40)
-                        .background(
+                        .background(.ultraThinMaterial, in: Circle())
+                        .overlay(
                             Circle()
-                                .fill(Color(.tertiarySystemGroupedBackground))
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                         )
                 }
+                .buttonStyle(.plain)
                 .disabled(audioRecorder.state == .transcribing)
                 .opacity(audioRecorder.state == .transcribing ? 0.5 : 1.0)
 
@@ -82,9 +171,10 @@ struct AudioRecordingOverlay: View {
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundStyle(.primary)
                                     .frame(width: 32, height: 32)
-                                    .background(
+                                    .background(.ultraThinMaterial, in: Circle())
+                                    .overlay(
                                         Circle()
-                                            .fill(Color(.quaternarySystemFill))
+                                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                                     )
                             }
                         }
@@ -100,21 +190,29 @@ struct AudioRecordingOverlay: View {
                     audioRecorder.stopRecording()
                 } label: {
                     Image(systemName: "paperplane.fill")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(audioRecorder.isRecording ? Color.primary : Color.secondary)
                         .frame(width: 40, height: 40)
+                        .background(.ultraThinMaterial, in: Circle())
+                        .overlay(
+                            Circle()
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        )
                 }
+                .buttonStyle(.plain)
                 .disabled(!audioRecorder.isRecording)
                 .opacity(audioRecorder.isRecording ? 1.0 : 0.5)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 11)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 30)  // Position just above tab bar
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 11)
-            .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color(.tertiarySystemGroupedBackground))
-            )
-            .padding(.horizontal, 16)
-            .padding(.bottom, 90)  // Position just above tab bar
         }
         .transition(
             .asymmetric(
@@ -190,7 +288,9 @@ struct AudioRecordingOverlay: View {
             }(),
             isPresented: .constant(true),
             onDismiss: {},
-            onSend: {}
+            onSend: {},
+            onConfirm: { _ in },
+            onRetry: {}
         )
     }
     .background(Color(.systemGray6))

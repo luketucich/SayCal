@@ -17,119 +17,89 @@ struct PhysicalStatsView: View {
             .padding(.horizontal, 20)
             .padding(.top, 24)
 
-            List {
-                Section {
-                    HStack(spacing: 16) {
+            ScrollView {
+                VStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Sex")
-                            .frame(width: 80, alignment: .leading)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .padding(.horizontal, 4)
 
-                        Picker("Sex", selection: $state.sex) {
-                            Text("Male").tag(Sex.male)
-                            Text("Female").tag(Sex.female)
-                        }
-                        .pickerStyle(.segmented)
-                        .frame(maxWidth: .infinity)
+                        SexPickerContent(selection: $state.sex)
+                            .padding(16)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                            )
+                            .onChange(of: state.sex) { _, _ in
+                                HapticManager.shared.light()
+                            }
                     }
-                    .onChange(of: state.sex) { _, _ in
-                        HapticManager.shared.light()
-                    }
-                } footer: {
-                    Text("Required for accurate calorie calculations based on metabolic differences")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .listRowBackground(Color.clear)
+                    .padding(.horizontal, 20)
 
-                Section {
-                    HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Age")
-                            .frame(width: 80, alignment: .leading)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .padding(.horizontal, 4)
 
-                        Picker("Age", selection: $state.age) {
-                            ForEach(13..<121, id: \.self) { age in
-                                Text("\(age)").tag(age)
+                        AgePickerContent(age: $state.age)
+                            .padding(16)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                            )
+                            .onChange(of: state.age) { _, _ in
+                                HapticManager.shared.light()
                             }
-                        }
-                        .pickerStyle(.wheel)
-                        .labelsHidden()
-                        .frame(maxWidth: .infinity)
                     }
-                    .frame(height: 100)
-                }.listRowBackground(Color.clear)
+                    .padding(.horizontal, 20)
 
-                Section {
-                    if state.unitsPreference == .metric {
-                        HStack(spacing: 16) {
-                            Text("Height")
-                                .frame(width: 80, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Height")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .padding(.horizontal, 4)
 
-                            Picker("Height", selection: $state.heightCm) {
-                                ForEach(100..<251, id: \.self) { cm in
-                                    Text("\(cm) cm").tag(cm)
-                                }
+                        HeightPickerContent(heightCm: $state.heightCm, units: state.unitsPreference)
+                            .padding(16)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                            )
+                            .onChange(of: state.heightCm) { _, _ in
+                                HapticManager.shared.light()
                             }
-                            .pickerStyle(.wheel)
-                            .labelsHidden()
-                            .frame(maxWidth: .infinity)
-                        }
-                        .frame(height: 100)
-                    } else {
-                        HStack(spacing: 16) {
-                            Text("Height")
-                                .frame(width: 80, alignment: .leading)
-
-                            Picker("Height", selection: $state.heightCm) {
-                                ForEach(100..<251, id: \.self) { cm in
-                                    let (ft, inch) = cm.cmToFeetAndInches
-                                    Text("\(ft)' \(inch)\"").tag(cm)
-                                }
-                            }
-                            .pickerStyle(.wheel)
-                            .labelsHidden()
-                            .frame(maxWidth: .infinity)
-                        }
-                        .frame(height: 100)
                     }
-                }.listRowBackground(Color.clear)
+                    .padding(.horizontal, 20)
 
-                Section {
-                    if state.unitsPreference == .metric {
-                        HStack(spacing: 16) {
-                            Text("Weight")
-                                .frame(width: 80, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Weight")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .padding(.horizontal, 4)
 
-                            Picker("Weight", selection: $state.weightKg) {
-                                ForEach(Array(stride(from: 30.0, through: 300.0, by: 0.5)), id: \.self) { weight in
-                                    Text(String(format: "%.1f kg", weight)).tag(weight)
-                                }
+                        WeightPickerContent(weightKg: $state.weightKg, units: state.unitsPreference)
+                            .padding(16)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                            )
+                            .onChange(of: state.weightKg) { _, _ in
+                                HapticManager.shared.light()
                             }
-                            .pickerStyle(.wheel)
-                            .labelsHidden()
-                            .frame(maxWidth: .infinity)
-                        }
-                        .frame(height: 100)
-                    } else {
-                        HStack(spacing: 16) {
-                            Text("Weight")
-                                .frame(width: 80, alignment: .leading)
-
-                            Picker("Weight", selection: $state.weightKg) {
-                                ForEach(Array(stride(from: 30.0, through: 300.0, by: 0.5)), id: \.self) { weightKg in
-                                    let lbs = Int(weightKg.kgToLbs)
-                                    Text("\(lbs) lbs").tag(weightKg)
-                                }
-                            }
-                            .pickerStyle(.wheel)
-                            .labelsHidden()
-                            .frame(maxWidth: .infinity)
-                        }
-                        .frame(height: 100)
                     }
-                }.listRowBackground(Color.clear)
+                    .padding(.horizontal, 20)
+
+                    Spacer()
+                }
+                .padding(.top, 20)
             }
-            .listStyle(.insetGrouped)
-            .listSectionSpacing(0)
-            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
 
             OnboardingFooter(onBack: { state.previousStep() }) {
                 state.nextStep()

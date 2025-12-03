@@ -2,11 +2,15 @@ import SwiftUI
 
 @main
 struct SayCalApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var userManager = UserManager.shared
 
     init() {
         // Start loading WhisperKit model immediately on app launch
         _ = LocalTranscriptionManager.shared
+
+        // Initialize background network manager
+        _ = BackgroundNetworkManager.shared
     }
 
     var body: some Scene {

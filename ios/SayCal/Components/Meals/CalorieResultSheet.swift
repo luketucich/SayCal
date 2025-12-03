@@ -6,10 +6,10 @@ struct CalorieResultSheet: View {
     @ObservedObject var mealLogger = MealManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var hasAppeared = false
-    @State private var shimmerPhase: CGFloat = 0
     @State private var contentRevealed = false
     @State private var selectedDetent: PresentationDetent = .medium
     @State private var showDeleteConfirmation = false
+    @State private var expandedMicros: Set<String> = []
 
     private var meal: LoggedMeal? {
         mealLogger.loggedMeals.first(where: { $0.id == mealId })
@@ -127,9 +127,10 @@ struct CalorieResultSheet: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
-                .background(
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.secondarySystemGroupedBackground))
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                 )
                 .foregroundStyle(.primary)
             }
@@ -146,9 +147,10 @@ struct CalorieResultSheet: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
-                .background(
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.secondarySystemGroupedBackground))
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                 )
                 .foregroundStyle(.red)
             }
@@ -158,7 +160,7 @@ struct CalorieResultSheet: View {
     }
 
     // MARK: - Nutrition Card
-    
+
     private var nutritionCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             if let response = nutritionResponse {
@@ -179,9 +181,10 @@ struct CalorieResultSheet: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemGroupedBackground))
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
         )
         .opacity(hasAppeared ? 1 : 0)
         .offset(y: hasAppeared ? 0 : 10)
@@ -198,7 +201,8 @@ struct CalorieResultSheet: View {
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
-                Text(analysis.description)
+                // Prioritize AI-generated title, fall back to API description
+                Text(meal?.aiGeneratedTitle ?? analysis.description)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.primary)
             }
@@ -308,19 +312,60 @@ struct CalorieResultSheet: View {
                 miniMacro(label: "F", value: item.fats, color: .pink)
             }
 
-            // Micros (if available, on separate line)
+            // Micros expandable section
             if !item.micros.isEmpty {
-                Text(item.micros.joined(separator: " • "))
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
-                    .fixedSize(horizontal: false, vertical: true)
+                VStack(spacing: 6) {
+                    Button {
+                        HapticManager.shared.light()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            if expandedMicros.contains(item.id) {
+                                expandedMicros.remove(item.id)
+                            } else {
+                                expandedMicros.insert(item.id)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Show Micros")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(.secondary)
+
+                            Image(systemName: expandedMicros.contains(item.id) ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    if expandedMicros.contains(item.id) {
+                        LazyVGrid(columns: [
+                            GridItem(.flexible(), spacing: 8),
+                            GridItem(.flexible(), spacing: 8)
+                        ], spacing: 6) {
+                            ForEach(item.micros) { micro in
+                                microChip(micro)
+                            }
+                        }
+                        .padding(.top, 2)
+                    }
+                }
             }
         }
         .padding(12)
-        .background(
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.quaternarySystemFill))
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
         )
+    }
+
+    private func microChip(_ micro: Micronutrient) -> some View {
+        Text(micro.displayText)
+            .font(.system(size: 10, weight: .medium))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 6))
     }
     
     private func miniMacro(label: String, value: Double, color: Color) -> some View {
@@ -362,8 +407,8 @@ struct CalorieResultSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             // Matches: Meal Type & Description
             VStack(alignment: .leading, spacing: 4) {
-                shimmer(width: 50, height: 11)
-                shimmer(width: 200, height: 15)
+                ShimmerView(width: 50, height: 11)
+                ShimmerView(width: 200, height: 15)
             }
 
             Divider()
@@ -371,19 +416,19 @@ struct CalorieResultSheet: View {
             // Matches: Calories + Macros Combined
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
-                    shimmer(width: 55, height: 11)
+                    ShimmerView(width: 55, height: 11)
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        shimmer(width: 70, height: 28)
-                        shimmer(width: 30, height: 12)
+                        ShimmerView(width: 70, height: 28)
+                        ShimmerView(width: 30, height: 12)
                     }
                 }
 
                 Spacer()
 
                 HStack(spacing: 10) {
-                    shimmer(width: 44, height: 40)
-                    shimmer(width: 44, height: 40)
-                    shimmer(width: 44, height: 40)
+                    ShimmerView(width: 44, height: 40)
+                    ShimmerView(width: 44, height: 40)
+                    ShimmerView(width: 44, height: 40)
                 }
             }
 
@@ -391,7 +436,7 @@ struct CalorieResultSheet: View {
 
             // Matches: Breakdown
             VStack(alignment: .leading, spacing: 10) {
-                shimmer(width: 70, height: 11)
+                ShimmerView(width: 70, height: 11)
 
                 ForEach(0..<2, id: \.self) { _ in
                     skeletonBreakdownRow
@@ -404,71 +449,30 @@ struct CalorieResultSheet: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 8) {
                 VStack(alignment: .leading, spacing: 2) {
-                    shimmer(width: 130, height: 14)
-                    shimmer(width: 70, height: 12)
+                    ShimmerView(width: 130, height: 14)
+                    ShimmerView(width: 70, height: 12)
                 }
                 Spacer()
-                shimmer(width: 60, height: 16)
+                ShimmerView(width: 60, height: 16)
             }
 
             HStack(spacing: 12) {
-                shimmer(width: 30, height: 11)
-                shimmer(width: 30, height: 11)
-                shimmer(width: 30, height: 11)
+                ShimmerView(width: 30, height: 11)
+                ShimmerView(width: 30, height: 11)
+                ShimmerView(width: 30, height: 11)
                 Spacer()
             }
         }
         .padding(12)
-        .background(
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.quaternarySystemFill))
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
         )
     }
     
     // MARK: - Shimmer Effect
 
-    private func shimmer(width: CGFloat, height: CGFloat) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: height / 3)
-                .fill(Color(.systemGray5))
-                .frame(width: width, height: height)
-
-            RoundedRectangle(cornerRadius: height / 3)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.clear,
-                            Color(.systemGray4).opacity(0.5),
-                            Color.clear
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .frame(width: width, height: height)
-                .offset(x: shimmerPhase * width * 2 - width)
-                .onAppear {
-                    withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
-                        shimmerPhase = 1
-                    }
-                }
-        }
-        .clipShape(RoundedRectangle(cornerRadius: height / 3))
-    }
-}
-
-// MARK: - Reveal Animation Modifier
-
-private struct RevealModifier: ViewModifier {
-    let delay: Double
-    let revealed: Bool
-    
-    func body(content: Content) -> some View {
-        content
-            .opacity(revealed ? 1 : 0)
-            .offset(y: revealed ? 0 : 8)
-            .animation(.spring(response: 0.4, dampingFraction: 0.8).delay(delay), value: revealed)
-    }
 }
 
 // MARK: - Previews

@@ -33,7 +33,11 @@ struct EmailInputView: View {
                         .autocorrectionDisabled()
                 }
                 .padding()
-                .background(RoundedRectangle(cornerRadius: 12).fill(.background))
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                )
 
                 if let errorMessage {
                     HStack(spacing: 8) {

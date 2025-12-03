@@ -102,7 +102,8 @@ class UserManager: ObservableObject {
         targetCalories: Int,
         carbsPercent: Int,
         fatsPercent: Int,
-        proteinPercent: Int
+        proteinPercent: Int,
+        tier: Tier = .free
     ) async throws {
         guard currentUser != nil else {
             throw UserManagerError.noAuthenticatedUser
@@ -123,6 +124,7 @@ class UserManager: ObservableObject {
             carbsPercent: carbsPercent,
             fatsPercent: fatsPercent,
             proteinPercent: proteinPercent,
+            tier: tier,
             createdAt: nil,  // Set by database
             updatedAt: nil,  // Set by database
             onboardingCompleted: true
@@ -166,6 +168,7 @@ class UserManager: ObservableObject {
             let carbs_percent: Int
             let fats_percent: Int
             let protein_percent: Int
+            let tier: Tier
             let onboarding_completed: Bool
         }
 
@@ -183,6 +186,7 @@ class UserManager: ObservableObject {
             carbs_percent: profile.carbsPercent,
             fats_percent: profile.fatsPercent,
             protein_percent: profile.proteinPercent,
+            tier: profile.tier,
             onboarding_completed: profile.onboardingCompleted
         )
 

@@ -1,8 +1,19 @@
 import Foundation
 import Combine
+import Supabase
 
 // MARK: - Meal Manager
 
+/// Manages meal logging and nutrition tracking
+///
+/// **Meal Logging Flow:**
+/// 1. User inputs meal via voice (AudioRecordingOverlay) or text (MealInputToolbar)
+/// 2. Voice input → WhisperKit (LocalTranscriptionManager) → transcription
+/// 3. createLoadingMeal() creates placeholder with transcription
+/// 4. analyzeMealInBackground() sends request via BackgroundNetworkManager
+/// 5. Background task continues even if app is closed/suspended
+/// 6. BackgroundNetworkManager calls updateMeal() when complete
+/// 7. UI automatically updates via @Published properties
 class MealManager: ObservableObject {
     static let shared = MealManager()
 
@@ -32,16 +43,32 @@ class MealManager: ObservableObject {
     // MARK: - Meal Management
 
     func createLoadingMeal(transcription: String?) -> String {
-        let meal = LoggedMeal(transcription: transcription, nutritionResponse: nil, isLoading: true)
+        let meal = LoggedMeal(
+            transcription: transcription,
+            aiGeneratedTitle: nil,
+            nutritionResponse: nil,
+            isLoading: true
+        )
         loggedMeals.append(meal)
         saveMeals()
-        return meal.id
-    }
 
-    func updateMealTranscription(id: String, transcription: String) {
-        guard let index = loggedMeals.firstIndex(where: { $0.id == id }) else { return }
-        loggedMeals[index].transcription = transcription
-        saveMeals()
+        // Generate AI title using Foundation Models (iOS 26.0+)
+        if let transcription = transcription {
+            Task {
+                if #available(iOS 26.0, *) {
+                    if let title = await AIHelpers.generateMealTitle(from: transcription) {
+                        await MainActor.run {
+                            if let index = loggedMeals.firstIndex(where: { $0.id == meal.id }) {
+                                loggedMeals[index].aiGeneratedTitle = title
+                                saveMeals()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return meal.id
     }
 
     func updateMeal(id: String, nutritionResponse: NutritionResponse) {
@@ -83,6 +110,35 @@ class MealManager: ObservableObject {
         }
 
         return totals
+    }
+
+    // MARK: - Nutrition Analysis (Background)
+
+    func analyzeMealInBackground(mealId: String, transcription: String) async {
+        guard let userId = try? await SupabaseManager.client.auth.session.user.id else {
+            print("❌ No authenticated user for background analysis")
+            // Remove the loading meal if we can't get user ID
+            if let meal = loggedMeals.first(where: { $0.id == mealId }) {
+                deleteMeal(meal)
+            }
+            return
+        }
+
+        print("🌐 Starting background analysis for meal: \(mealId)")
+
+        do {
+            try await BackgroundNetworkManager.shared.analyzeMeal(
+                mealId: mealId,
+                transcription: transcription,
+                userId: userId.uuidString
+            )
+        } catch {
+            print("❌ Failed to start background analysis: \(error)")
+            // Remove the loading meal if background task fails to start
+            if let meal = loggedMeals.first(where: { $0.id == mealId }) {
+                deleteMeal(meal)
+            }
+        }
     }
 
     // MARK: - Persistence

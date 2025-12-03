@@ -2,6 +2,18 @@ import Foundation
 
 // MARK: - Nutrition Response Types
 
+struct Micronutrient: Codable, Identifiable {
+    let name: String
+    let value: Double
+    let unit: String
+
+    var id: String { name }
+
+    var displayText: String {
+        "\(name) \(value)\(unit)"
+    }
+}
+
 struct NutritionItem: Codable, Identifiable {
     let item: String
     let portion: String
@@ -9,8 +21,8 @@ struct NutritionItem: Codable, Identifiable {
     let protein: Double
     let carbs: Double
     let fats: Double
-    let micros: [String]
-    
+    let micros: [Micronutrient]
+
     var id: String { item + portion }
 }
 
@@ -119,7 +131,10 @@ extension NutritionAnalysis {
                 protein: 42,
                 carbs: 0,
                 fats: 6,
-                micros: ["Iron: 8%", "B12: 25%"]
+                micros: [
+                    Micronutrient(name: "Iron", value: 1.5, unit: "mg"),
+                    Micronutrient(name: "Vitamin B12", value: 0.6, unit: "mcg")
+                ]
             ),
             NutritionItem(
                 item: "White Rice",
@@ -137,7 +152,10 @@ extension NutritionAnalysis {
                 protein: 4,
                 carbs: 10,
                 fats: 0.5,
-                micros: ["Vitamin C: 135%", "Vitamin K: 116%"]
+                micros: [
+                    Micronutrient(name: "Vitamin C", value: 81, unit: "mg"),
+                    Micronutrient(name: "Vitamin K", value: 93, unit: "mcg")
+                ]
             )
         ]
     )

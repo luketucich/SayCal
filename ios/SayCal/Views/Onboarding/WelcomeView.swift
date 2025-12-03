@@ -43,7 +43,11 @@ struct WelcomeView: View {
                     .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(.background))
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                    )
                 }
             }
             .padding(.horizontal, 24)

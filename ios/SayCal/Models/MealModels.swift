@@ -6,6 +6,7 @@ struct LoggedMeal: Codable, Identifiable {
     let id: String
     let timestamp: Date
     var transcription: String?
+    var aiGeneratedTitle: String?
     var nutritionResponse: NutritionResponse?
     var isLoading: Bool
 
@@ -13,12 +14,14 @@ struct LoggedMeal: Codable, Identifiable {
         id: String = UUID().uuidString,
         timestamp: Date = Date(),
         transcription: String?,
+        aiGeneratedTitle: String? = nil,
         nutritionResponse: NutritionResponse? = nil,
         isLoading: Bool = false
     ) {
         self.id = id
         self.timestamp = timestamp
         self.transcription = transcription
+        self.aiGeneratedTitle = aiGeneratedTitle
         self.nutritionResponse = nutritionResponse
         self.isLoading = isLoading
     }

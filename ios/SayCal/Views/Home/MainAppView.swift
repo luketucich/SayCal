@@ -1,0 +1,409 @@
+import SwiftUI
+import Supabase
+
+enum AppTab: Hashable {
+    case daily
+    case recipes
+    case add
+}
+
+struct MainAppView: View {
+    @EnvironmentObject var userManager: UserManager
+    @StateObject private var audioRecorder = AudioRecorder()
+    @Environment(\.colorScheme) private var colorScheme
+    @AppStorage("appTheme") private var selectedAppTheme: AppTheme = .device
+
+    @State private var showSettings = false
+    @State private var showMicronutrients = false
+    @State private var showResetConfirmation = false
+    @State private var showInputMenu = false
+    @State private var isMenuClosing = false
+    @State private var selectedTab: AppTab = .daily
+    @State private var previousTab: AppTab = .daily
+    @State private var selectedDate = Calendar.current.startOfDay(for: Date())
+
+    @StateObject private var mealLogger = MealManager.shared
+
+    @State private var showRecordingOverlay = false
+    @State private var showTextInput = false
+    @State private var showResultSheet = false
+    @State private var currentMealId: String?
+    @State private var selectedMealId: String?
+    @State private var textInput: String = ""
+
+    @FocusState private var isTextInputFocused: Bool
+
+    private var isViewingToday: Bool {
+        Calendar.current.isDateInToday(selectedDate)
+    }
+
+    private var tabSelection: Binding<AppTab> {
+        Binding(
+            get: { selectedTab },
+            set: { newValue in
+                if newValue != selectedTab {
+                    previousTab = selectedTab
+                    selectedTab = newValue
+                    if showInputMenu { closeMenu() }
+                }
+            }
+        )
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                    CustomToolbar(
+                        selectedTab: selectedTab,
+                        onTierToggle: {
+                            toggleTier()
+                        },
+                        onReset: {
+                            showResetConfirmation = true
+                        },
+                        onSettings: {
+                            showSettings = true
+                        },
+                        onMicronutrients: {
+                            showMicronutrients = true
+                        }
+                    )
+                    .environmentObject(userManager)
+
+                    ZStack {
+                        // Tab content based on selection
+                        switch selectedTab {
+                        case .daily:
+                            DailyView(
+                                showSettings: $showSettings,
+                                selectedDate: $selectedDate,
+                                onMealTap: { meal in
+                                    selectedMealId = meal.id
+                                    showResultSheet = true
+                                }
+                            )
+                        case .recipes:
+                            RecipesView(showSettings: $showSettings)
+                        case .add:
+                            Color.clear
+                        }
+
+            // Floating menu
+            if showInputMenu || isMenuClosing {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 12) {
+                            MenuOption(
+                                icon: "mic.fill",
+                                label: "Voice",
+                                appearDelay: 0.06,
+                                disappearDelay: 0.06,
+                                isClosing: isMenuClosing
+                            ) {
+                                HapticManager.shared.light()
+                                closeMenu()
+                                startVoiceRecording()
+                            }
+
+                            MenuOption(
+                                icon: "keyboard",
+                                label: "Type",
+                                appearDelay: 0,
+                                disappearDelay: 0,
+                                isClosing: isMenuClosing
+                            ) {
+                                HapticManager.shared.light()
+                                closeMenu()
+                                startTextInput()
+                            }
+                        }
+                        .padding(.trailing, 16)
+                    }
+                    .padding(.bottom, 30)
+                }
+            }
+
+            // Audio recording overlay
+            if showRecordingOverlay {
+                AudioRecordingOverlay(
+                    audioRecorder: audioRecorder,
+                    isPresented: $showRecordingOverlay,
+                    onDismiss: {
+                        audioRecorder.state = .idle
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            showRecordingOverlay = false
+                        }
+                    },
+                    onSend: {
+                        // Just stop recording, don't create meal yet
+                        // Meal will be created after transcription confirmation
+                    },
+                    onConfirm: { transcription in
+                        handleTranscriptionConfirmed(transcription)
+                    },
+                    onRetry: {
+                        handleTranscriptionRetry()
+                    }
+                )
+                }
+            }
+
+            if showTextInput {
+                MealInputToolbar(
+                    textInput: $textInput,
+                    isTextInputFocused: $isTextInputFocused,
+                    onCancel: handleTextInputCancel,
+                    onSend: handleTextInputSend
+                )
+            } else {
+                HStack(alignment: .bottom, spacing: 0) {
+                    CustomTabBar(selectedTab: tabSelection)
+                        .padding(.leading, 20)
+
+                    Spacer()
+
+                    FloatingAddButton(onTap: toggleMenu)
+                        .padding(.trailing, 20)
+                }
+                .padding(.bottom, 16)
+            }
+        }
+
+        .sheet(isPresented: $showSettings) {
+            SettingsSheet()
+                .environmentObject(userManager)
+                .preferredColorScheme(selectedAppTheme.colorScheme)
+                .tint(selectedAppTheme.accentColor)
+        }
+
+        .sheet(isPresented: $showMicronutrients) {
+            MicronutrientsSheet(date: selectedDate)
+        }
+
+        .sheet(isPresented: $showResultSheet) {
+            if let mealId = selectedMealId {
+                CalorieResultSheet(mealId: mealId)
+            }
+        }
+        .onChange(of: showResultSheet) { _, isShowing in
+            if !isShowing {
+                selectedMealId = nil
+            }
+        }
+
+        .onChange(of: showSettings) { _, isShowing in
+            if isShowing && showInputMenu {
+                closeMenu()
+            }
+        }
+
+        .confirmationDialog("Reset all meals?", isPresented: $showResetConfirmation, titleVisibility: .visible) {
+            Button("Reset All Data", role: .destructive) {
+                HapticManager.shared.medium()
+                MealManager.shared.resetAllData()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will delete all logged meals from every day. This action cannot be undone.")
+        }
+
+        .navigationBarHidden(true)
+        .preferredColorScheme(selectedAppTheme.colorScheme)
+        .tint(selectedAppTheme.accentColor)
+        }
+    }
+
+    // MARK: - Menu
+
+    private func toggleMenu() {
+        if showInputMenu {
+            closeMenu()
+        } else {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                showInputMenu = true
+            }
+        }
+    }
+
+    private func closeMenu() {
+        guard !isMenuClosing else { return }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            isMenuClosing = true
+            showInputMenu = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            isMenuClosing = false
+        }
+    }
+
+    // MARK: - Voice Recording
+
+    private func startVoiceRecording() {
+        audioRecorder.requestPermission()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                showRecordingOverlay = true
+            }
+        }
+    }
+
+    private func handleTranscriptionConfirmed(_ transcription: String) {
+        // Close the overlay
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            showRecordingOverlay = false
+        }
+
+        // Process the meal (will create it only on success)
+        Task {
+            await processMeal(for: transcription)
+        }
+
+        // Reset recorder
+        audioRecorder.state = .idle
+    }
+
+    private func handleTranscriptionRetry() {
+        // Reset audio recorder to start a new recording
+        audioRecorder.state = .idle
+
+        // Small delay before starting new recording
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            audioRecorder.startRecording()
+        }
+    }
+
+    // MARK: - Text Input
+
+    private func startTextInput() {
+        textInput = ""
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                showTextInput = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isTextInputFocused = true
+            }
+        }
+    }
+
+    private func handleTextInputCancel() {
+        isTextInputFocused = false
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            showTextInput = false
+        }
+        textInput = ""
+    }
+
+    private func handleTextInputSend() {
+        guard !textInput.isEmpty else { return }
+
+        let mealText = textInput
+        textInput = ""
+        isTextInputFocused = false
+
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            showTextInput = false
+        }
+
+        Task {
+            await processMeal(for: mealText)
+        }
+    }
+
+    private func processMeal(for mealText: String) async {
+        // Create loading placeholder immediately
+        let mealId = await MainActor.run {
+            MealManager.shared.createLoadingMeal(transcription: mealText)
+        }
+
+        // Use background analysis so it continues even if app is closed
+        await MealManager.shared.analyzeMealInBackground(mealId: mealId, transcription: mealText)
+    }
+
+    private func toggleTier() {
+        guard let profile = userManager.profile else { return }
+        Task {
+            do {
+                let newTier: Tier = profile.tier == .free ? .premium : .free
+                let updatedProfile = UserProfile(
+                    userId: profile.userId,
+                    unitsPreference: profile.unitsPreference,
+                    sex: profile.sex,
+                    age: profile.age,
+                    heightCm: profile.heightCm,
+                    weightKg: profile.weightKg,
+                    activityLevel: profile.activityLevel,
+                    dietaryPreferences: profile.dietaryPreferences,
+                    allergies: profile.allergies,
+                    goal: profile.goal,
+                    targetCalories: profile.targetCalories,
+                    carbsPercent: profile.carbsPercent,
+                    fatsPercent: profile.fatsPercent,
+                    proteinPercent: profile.proteinPercent,
+                    tier: newTier,
+                    createdAt: profile.createdAt,
+                    updatedAt: profile.updatedAt,
+                    onboardingCompleted: profile.onboardingCompleted
+                )
+                try await userManager.updateProfile(updatedProfile)
+            } catch {
+                print("Failed to toggle tier: \(error)")
+            }
+        }
+    }
+}
+
+// MARK: - Menu Option Button
+struct MenuOption: View {
+    let icon: String
+    let label: String
+    var appearDelay: Double = 0
+    var disappearDelay: Double = 0
+    var isClosing: Bool = false
+    let action: () -> Void
+
+    @State private var appeared = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Text(label)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.primary)
+
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(
+                        Circle()
+                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                    )
+            }
+        }
+        .scaleEffect(appeared ? 1 : 0.5)
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 30)
+        .onAppear {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7).delay(appearDelay)) {
+                appeared = true
+            }
+        }
+        .onChange(of: isClosing) { _, closing in
+            if closing {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.8).delay(disappearDelay)) {
+                    appeared = false
+                }
+            }
+        }
+    }
+}
+
+#Preview {
+    MainAppView()
+        .environmentObject(UserManager.shared)
+}

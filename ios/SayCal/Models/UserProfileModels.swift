@@ -16,6 +16,7 @@ struct UserProfile: Codable {
     let carbsPercent: Int
     let fatsPercent: Int
     let proteinPercent: Int
+    let tier: Tier
     let createdAt: Date?
     let updatedAt: Date?
     let onboardingCompleted: Bool
@@ -35,6 +36,7 @@ struct UserProfile: Codable {
         case carbsPercent = "carbs_percent"
         case fatsPercent = "fats_percent"
         case proteinPercent = "protein_percent"
+        case tier
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case onboardingCompleted = "onboarding_completed"
@@ -49,6 +51,18 @@ enum UnitsPreference: String, Codable, CaseIterable {
         switch self {
         case .metric: return "Metric (kg, cm)"
         case .imperial: return "Imperial (lbs, ft/in)"
+        }
+    }
+}
+
+enum Tier: String, Codable, CaseIterable {
+    case free = "free"
+    case premium = "premium"
+
+    var displayName: String {
+        switch self {
+        case .free: return "Free"
+        case .premium: return "Premium"
         }
     }
 }
@@ -156,28 +170,3 @@ struct DietaryOptions {
     ]
 }
 
-extension Double {
-    var kgToLbs: Double { self * 2.20462 }
-    var lbsToKg: Double { self / 2.20462 }
-    var int: Int { Int(self) }
-}
-
-extension Int {
-    var cmToInches: Int {
-        (Double(self) / 2.54).rounded(.toNearestOrEven).int
-    }
-
-    var inchesToCm: Int {
-        (Double(self) * 2.54).rounded(.toNearestOrEven).int
-    }
-
-    var cmToFeetAndInches: (feet: Int, inches: Int) {
-        let totalInches = self.cmToInches
-        return (feet: totalInches / 12, inches: totalInches % 12)
-    }
-}
-
-func feetAndInchesToCm(feet: Int, inches: Int) -> Int {
-    let totalInches = (feet * 12) + inches
-    return totalInches.inchesToCm
-}

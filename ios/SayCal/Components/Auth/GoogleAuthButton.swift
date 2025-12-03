@@ -27,13 +27,10 @@ struct GoogleAuthButton: View {
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                )
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color(.systemGray4), lineWidth: 1.5)
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                 )
             }
 

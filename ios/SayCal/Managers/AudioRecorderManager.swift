@@ -1,50 +1,42 @@
 import SwiftUI
 import AVFoundation
-import Supabase
 import Combine
 
 enum ProcessingState: Equatable {
     case idle
     case recording
     case transcribing
-    case analyzing(transcription: String)
-    case completed(transcription: String, response: NutritionResponse)
+    case awaitingConfirmation(transcription: String)
+    case completed(transcription: String)
     case error(message: String)
-    
+
     var isProcessing: Bool {
         switch self {
-        case .idle, .completed, .error:
+        case .idle, .completed, .error, .awaitingConfirmation:
             return false
-        case .recording, .transcribing, .analyzing:
+        case .recording, .transcribing:
             return true
         }
     }
-    
+
     var transcription: String? {
         switch self {
-        case .analyzing(let transcription), .completed(let transcription, _):
+        case .completed(let transcription), .awaitingConfirmation(let transcription):
             return transcription
         default:
             return nil
         }
     }
-    
-    var nutritionResponse: NutritionResponse? {
-        if case .completed(_, let response) = self {
-            return response
-        }
-        return nil
-    }
-    
+
     static func == (lhs: ProcessingState, rhs: ProcessingState) -> Bool {
         switch (lhs, rhs) {
         case (.idle, .idle), (.recording, .recording), (.transcribing, .transcribing):
             return true
-        case (.analyzing(let l), .analyzing(let r)):
-            return l == r
         case (.error(let l), .error(let r)):
             return l == r
-        case (.completed(let lt, _), .completed(let rt, _)):
+        case (.completed(let lt), .completed(let rt)):
+            return lt == rt
+        case (.awaitingConfirmation(let lt), .awaitingConfirmation(let rt)):
             return lt == rt
         default:
             return false
@@ -208,18 +200,16 @@ class AudioRecorder: NSObject, ObservableObject {
     }
 
     // MARK: - Processing Pipeline
-    
+
     private func processRecording(_ fileURL: URL) async {
         defer { cleanupRecording() }
-        
-        // Step 1: Transcribe
+
+        // Transcribe audio
         guard let transcription = await transcribe(fileURL) else { return }
-        
-        state = .analyzing(transcription: transcription)
+
+        state = .awaitingConfirmation(transcription: transcription)
         HapticManager.shared.success()
-        
-        // Step 2: Analyze nutrition
-        await analyzeNutrition(transcription: transcription)
+        print("✅ Transcription complete: \(transcription)")
     }
     
     // MARK: - Local Transcription (On-Device)
@@ -245,29 +235,6 @@ class AudioRecorder: NSObject, ObservableObject {
             state = .error(message: "Failed to transcribe audio")
             HapticManager.shared.error()
             return nil
-        }
-    }
-
-    private func analyzeNutrition(transcription: String) async {
-        do {
-            print("🧮 Analyzing nutrition...")
-            
-            let response: NutritionResponse = try await SupabaseManager.client.functions.invoke(
-                "calculate-calories",
-                options: FunctionInvokeOptions(
-                    body: ["transcribed_meal": transcription]
-                )
-            )
-            
-            state = .completed(transcription: transcription, response: response)
-            HapticManager.shared.success()
-            print(response)
-            print("✅ Analysis complete")
-            
-        } catch {
-            print("❌ Analysis failed: \(error)")
-            state = .error(message: "Failed to analyze nutrition")
-            HapticManager.shared.error()
         }
     }
 }

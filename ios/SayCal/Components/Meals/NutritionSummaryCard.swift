@@ -25,6 +25,12 @@ struct NutritionSummaryCard: View {
         min(max(Double(consumedCalories) / Double(goalCalories), 0), 1.0)
     }
 
+    private var progressBarColor: Color {
+        // Interpolate from orange/red (low progress) to green (high progress)
+        let hue = progress * 0.33 // 0.0 (red) to 0.33 (green) in HSB color space
+        return Color(hue: hue, saturation: 0.7, brightness: 0.8)
+    }
+
     private var carbsConsumed: Int {
         Int(totals.totalCarbs)
     }
@@ -41,18 +47,18 @@ struct NutritionSummaryCard: View {
         VStack(spacing: 10) {
             // Calories row
             HStack(alignment: .firstTextBaseline) {
-                Text("\(remainingCalories)")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                Text("\(consumedCalories)")
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
                     .contentTransition(.numericText())
 
-                Text("left")
+                Text("consumed")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
                 Text("of \(goalCalories)")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
@@ -63,12 +69,12 @@ struct NutritionSummaryCard: View {
                         .fill(Color.primary.opacity(0.1))
 
                     Capsule()
-                        .fill(Color.primary)
+                        .fill(progressBarColor)
                         .frame(width: geo.size.width * progress)
                         .animation(.spring(response: 0.5, dampingFraction: 0.8), value: progress)
                 }
             }
-            .frame(height: 5)
+            .frame(height: 8)
 
             // Macros row
             HStack(spacing: 8) {
@@ -89,7 +95,11 @@ struct NutritionSummaryCard: View {
             .frame(maxWidth: .infinity)
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 18).fill(Color(.tertiarySystemGroupedBackground)))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+        )
         .padding(.horizontal, 20)
     }
 }

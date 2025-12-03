@@ -87,7 +87,9 @@ class OnboardingState: ObservableObject {
 
 struct OnboardingContainerView: View {
     @StateObject private var state = OnboardingState()
+    @EnvironmentObject var userManager: UserManager
     @Environment(\.dismiss) var dismiss
+    @State private var showSkipConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -105,6 +107,32 @@ struct OnboardingContainerView: View {
             }
             .background(Color(.systemBackground))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        HapticManager.shared.light()
+                        showSkipConfirmation = true
+                    } label: {
+                        Text("Set up later")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .confirmationDialog("Skip onboarding?", isPresented: $showSkipConfirmation, titleVisibility: .visible) {
+                Button("Set up later") {
+                    Task {
+                        do {
+                            try await userManager.completeOnboarding(with: state)
+                        } catch {
+                            print("Failed to skip onboarding: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("You can always update your preferences later in settings.")
+            }
         }
     }
 

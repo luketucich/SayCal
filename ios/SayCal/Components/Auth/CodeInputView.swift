@@ -114,10 +114,10 @@ struct CodeDigitBox: View {
         Text(digit)
             .font(.system(size: 24, weight: .semibold, design: .rounded))
             .frame(width: 48, height: 56)
-            .background(RoundedRectangle(cornerRadius: 12).fill(.background))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isActive ? Color.primary : Color.primary.opacity(0.2), lineWidth: isActive ? 2 : 1)
+                    .strokeBorder(isActive ? Color.primary : Color.primary.opacity(0.08), lineWidth: isActive ? 2 : 0.5)
             )
     }
 }

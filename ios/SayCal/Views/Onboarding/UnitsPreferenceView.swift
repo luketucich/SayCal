@@ -17,22 +17,25 @@ struct UnitsPreferenceView: View {
             .padding(.horizontal, 20)
             .padding(.top, 24)
 
-            List {
-                Section {
-                    Picker("Units", selection: $state.unitsPreference) {
-                        Text("Metric (kg, cm)").tag(UnitsPreference.metric)
-                        Text("Imperial (lbs, ft)").tag(UnitsPreference.imperial)
-                    }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
-                    .onChange(of: state.unitsPreference) { _, _ in
-                        HapticManager.shared.light()
-                    }
+            ScrollView {
+                VStack(spacing: 20) {
+                    UnitsPickerContent(selection: $state.unitsPreference)
+                        .padding(16)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        )
+                        .padding(.horizontal, 20)
+                        .onChange(of: state.unitsPreference) { _, _ in
+                            HapticManager.shared.light()
+                        }
+
+                    Spacer()
                 }
-                .listRowBackground(Color.clear)
+                .padding(.top, 20)
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
 
             OnboardingFooter(showBack: false) {
                 state.nextStep()

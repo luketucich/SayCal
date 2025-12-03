@@ -2,8 +2,6 @@ import SwiftUI
 
 struct DietaryPreferencesView: View {
     @ObservedObject var state: OnboardingState
-    @State private var dietaryPreferences: [String] = DietaryOptions.dietaryPreferences
-    @State private var newPreference = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,48 +17,22 @@ struct DietaryPreferencesView: View {
             .padding(.horizontal, 20)
             .padding(.top, 24)
 
-            List {
-                Section {
-                    TextField("Add custom preference", text: $newPreference)
-                        .onSubmit {
-                            addCustomPreference()
-                        }
+            ScrollView {
+                VStack(spacing: 20) {
+                    DietaryPreferencesPickerContent(selectedPreferences: $state.selectedDietaryPreferences)
+                        .padding(16)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        )
+                        .padding(.horizontal, 20)
 
-                    if !newPreference.isEmpty {
-                        Button("Add \"\(newPreference)\"") {
-                            addCustomPreference()
-                        }
-                    }
+                    Spacer()
                 }
-                .listRowBackground(Color.clear)
-
-                Section {
-                    ForEach(dietaryPreferences, id: \.self) { preference in
-                        Button {
-                            HapticManager.shared.light()
-                            if state.selectedDietaryPreferences.contains(preference) {
-                                state.selectedDietaryPreferences.remove(preference)
-                            } else {
-                                state.selectedDietaryPreferences.insert(preference)
-                            }
-                        } label: {
-                            HStack {
-                                Text(preference.replacingOccurrences(of: "_", with: " ").capitalized)
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                if state.selectedDietaryPreferences.contains(preference) {
-                                    Image(systemName: "checkmark")
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(.primary)
-                                }
-                            }
-                        }
-                    }
-                }
-                .listRowBackground(Color.clear)
+                .padding(.top, 20)
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
 
             OnboardingFooter(
                 nextLabel: state.selectedDietaryPreferences.isEmpty ? "Skip" : "Next",
@@ -68,29 +40,6 @@ struct DietaryPreferencesView: View {
             ) {
                 state.nextStep()
             }
-        }
-        .onAppear {
-            let predefinedPreferences = Set(DietaryOptions.dietaryPreferences)
-            let customPreferences = state.selectedDietaryPreferences.filter { !predefinedPreferences.contains($0) }
-
-            for customPref in customPreferences {
-                if !dietaryPreferences.contains(customPref) {
-                    dietaryPreferences.insert(customPref, at: 0)
-                }
-            }
-        }
-    }
-
-    private func addCustomPreference() {
-        let trimmed = newPreference.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else { return }
-        guard !dietaryPreferences.contains(where: { $0.lowercased() == trimmed.lowercased() }) else { return }
-
-        HapticManager.shared.light()
-        withAnimation {
-            dietaryPreferences.insert(trimmed, at: 0)
-            state.selectedDietaryPreferences.insert(trimmed)
-            newPreference = ""
         }
     }
 }

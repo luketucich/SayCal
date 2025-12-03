@@ -2,22 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>GIDClientID</key>
-    <string>903193712878-d9kj2ur4c1c3ed3aod8stqjcrvam2br8.apps.googleusercontent.com</string>
-    <key>CFBundleURLTypes</key>
-    <array>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>com.googleusercontent.apps.903193712878-d9kj2ur4c1c3ed3aod8stqjcrvam2br8</string>
-        </array>
-      </dict>
-    </array>
-    
-    <key>GIDServerClientID</key>
-    <string>903193712878-sttafkc4ca93ldnl4cgftp3qofrqp7os.apps.googleusercontent.com</string>
-    
-    <key>NSMicrophoneUsageDescription</key>
-    <string>We need microphone access to record your meal entries</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.903193712878-d9kj2ur4c1c3ed3aod8stqjcrvam2br8</string>
+			</array>
+		</dict>
+	</array>
+	<key>GIDClientID</key>
+	<string>903193712878-d9kj2ur4c1c3ed3aod8stqjcrvam2br8.apps.googleusercontent.com</string>
+	<key>GIDServerClientID</key>
+	<string>903193712878-sttafkc4ca93ldnl4cgftp3qofrqp7os.apps.googleusercontent.com</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
 </dict>
 </plist>

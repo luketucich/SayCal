@@ -17,29 +17,25 @@ struct ActivityLevelView: View {
             .padding(.horizontal, 20)
             .padding(.top, 24)
 
-            List {
-                Section {
-                    Picker("Activity Level", selection: $state.activityLevel) {
-                        ForEach(ActivityLevel.allCases, id: \.self) { level in
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(level.displayName)
-                                Text(level.description)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .tag(level)
+            ScrollView {
+                VStack(spacing: 20) {
+                    ActivityLevelPickerContent(selection: $state.activityLevel)
+                        .padding(16)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        )
+                        .padding(.horizontal, 20)
+                        .onChange(of: state.activityLevel) { _, _ in
+                            HapticManager.shared.light()
                         }
-                    }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
-                    .onChange(of: state.activityLevel) { _, _ in
-                        HapticManager.shared.light()
-                    }
+
+                    Spacer()
                 }
-                .listRowBackground(Color.clear)
+                .padding(.top, 20)
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
 
             OnboardingFooter(onBack: { state.previousStep() }) {
                 state.nextStep()

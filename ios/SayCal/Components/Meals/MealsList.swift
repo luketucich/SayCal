@@ -99,8 +99,8 @@ enum MealType: String, CaseIterable {
         case .breakfast: return "sunrise.fill"
         case .lunch: return "sun.max.fill"
         case .dinner: return "moon.stars.fill"
-        case .snack: return "carrot.fill"
-        case .drink: return "cup.and.saucer.fill"
+        case .snack: return "leaf.fill"
+        case .drink: return "drop.fill"
         }
     }
 }
@@ -147,16 +147,26 @@ struct MealCard: View {
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 2)
 
-                shimmer(width: 140, height: 12)
-                    .frame(maxWidth: .infinity)
-                    .lineLimit(3)
+                // Show AI-generated title if available, otherwise shimmer
+                if let aiTitle = meal.aiGeneratedTitle {
+                    Text(aiTitle)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .lineLimit(3)
+                } else {
+                    ShimmerView(width: 140, height: 12)
+                        .frame(maxWidth: .infinity)
+                        .lineLimit(3)
+                }
 
                 Text("•")
                     .font(.system(size: 10))
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 2)
 
-                shimmer(width: 50, height: 14)
+                ShimmerView(width: 50, height: 14)
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 10, weight: .semibold))
@@ -171,7 +181,8 @@ struct MealCard: View {
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 2)
 
-                Text(analysis.description)
+                // Prioritize AI-generated title, fall back to API description
+                Text(meal.aiGeneratedTitle ?? analysis.description)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
@@ -197,9 +208,10 @@ struct MealCard: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
-        .background(
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.tertiarySystemGroupedBackground))
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
         )
         .contentShape(Rectangle())
         .onTapGesture {
@@ -207,34 +219,6 @@ struct MealCard: View {
                 HapticManager.shared.light()
                 onTap()
             }
-        }
-    }
-
-    private func shimmer(width: CGFloat, height: CGFloat) -> some View {
-        TimelineView(.animation) { timeline in
-            let phase = timeline.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.5) / 1.5
-
-            ZStack {
-                RoundedRectangle(cornerRadius: height / 3)
-                    .fill(Color(.systemGray5))
-                    .frame(width: width, height: height)
-
-                RoundedRectangle(cornerRadius: height / 3)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.clear,
-                                Color(.systemGray4).opacity(0.5),
-                                Color.clear
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(width: width, height: height)
-                    .offset(x: phase * width * 2 - width)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: height / 3))
         }
     }
 }

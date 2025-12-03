@@ -18,9 +18,10 @@ struct DateSelectorView: View {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .frame(width: 36, height: 36)
-                    .background(
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.tertiarySystemGroupedBackground))
+                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                     )
             }
 
@@ -30,9 +31,10 @@ struct DateSelectorView: View {
             } label: {
                 SelectedDateOverlay(date: selectedDate, isToday: Calendar.current.isDateInToday(selectedDate))
                     .frame(width: 120, height: 36)
-                    .background(
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.tertiarySystemGroupedBackground))
+                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                     )
             }
 
@@ -44,9 +46,10 @@ struct DateSelectorView: View {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .frame(width: 36, height: 36)
-                    .background(
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.tertiarySystemGroupedBackground))
+                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
                     )
             }
         }
@@ -54,6 +57,7 @@ struct DateSelectorView: View {
         .sheet(isPresented: $showCalendar) {
             CalendarPickerView(selectedDate: $selectedDate)
                 .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
     }
 
@@ -132,20 +136,40 @@ struct CalendarPickerView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 20) {
-            DatePicker(
-                "Select Date",
-                selection: $selectedDate,
-                displayedComponents: .date
-            )
-            .datePickerStyle(.graphical)
-            .padding()
-            .onChange(of: selectedDate) { _, _ in
-                HapticManager.shared.light()
-                dismiss()
+        NavigationStack {
+            VStack {
+                DatePicker(
+                    "",
+                    selection: $selectedDate,
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.graphical)
+                .tint(.blue)
+                .onChange(of: selectedDate) { _, _ in
+                    HapticManager.shared.light()
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Select Date")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        HapticManager.shared.light()
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
         }
-        .presentationBackground(Color(.systemBackground))
+        .presentationDragIndicator(.visible)
     }
 }
 

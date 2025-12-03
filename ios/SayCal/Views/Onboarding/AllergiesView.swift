@@ -3,8 +3,6 @@ import SwiftUI
 struct AllergiesView: View {
     @ObservedObject var state: OnboardingState
     @EnvironmentObject var userManager: UserManager
-    @State private var allergies: [String] = DietaryOptions.commonAllergies
-    @State private var newAllergy = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,48 +18,22 @@ struct AllergiesView: View {
             .padding(.horizontal, 20)
             .padding(.top, 24)
 
-            List {
-                Section {
-                    TextField("Add custom allergy", text: $newAllergy)
-                        .onSubmit {
-                            addCustomAllergy()
-                        }
+            ScrollView {
+                VStack(spacing: 20) {
+                    AllergiesPickerContent(selectedAllergies: $state.selectedAllergies)
+                        .padding(16)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        )
+                        .padding(.horizontal, 20)
 
-                    if !newAllergy.isEmpty {
-                        Button("Add \"\(newAllergy)\"") {
-                            addCustomAllergy()
-                        }
-                    }
+                    Spacer()
                 }
-                .listRowBackground(Color.clear)
-
-                Section {
-                    ForEach(allergies, id: \.self) { allergy in
-                        Button {
-                            HapticManager.shared.light()
-                            if state.selectedAllergies.contains(allergy) {
-                                state.selectedAllergies.remove(allergy)
-                            } else {
-                                state.selectedAllergies.insert(allergy)
-                            }
-                        } label: {
-                            HStack {
-                                Text(allergy.replacingOccurrences(of: "_", with: " ").capitalized)
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                if state.selectedAllergies.contains(allergy) {
-                                    Image(systemName: "checkmark")
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(.primary)
-                                }
-                            }
-                        }
-                    }
-                }
-                .listRowBackground(Color.clear)
+                .padding(.top, 20)
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
 
             OnboardingFooter(
                 nextLabel: "Complete Setup",
@@ -76,29 +48,6 @@ struct AllergiesView: View {
                     }
                 }
             }
-        }
-        .onAppear {
-            let predefinedAllergies = Set(DietaryOptions.commonAllergies)
-            let customAllergies = state.selectedAllergies.filter { !predefinedAllergies.contains($0) }
-
-            for customAllergy in customAllergies {
-                if !allergies.contains(customAllergy) {
-                    allergies.insert(customAllergy, at: 0)
-                }
-            }
-        }
-    }
-
-    private func addCustomAllergy() {
-        let trimmed = newAllergy.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else { return }
-        guard !allergies.contains(where: { $0.lowercased() == trimmed.lowercased() }) else { return }
-
-        HapticManager.shared.light()
-        withAnimation {
-            allergies.insert(trimmed, at: 0)
-            state.selectedAllergies.insert(trimmed)
-            newAllergy = ""
         }
     }
 }
