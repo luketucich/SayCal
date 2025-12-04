@@ -105,7 +105,7 @@ struct OnboardingContainerView: View {
                     ))
                     .id(state.currentStep)
             }
-            .background(Color(.systemBackground))
+            .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -114,7 +114,7 @@ struct OnboardingContainerView: View {
                         showSkipConfirmation = true
                     } label: {
                         Text("Set up later")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -231,7 +231,7 @@ struct OnboardingFooter: View {
                         Image(systemName: nextIcon)
                     }
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color(.systemBackground))
+                    .foregroundStyle(Color.appBackground)
                     .frame(minWidth: 100)
                     .frame(height: 44)
                 }
@@ -241,7 +241,7 @@ struct OnboardingFooter: View {
             }
             .padding(16)
         }
-        .background(Color(.systemBackground))
+        .background(Color.appBackground)
     }
 }
 

@@ -112,9 +112,10 @@ FIELD FORMATS:
 - item: "[Food], [Brand/type]" without quantity. Use corrected, canonical names.
 - portion: ALWAYS include a measurable unit. Examples: "2 eggs", "1 Grande (16 oz)", "6 oz breast", "1 cup cooked"
 - micros: Array of micronutrient objects with structure: {"name": string, "value": number, "unit": string}
-  FIBER & FATS:
+  DIETARY DETAILS:
   • Fiber in g (grams)
-  • Sugar in g (grams)
+  • Sugar in g (grams) - TOTAL sugars including natural sugars from fruits, dairy, etc.
+  • Added Sugars in g (grams) - ONLY sugars added during processing/preparation, separate from natural sugars
   • Saturated Fat in g (grams)
   • Cholesterol in mg (milligrams)
 
@@ -141,9 +142,15 @@ FIELD FORMATS:
   • Riboflavin in mg (milligrams)
   • Niacin in mg (milligrams)
 
-  Format: [{"name": "Sodium", "value": 200, "unit": "mg"}, {"name": "Fiber", "value": 3, "unit": "g"}]
+  Format: [{"name": "Sodium", "value": 200, "unit": "mg"}, {"name": "Fiber", "value": 3, "unit": "g"}, {"name": "Sugar", "value": 12, "unit": "g"}, {"name": "Added Sugars", "value": 8, "unit": "g"}]
   NEVER use percentages (%). Always use actual amounts.
   Include as many of these as relevant for the food items. Empty array [] if none apply.
+
+  IMPORTANT FOR SUGARS:
+  - Sugar = total sugars (natural + added)
+  - Added Sugars = only sugars added during processing (e.g., in bread, sweetened yogurt, sauces, packaged foods)
+  - For whole foods (plain fruit, plain milk, unsweetened items), Added Sugars = 0
+  - For processed/sweetened foods, estimate Added Sugars based on typical recipes or nutrition labels
 
 EXAMPLE:
 Input: "2 eggs and toast with butter"
@@ -157,7 +164,7 @@ Output:
   "total_fats": 22.0,
   "breakdown": [
     {"item": "Eggs, large", "portion": "2 eggs", "calories": 145, "protein": 12.5, "carbs": 1.0, "fats": 9.5, "micros": [{"name": "Cholesterol", "value": 372, "unit": "mg"}, {"name": "Vitamin D", "value": 2, "unit": "mcg"}, {"name": "Sodium", "value": 140, "unit": "mg"}]},
-    {"item": "Bread, white toast", "portion": "1 slice", "calories": 80, "protein": 2.5, "carbs": 14.5, "fats": 1.0, "micros": [{"name": "Sodium", "value": 130, "unit": "mg"}, {"name": "Fiber", "value": 1, "unit": "g"}]},
+    {"item": "Bread, white toast", "portion": "1 slice", "calories": 80, "protein": 2.5, "carbs": 14.5, "fats": 1.0, "micros": [{"name": "Sodium", "value": 130, "unit": "mg"}, {"name": "Fiber", "value": 1, "unit": "g"}, {"name": "Sugar", "value": 1.5, "unit": "g"}, {"name": "Added Sugars", "value": 1.5, "unit": "g"}]},
     {"item": "Butter, salted", "portion": "1 tbsp (14g)", "calories": 100, "protein": 0.0, "carbs": 0.0, "fats": 11.5, "micros": [{"name": "Saturated Fat", "value": 7, "unit": "g"}, {"name": "Vitamin A", "value": 97, "unit": "mcg"}, {"name": "Sodium", "value": 90, "unit": "mg"}]}
   ]
 }
@@ -240,9 +247,10 @@ FIELD FORMATS:
 - item: "[Food], [Brand/type]" without quantity. Use corrected, canonical names.
 - portion: ALWAYS include a measurable unit. Examples: "2 eggs", "1 Grande (16 oz)", "6 oz breast", "1 cup cooked"
 - micros: Array of micronutrient objects with structure: {"name": string, "value": number, "unit": string}
-  FIBER & FATS:
+  DIETARY DETAILS:
   • Fiber in g (grams)
-  • Sugar in g (grams)
+  • Sugar in g (grams) - TOTAL sugars including natural sugars from fruits, dairy, etc.
+  • Added Sugars in g (grams) - ONLY sugars added during processing/preparation, separate from natural sugars
   • Saturated Fat in g (grams)
   • Cholesterol in mg (milligrams)
 
@@ -269,9 +277,15 @@ FIELD FORMATS:
   • Riboflavin in mg (milligrams)
   • Niacin in mg (milligrams)
 
-  Format: [{"name": "Sodium", "value": 200, "unit": "mg"}, {"name": "Fiber", "value": 3, "unit": "g"}]
+  Format: [{"name": "Sodium", "value": 200, "unit": "mg"}, {"name": "Fiber", "value": 3, "unit": "g"}, {"name": "Sugar", "value": 12, "unit": "g"}, {"name": "Added Sugars", "value": 8, "unit": "g"}]
   NEVER use percentages (%). Always use actual amounts.
   Include as many of these as relevant for the food items. Empty array [] if none apply.
+
+  IMPORTANT FOR SUGARS:
+  - Sugar = total sugars (natural + added)
+  - Added Sugars = only sugars added during processing (e.g., in bread, sweetened yogurt, sauces, packaged foods)
+  - For whole foods (plain fruit, plain milk, unsweetened items), Added Sugars = 0
+  - For processed/sweetened foods, estimate Added Sugars based on typical recipes or nutrition labels
 
 EXAMPLE:
 Input: "2 eggs and toast with butter"
@@ -285,7 +299,7 @@ Output:
   "total_fats": 22.0,
   "breakdown": [
     {"item": "Eggs, large", "portion": "2 eggs", "calories": 145, "protein": 12.5, "carbs": 1.0, "fats": 9.5, "micros": [{"name": "Cholesterol", "value": 372, "unit": "mg"}, {"name": "Vitamin D", "value": 2, "unit": "mcg"}, {"name": "Sodium", "value": 140, "unit": "mg"}]},
-    {"item": "Bread, white toast", "portion": "1 slice", "calories": 80, "protein": 2.5, "carbs": 14.5, "fats": 1.0, "micros": [{"name": "Sodium", "value": 130, "unit": "mg"}, {"name": "Fiber", "value": 1, "unit": "g"}]},
+    {"item": "Bread, white toast", "portion": "1 slice", "calories": 80, "protein": 2.5, "carbs": 14.5, "fats": 1.0, "micros": [{"name": "Sodium", "value": 130, "unit": "mg"}, {"name": "Fiber", "value": 1, "unit": "g"}, {"name": "Sugar", "value": 1.5, "unit": "g"}, {"name": "Added Sugars", "value": 1.5, "unit": "g"}]},
     {"item": "Butter, salted", "portion": "1 tbsp (14g)", "calories": 100, "protein": 0.0, "carbs": 0.0, "fats": 11.5, "micros": [{"name": "Saturated Fat", "value": 7, "unit": "g"}, {"name": "Vitamin A", "value": 97, "unit": "mcg"}, {"name": "Sodium", "value": 90, "unit": "mg"}]}
   ]
 }

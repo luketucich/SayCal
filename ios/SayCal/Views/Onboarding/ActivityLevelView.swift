@@ -7,7 +7,7 @@ struct ActivityLevelView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Activity level")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
 
                 Text("How active are you on a typical day?")
                     .font(.subheadline)
@@ -21,11 +21,8 @@ struct ActivityLevelView: View {
                 VStack(spacing: 20) {
                     ActivityLevelPickerContent(selection: $state.activityLevel)
                         .padding(16)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                        )
+                        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                         .padding(.horizontal, 20)
                         .onChange(of: state.activityLevel) { _, _ in
                             HapticManager.shared.light()
@@ -35,7 +32,7 @@ struct ActivityLevelView: View {
                 }
                 .padding(.top, 20)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
 
             OnboardingFooter(onBack: { state.previousStep() }) {
                 state.nextStep()

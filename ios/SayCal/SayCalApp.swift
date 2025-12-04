@@ -22,7 +22,7 @@ struct SayCalApp: App {
                 } else if userManager.isAuthenticated {
                     if userManager.profile?.onboardingCompleted == true {
                         MainAppView()
-
+                        
                     } else {
                         OnboardingContainerView()
                     }
@@ -32,6 +32,7 @@ struct SayCalApp: App {
                 }
             }
             .environmentObject(userManager)
+            .font(.system(.body, design: .rounded))
         }
     }
 }
@@ -39,7 +40,7 @@ struct SayCalApp: App {
 struct LoadingView: View {
     var body: some View {
         ZStack {
-            Color(.systemBackground)
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {

@@ -19,19 +19,16 @@ struct GoogleAuthButton: View {
             } label: {
                 HStack(spacing: 8) {
                     Text("G")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
 
                     Text("Sign in with Google")
-                        .font(.system(size: 22, weight: .medium))
+                        .font(.system(size: 22, weight: .medium, design: .rounded))
                 }
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                )
+                .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .cardShadow()
             }
 
             if let errorMessage {

@@ -28,11 +28,8 @@ struct AudioRecordingOverlay: View {
                         .focused($isTextFieldFocused)
                         .lineLimit(3...6)
                         .padding(12)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                        )
+                        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .cardShadow()
 
                     Text("Tap the input box to manually make changes or retry to send a new voice message.")
                         .font(.caption)
@@ -45,14 +42,11 @@ struct AudioRecordingOverlay: View {
                             onDismiss()
                         } label: {
                             Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.primary)
                                 .frame(width: 44, height: 44)
-                                .background(.ultraThinMaterial, in: Circle())
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                                )
+                                .background(Color.appCardBackground, in: Circle())
+        .cardShadow()
                         }
 
                         Button {
@@ -60,14 +54,11 @@ struct AudioRecordingOverlay: View {
                             onRetry()
                         } label: {
                             Image(systemName: "arrow.clockwise")
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.primary)
                                 .frame(width: 44, height: 44)
-                                .background(.ultraThinMaterial, in: Circle())
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                                )
+                                .background(Color.appCardBackground, in: Circle())
+        .cardShadow()
                         }
 
                         Spacer()
@@ -77,7 +68,7 @@ struct AudioRecordingOverlay: View {
                             onConfirm(editableTranscription)
                         } label: {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .frame(width: 44, height: 44)
                                 .background(
@@ -88,13 +79,10 @@ struct AudioRecordingOverlay: View {
                     }
                 }
                 .padding(16)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                )
+                .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 18))
+        .cardShadow()
                 .padding(.horizontal, 16)
-                .padding(.bottom, 30)
+                .padding(.bottom, 100)
                 .onAppear {
                     editableTranscription = transcription
                 }
@@ -111,14 +99,11 @@ struct AudioRecordingOverlay: View {
                     onDismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(.secondary)
                         .frame(width: 40, height: 40)
-                        .background(.ultraThinMaterial, in: Circle())
-                        .overlay(
-                            Circle()
-                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                        )
+                        .background(Color.appCardBackground, in: Circle())
+        .cardShadow()
                 }
                 .buttonStyle(.plain)
                 .disabled(audioRecorder.state == .transcribing)
@@ -168,14 +153,11 @@ struct AudioRecordingOverlay: View {
                                 audioRecorder.startRecording()
                             } label: {
                                 Image(systemName: "arrow.clockwise")
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
                                     .foregroundStyle(.primary)
                                     .frame(width: 32, height: 32)
-                                    .background(.ultraThinMaterial, in: Circle())
-                                    .overlay(
-                                        Circle()
-                                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                                    )
+                                    .background(Color.appCardBackground, in: Circle())
+        .cardShadow()
                             }
                         }
                     }
@@ -190,14 +172,11 @@ struct AudioRecordingOverlay: View {
                     audioRecorder.stopRecording()
                 } label: {
                     Image(systemName: "paperplane.fill")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundStyle(audioRecorder.isRecording ? Color.primary : Color.secondary)
                         .frame(width: 40, height: 40)
-                        .background(.ultraThinMaterial, in: Circle())
-                        .overlay(
-                            Circle()
-                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                        )
+                        .background(Color.appCardBackground, in: Circle())
+        .cardShadow()
                 }
                 .buttonStyle(.plain)
                 .disabled(!audioRecorder.isRecording)
@@ -205,13 +184,10 @@ struct AudioRecordingOverlay: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 11)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                )
+                .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 18))
+        .cardShadow()
                 .padding(.horizontal, 16)
-                .padding(.bottom, 30)  // Position just above tab bar
+                .padding(.bottom, 100)  // Position just above tab bar
             }
         }
         .transition(

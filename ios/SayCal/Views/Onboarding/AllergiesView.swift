@@ -8,7 +8,7 @@ struct AllergiesView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Food allergies")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
 
                 Text("Select any allergies you have (optional)")
                     .font(.subheadline)
@@ -22,18 +22,15 @@ struct AllergiesView: View {
                 VStack(spacing: 20) {
                     AllergiesPickerContent(selectedAllergies: $state.selectedAllergies)
                         .padding(16)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                        )
+                        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                         .padding(.horizontal, 20)
 
                     Spacer()
                 }
                 .padding(.top, 20)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
 
             OnboardingFooter(
                 nextLabel: "Complete Setup",

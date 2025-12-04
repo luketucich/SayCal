@@ -7,7 +7,7 @@ struct DietaryPreferencesView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Dietary preferences")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
 
                 Text("Select any that apply (optional)")
                     .font(.subheadline)
@@ -21,18 +21,15 @@ struct DietaryPreferencesView: View {
                 VStack(spacing: 20) {
                     DietaryPreferencesPickerContent(selectedPreferences: $state.selectedDietaryPreferences)
                         .padding(16)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                        )
+                        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                         .padding(.horizontal, 20)
 
                     Spacer()
                 }
                 .padding(.top, 20)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
 
             OnboardingFooter(
                 nextLabel: state.selectedDietaryPreferences.isEmpty ? "Skip" : "Next",

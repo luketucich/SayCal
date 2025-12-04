@@ -10,7 +10,7 @@ struct WelcomeView: View {
             // App branding
             VStack(spacing: 16) {
                 Image(systemName: "fork.knife.circle.fill")
-                    .font(.system(size: 80))
+                    .font(.system(size: 80, design: .rounded))
                     .foregroundStyle(.primary)
 
                 VStack(spacing: 4) {
@@ -43,11 +43,8 @@ struct WelcomeView: View {
                     .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .cardShadow()
                 }
             }
             .padding(.horizontal, 24)
@@ -61,7 +58,7 @@ struct WelcomeView: View {
                 .padding(.horizontal, 40)
                 .padding(.bottom, 24)
         }
-        .background(Color(.systemBackground))
+        .background(Color.appBackground)
         .sheet(isPresented: $showEmailAuth) {
             EmailAuthView()
         }

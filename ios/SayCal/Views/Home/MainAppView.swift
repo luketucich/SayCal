@@ -3,7 +3,8 @@ import Supabase
 
 enum AppTab: Hashable {
     case daily
-    case recipes
+    case micros
+    case profile
     case add
 }
 
@@ -13,9 +14,6 @@ struct MainAppView: View {
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("appTheme") private var selectedAppTheme: AppTheme = .device
 
-    @State private var showSettings = false
-    @State private var showMicronutrients = false
-    @State private var showResetConfirmation = false
     @State private var showInputMenu = false
     @State private var isMenuClosing = false
     @State private var selectedTab: AppTab = .daily
@@ -26,12 +24,15 @@ struct MainAppView: View {
 
     @State private var showRecordingOverlay = false
     @State private var showTextInput = false
-    @State private var showResultSheet = false
     @State private var currentMealId: String?
     @State private var selectedMealId: String?
     @State private var textInput: String = ""
 
     @FocusState private var isTextInputFocused: Bool
+    
+    // Constants for consistent spacing
+    private let bottomBarHeight: CGFloat = 80
+    private let gradientHeight: CGFloat = 200
 
     private var isViewingToday: Bool {
         Calendar.current.isDateInToday(selectedDate)
@@ -52,166 +53,116 @@ struct MainAppView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                    CustomToolbar(
-                        selectedTab: selectedTab,
-                        onTierToggle: {
-                            toggleTier()
+            ZStack(alignment: .bottom) {
+                // MARK: - Main Content
+                Group {
+                    switch selectedTab {
+                    case .daily:
+                        DailyView(
+                            selectedDate: $selectedDate,
+                            onMealTap: { meal in
+                                selectedMealId = meal.id
+                            }
+                        )
+                    case .micros:
+                        MicrosView(selectedDate: $selectedDate)
+                    case .profile:
+                        ProfileView()
+                            .environmentObject(userManager)
+                    case .add:
+                        Color.clear
+                    }
+                }
+                .ignoresSafeArea(edges: .bottom)
+
+                // MARK: - Floating Menu
+                if showInputMenu || isMenuClosing {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 12) {
+                                MenuOption(
+                                    icon: "mic.fill",
+                                    label: "Voice",
+                                    appearDelay: 0.06,
+                                    disappearDelay: 0.06,
+                                    isClosing: isMenuClosing
+                                ) {
+                                    HapticManager.shared.light()
+                                    closeMenu()
+                                    startVoiceRecording()
+                                }
+
+                                MenuOption(
+                                    icon: "keyboard",
+                                    label: "Type",
+                                    appearDelay: 0,
+                                    disappearDelay: 0,
+                                    isClosing: isMenuClosing
+                                ) {
+                                    HapticManager.shared.light()
+                                    closeMenu()
+                                    startTextInput()
+                                }
+                            }
+                            .padding(.trailing, 16)
+                        }
+                        .padding(.bottom, bottomBarHeight + 20)
+                    }
+                }
+
+                // MARK: - Audio Recording Overlay
+                if showRecordingOverlay {
+                    AudioRecordingOverlay(
+                        audioRecorder: audioRecorder,
+                        isPresented: $showRecordingOverlay,
+                        onDismiss: {
+                            audioRecorder.state = .idle
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                showRecordingOverlay = false
+                            }
                         },
-                        onReset: {
-                            showResetConfirmation = true
+                        onSend: {
+                            // Just stop recording, don't create meal yet
+                            // Meal will be created after transcription confirmation
                         },
-                        onSettings: {
-                            showSettings = true
+                        onConfirm: { transcription in
+                            handleTranscriptionConfirmed(transcription)
                         },
-                        onMicronutrients: {
-                            showMicronutrients = true
+                        onRetry: {
+                            handleTranscriptionRetry()
                         }
                     )
-                    .environmentObject(userManager)
+                }
 
-                    ZStack {
-                        // Tab content based on selection
-                        switch selectedTab {
-                        case .daily:
-                            DailyView(
-                                showSettings: $showSettings,
-                                selectedDate: $selectedDate,
-                                onMealTap: { meal in
-                                    selectedMealId = meal.id
-                                    showResultSheet = true
-                                }
-                            )
-                        case .recipes:
-                            RecipesView(showSettings: $showSettings)
-                        case .add:
-                            Color.clear
-                        }
+                // MARK: - Bottom Bar
+                if showTextInput {
+                    MealInputToolbar(
+                        textInput: $textInput,
+                        isTextInputFocused: $isTextInputFocused,
+                        onCancel: handleTextInputCancel,
+                        onSend: handleTextInputSend
+                    )
+                } else {
+                    HStack(alignment: .bottom, spacing: 0) {
+                        CustomTabBar(selectedTab: tabSelection)
+                            .padding(.leading, 20)
 
-            // Floating menu
-            if showInputMenu || isMenuClosing {
-                VStack {
-                    Spacer()
-                    HStack {
                         Spacer()
-                        VStack(alignment: .trailing, spacing: 12) {
-                            MenuOption(
-                                icon: "mic.fill",
-                                label: "Voice",
-                                appearDelay: 0.06,
-                                disappearDelay: 0.06,
-                                isClosing: isMenuClosing
-                            ) {
-                                HapticManager.shared.light()
-                                closeMenu()
-                                startVoiceRecording()
-                            }
 
-                            MenuOption(
-                                icon: "keyboard",
-                                label: "Type",
-                                appearDelay: 0,
-                                disappearDelay: 0,
-                                isClosing: isMenuClosing
-                            ) {
-                                HapticManager.shared.light()
-                                closeMenu()
-                                startTextInput()
-                            }
-                        }
-                        .padding(.trailing, 16)
+                        FloatingAddButton(onTap: toggleMenu)
+                            .padding(.trailing, 20)
                     }
-                    .padding(.bottom, 30)
+                    .frame(height: bottomBarHeight)
                 }
             }
-
-            // Audio recording overlay
-            if showRecordingOverlay {
-                AudioRecordingOverlay(
-                    audioRecorder: audioRecorder,
-                    isPresented: $showRecordingOverlay,
-                    onDismiss: {
-                        audioRecorder.state = .idle
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            showRecordingOverlay = false
-                        }
-                    },
-                    onSend: {
-                        // Just stop recording, don't create meal yet
-                        // Meal will be created after transcription confirmation
-                    },
-                    onConfirm: { transcription in
-                        handleTranscriptionConfirmed(transcription)
-                    },
-                    onRetry: {
-                        handleTranscriptionRetry()
-                    }
-                )
-                }
+            .navigationDestination(item: $selectedMealId) { mealId in
+                MealSummaryView(mealId: mealId)
             }
-
-            if showTextInput {
-                MealInputToolbar(
-                    textInput: $textInput,
-                    isTextInputFocused: $isTextInputFocused,
-                    onCancel: handleTextInputCancel,
-                    onSend: handleTextInputSend
-                )
-            } else {
-                HStack(alignment: .bottom, spacing: 0) {
-                    CustomTabBar(selectedTab: tabSelection)
-                        .padding(.leading, 20)
-
-                    Spacer()
-
-                    FloatingAddButton(onTap: toggleMenu)
-                        .padding(.trailing, 20)
-                }
-                .padding(.bottom, 16)
-            }
-        }
-
-        .sheet(isPresented: $showSettings) {
-            SettingsSheet()
-                .environmentObject(userManager)
-                .preferredColorScheme(selectedAppTheme.colorScheme)
-                .tint(selectedAppTheme.accentColor)
-        }
-
-        .sheet(isPresented: $showMicronutrients) {
-            MicronutrientsSheet(date: selectedDate)
-        }
-
-        .sheet(isPresented: $showResultSheet) {
-            if let mealId = selectedMealId {
-                CalorieResultSheet(mealId: mealId)
-            }
-        }
-        .onChange(of: showResultSheet) { _, isShowing in
-            if !isShowing {
-                selectedMealId = nil
-            }
-        }
-
-        .onChange(of: showSettings) { _, isShowing in
-            if isShowing && showInputMenu {
-                closeMenu()
-            }
-        }
-
-        .confirmationDialog("Reset all meals?", isPresented: $showResetConfirmation, titleVisibility: .visible) {
-            Button("Reset All Data", role: .destructive) {
-                HapticManager.shared.medium()
-                MealManager.shared.resetAllData()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This will delete all logged meals from every day. This action cannot be undone.")
-        }
-
-        .navigationBarHidden(true)
-        .preferredColorScheme(selectedAppTheme.colorScheme)
-        .tint(selectedAppTheme.accentColor)
+            .navigationBarHidden(true)
+            .preferredColorScheme(selectedAppTheme.colorScheme)
+            .tint(selectedAppTheme.accentColor)
         }
     }
 
@@ -321,38 +272,6 @@ struct MainAppView: View {
         // Use background analysis so it continues even if app is closed
         await MealManager.shared.analyzeMealInBackground(mealId: mealId, transcription: mealText)
     }
-
-    private func toggleTier() {
-        guard let profile = userManager.profile else { return }
-        Task {
-            do {
-                let newTier: Tier = profile.tier == .free ? .premium : .free
-                let updatedProfile = UserProfile(
-                    userId: profile.userId,
-                    unitsPreference: profile.unitsPreference,
-                    sex: profile.sex,
-                    age: profile.age,
-                    heightCm: profile.heightCm,
-                    weightKg: profile.weightKg,
-                    activityLevel: profile.activityLevel,
-                    dietaryPreferences: profile.dietaryPreferences,
-                    allergies: profile.allergies,
-                    goal: profile.goal,
-                    targetCalories: profile.targetCalories,
-                    carbsPercent: profile.carbsPercent,
-                    fatsPercent: profile.fatsPercent,
-                    proteinPercent: profile.proteinPercent,
-                    tier: newTier,
-                    createdAt: profile.createdAt,
-                    updatedAt: profile.updatedAt,
-                    onboardingCompleted: profile.onboardingCompleted
-                )
-                try await userManager.updateProfile(updatedProfile)
-            } catch {
-                print("Failed to toggle tier: \(error)")
-            }
-        }
-    }
 }
 
 // MARK: - Menu Option Button
@@ -375,14 +294,11 @@ struct MenuOption: View {
                     .foregroundStyle(.primary)
 
                 Image(systemName: icon)
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 18, weight: .medium, design: .rounded))
                     .foregroundStyle(.primary)
                     .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay(
-                        Circle()
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: Circle())
+                    .cardShadow()
             }
         }
         .scaleEffect(appeared ? 1 : 0.5)

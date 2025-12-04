@@ -9,13 +9,13 @@ struct FloatingAddButton: View {
             onTap()
         } label: {
             Image(systemName: "plus")
-                .font(.system(size: 19, weight: .semibold))
-                .foregroundStyle(.primary)
+                .font(.system(size: 19, weight: .semibold, design: .rounded))
+                .foregroundStyle(Color.appCardBackground)
                 .frame(width: 59, height: 59)
-                .background(.ultraThinMaterial, in: Circle())
+                .background(Color.primary, in: Circle())
                 .overlay(
                     Circle()
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        .strokeBorder(Color.appStroke, lineWidth: 0.5)
                 )
         }
         .buttonStyle(.plain)

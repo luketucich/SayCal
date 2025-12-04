@@ -15,14 +15,11 @@ struct DateSelectorView: View {
                 changeDate(by: -1)
             } label: {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.secondary)
                     .frame(width: 36, height: 36)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 12))
+                    .cardShadow()
             }
 
             // Center pill with date
@@ -31,11 +28,8 @@ struct DateSelectorView: View {
             } label: {
                 SelectedDateOverlay(date: selectedDate, isToday: Calendar.current.isDateInToday(selectedDate))
                     .frame(width: 120, height: 36)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 12))
+                    .cardShadow()
             }
 
             // Right arrow
@@ -43,14 +37,11 @@ struct DateSelectorView: View {
                 changeDate(by: 1)
             } label: {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.secondary)
                     .frame(width: 36, height: 36)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 12))
+                    .cardShadow()
             }
         }
         .frame(height: 44)
@@ -153,7 +144,7 @@ struct CalendarPickerView: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Select Date")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -163,7 +154,7 @@ struct CalendarPickerView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
                 }

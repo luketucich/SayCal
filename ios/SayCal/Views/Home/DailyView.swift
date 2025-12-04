@@ -3,7 +3,6 @@ import SwiftUI
 struct DailyView: View {
     @EnvironmentObject var userManager: UserManager
     @StateObject private var mealLogger = MealManager.shared
-    @Binding var showSettings: Bool
     @Binding var selectedDate: Date
     let onMealTap: (LoggedMeal) -> Void
 
@@ -21,10 +20,10 @@ struct DailyView: View {
                 // Meals List
                 MealsList(date: selectedDate, onMealTap: onMealTap)
 
-                Spacer()
+                Spacer(minLength: 100)
             }
-            .padding(.bottom, 100)
         }
+        .background(Color.appBackground)
         .onChange(of: userManager.profile?.targetCalories) { _, _ in
             mealLogger.syncGoalCaloriesFromProfile()
         }
@@ -32,6 +31,6 @@ struct DailyView: View {
 }
 
 #Preview {
-    DailyView(showSettings: .constant(false), selectedDate: .constant(Date()), onMealTap: { _ in })
+    DailyView(selectedDate: .constant(Date()), onMealTap: { _ in })
         .environmentObject(UserManager.shared)
 }

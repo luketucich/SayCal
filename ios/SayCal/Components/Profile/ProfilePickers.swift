@@ -26,23 +26,20 @@ struct GoalPickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Goal")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 GoalPickerContent(selection: $selection)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Goal")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -53,7 +50,7 @@ struct GoalPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -88,23 +85,20 @@ struct ActivityLevelPickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Activity Level")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 ActivityLevelPickerContent(selection: $selection)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Activity Level")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -115,7 +109,7 @@ struct ActivityLevelPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -150,23 +144,20 @@ struct SexPickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Sex")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 SexPickerContent(selection: $selection)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Sex")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -177,7 +168,7 @@ struct SexPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -212,23 +203,20 @@ struct AgePickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Age")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 AgePickerContent(age: $age)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Age")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -239,7 +227,7 @@ struct AgePickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -274,23 +262,20 @@ struct UnitsPickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Units")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 UnitsPickerContent(selection: $selection)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Units")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -301,7 +286,7 @@ struct UnitsPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -380,23 +365,20 @@ struct HeightPickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Height")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 HeightPickerContent(heightCm: $heightCm, units: units)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Height")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -407,7 +389,7 @@ struct HeightPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -455,23 +437,20 @@ struct WeightPickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Weight")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 WeightPickerContent(weightKg: $weightKg, units: units)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Weight")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -482,7 +461,7 @@ struct WeightPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -519,28 +498,25 @@ struct CaloriePickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Target Calories")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 CaloriePickerContent(calories: $calories)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Text("Recommended: \(calculated) cal/day")
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, design: .rounded))
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Target Calories")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -550,7 +526,7 @@ struct CaloriePickerSheet: View {
                         onReset()
                     } label: {
                         Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -560,7 +536,7 @@ struct CaloriePickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -582,7 +558,7 @@ struct MacroPickerContent: View {
             HStack(spacing: 8) {
                 VStack(spacing: 4) {
                     Text("Carbs")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
 
                     Picker("Carbs", selection: $carbs) {
@@ -597,7 +573,7 @@ struct MacroPickerContent: View {
 
                 VStack(spacing: 4) {
                     Text("Fat")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
 
                     Picker("Fat", selection: $fat) {
@@ -612,7 +588,7 @@ struct MacroPickerContent: View {
 
                 VStack(spacing: 4) {
                     Text("Protein")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
 
                     Picker("Protein", selection: $protein) {
@@ -628,7 +604,7 @@ struct MacroPickerContent: View {
 
             if total != 100 {
                 Text("Total must equal 100% (currently \(total)%)")
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, design: .rounded))
                     .foregroundStyle(.red)
             }
         }
@@ -650,23 +626,20 @@ struct MacroPickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Text("Macros")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
 
                 MacroPickerContent(carbs: $carbs, fat: $fat, protein: $protein)
                     .padding(16)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                     .padding(.horizontal, 16)
 
                 Spacer()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Macros")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -676,7 +649,7 @@ struct MacroPickerSheet: View {
                         onReset()
                     } label: {
                         Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -686,7 +659,7 @@ struct MacroPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                     .disabled(total != 100)
                 }
@@ -714,21 +687,18 @@ struct DietaryPreferencesPickerContent: View {
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: selectedPreferences.contains(pref) ? "checkmark.square.fill" : "square")
-                            .font(.system(size: 20, weight: .medium))
+                            .font(.system(size: 20, weight: .medium, design: .rounded))
                             .foregroundStyle(selectedPreferences.contains(pref) ? .primary : .secondary)
 
                         Text(pref.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(.system(size: 15, weight: .medium))
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(.primary)
 
                         Spacer()
                     }
                     .padding(12)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 8))
+        .cardShadow()
                 }
             }
         }
@@ -744,7 +714,7 @@ struct DietaryPreferencesPickerSheet: View {
         NavigationStack {
             VStack(spacing: 0) {
                 Text("Dietary Preferences")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
 
@@ -753,7 +723,7 @@ struct DietaryPreferencesPickerSheet: View {
                         .padding(16)
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Dietary Preferences")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -764,7 +734,7 @@ struct DietaryPreferencesPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }
@@ -791,21 +761,18 @@ struct AllergiesPickerContent: View {
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: selectedAllergies.contains(allergy) ? "checkmark.square.fill" : "square")
-                            .font(.system(size: 20, weight: .medium))
+                            .font(.system(size: 20, weight: .medium, design: .rounded))
                             .foregroundStyle(selectedAllergies.contains(allergy) ? .primary : .secondary)
 
                         Text(allergy.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(.system(size: 15, weight: .medium))
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(.primary)
 
                         Spacer()
                     }
                     .padding(12)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 8))
+        .cardShadow()
                 }
             }
         }
@@ -821,7 +788,7 @@ struct AllergiesPickerSheet: View {
         NavigationStack {
             VStack(spacing: 0) {
                 Text("Allergies")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
 
@@ -830,7 +797,7 @@ struct AllergiesPickerSheet: View {
                         .padding(16)
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Allergies")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -841,7 +808,7 @@ struct AllergiesPickerSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
                 }
             }

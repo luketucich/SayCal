@@ -22,10 +22,6 @@ struct MealInputToolbar: View {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.primary.opacity(0.05))
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
-                )
                 .fixedSize(horizontal: false, vertical: true)
 
             // Cancel button
@@ -34,14 +30,11 @@ struct MealInputToolbar: View {
                 onCancel()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundStyle(.secondary)
                     .frame(width: 36, height: 36)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay(
-                        Circle()
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: Circle())
+                    .cardShadow()
             }
             .buttonStyle(.plain)
 
@@ -51,19 +44,34 @@ struct MealInputToolbar: View {
                 onSend()
             } label: {
                 Image(systemName: "paperplane.fill")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(textInput.isEmpty ? .secondary : .primary)
                     .frame(width: 36, height: 36)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay(
-                        Circle()
-                            .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                    )
+                    .background(Color.appCardBackground, in: Circle())
+                    .cardShadow()
             }
             .buttonStyle(.plain)
             .disabled(textInput.isEmpty)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+        .padding(.top, 4)
+        .background(
+            Color.appBackground
+                // Extend under the keyboard only, so the fade is at the toolbar's top edge.
+                // If you want the fade at the very top of the screen instead, change to `.all`.
+                .ignoresSafeArea(edges: .bottom)
+                // Fade only the background at the very top
+                .mask(
+                    VStack(spacing: 0) {
+                        // Adjust this to control the fade length
+                        LinearGradient(colors: [.clear, .black],
+                                       startPoint: .top,
+                                       endPoint: .bottom)
+                            .frame(height: 12)
+                        Color.black
+                    }
+                )
+        )
     }
 }

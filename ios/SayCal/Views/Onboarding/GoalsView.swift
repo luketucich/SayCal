@@ -8,7 +8,7 @@ struct GoalsView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Your goal")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
 
                 Text("What are you trying to achieve?")
                     .font(.subheadline)
@@ -25,11 +25,8 @@ struct GoalsView: View {
 
                     GoalPickerContent(selection: $state.goal)
                         .padding(16)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                        )
+                        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                         .padding(.horizontal, 20)
                         .onChange(of: state.goal) { _, _ in
                             HapticManager.shared.light()
@@ -39,7 +36,7 @@ struct GoalsView: View {
                 }
                 .padding(.top, 16)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
 
             OnboardingFooter(onBack: { state.previousStep() }) {
                 state.nextStep()

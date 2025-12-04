@@ -1,13 +1,12 @@
 import SwiftUI
 
-struct CalorieResultSheet: View {
+struct MealSummaryView: View {
     let mealId: String
 
     @ObservedObject var mealLogger = MealManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var hasAppeared = false
     @State private var contentRevealed = false
-    @State private var selectedDetent: PresentationDetent = .medium
     @State private var showDeleteConfirmation = false
     @State private var expandedMicros: Set<String> = []
 
@@ -34,7 +33,7 @@ struct CalorieResultSheet: View {
                     // Meal not found
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 48))
+                            .font(.system(size: 48, design: .rounded))
                             .foregroundStyle(.secondary)
                         Text("Meal not found")
                             .font(.headline)
@@ -53,28 +52,12 @@ struct CalorieResultSheet: View {
                     }
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Meal Summary")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        HapticManager.shared.light()
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
         }
-        .presentationDetents([.medium, .large], selection: $selectedDetent)
-        .presentationDragIndicator(.visible)
-        .presentationBackgroundInteraction(.enabled(upThrough: .large))
-        .presentationContentInteraction(.scrolls)
         .onAppear {
-            print("📋 CalorieResultSheet appeared")
+            print("📋 MealSummaryView appeared")
             print("   mealId: \(mealId)")
             print("   meal found: \(meal != nil)")
             print("   isLoading: \(isLoading)")
@@ -121,17 +104,14 @@ struct CalorieResultSheet: View {
             } label: {
                 HStack {
                     Image(systemName: "pencil")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
                     Text("Edit")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                )
+                .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                 .foregroundStyle(.primary)
             }
 
@@ -141,17 +121,14 @@ struct CalorieResultSheet: View {
             } label: {
                 HStack {
                     Image(systemName: "trash")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
                     Text("Delete")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                )
+                .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                 .foregroundStyle(.red)
             }
         }
@@ -181,11 +158,8 @@ struct CalorieResultSheet: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-        )
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 16))
+        .cardShadow()
         .opacity(hasAppeared ? 1 : 0)
         .offset(y: hasAppeared ? 0 : 10)
     }
@@ -197,13 +171,13 @@ struct CalorieResultSheet: View {
             // Section 1: Meal Type & Description
             VStack(alignment: .leading, spacing: 4) {
                 Text(analysis.mealType)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
                 // Prioritize AI-generated title, fall back to API description
                 Text(meal?.aiGeneratedTitle ?? analysis.description)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundStyle(.primary)
             }
             .modifier(RevealModifier(delay: 0, revealed: contentRevealed))
@@ -216,7 +190,7 @@ struct CalorieResultSheet: View {
                 // Total Calories
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Calories")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
 
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
@@ -226,7 +200,7 @@ struct CalorieResultSheet: View {
                             .contentTransition(.numericText())
 
                         Text(" cal")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -236,9 +210,9 @@ struct CalorieResultSheet: View {
 
                 // Macros
                 HStack(spacing: 10) {
-                    macroPill(label: "P", value: analysis.totalProtein, color: .blue)
-                    macroPill(label: "C", value: analysis.totalCarbs, color: .orange)
-                    macroPill(label: "F", value: analysis.totalFats, color: .pink)
+                    macroPill(label: "P", value: analysis.totalProtein, color: .proteinColor)
+                    macroPill(label: "C", value: analysis.totalCarbs, color: .carbsColor)
+                    macroPill(label: "F", value: analysis.totalFats, color: .fatColor)
                 }
                 .modifier(RevealModifier(delay: 0.15, revealed: contentRevealed))
             }
@@ -249,7 +223,7 @@ struct CalorieResultSheet: View {
             // Section 3: Breakdown
             VStack(alignment: .leading, spacing: 10) {
                 Text("Breakdown")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
                     .modifier(RevealModifier(delay: 0.25, revealed: contentRevealed))
@@ -265,7 +239,7 @@ struct CalorieResultSheet: View {
     private func macroPill(label: String, value: Double, color: Color) -> some View {
         VStack(spacing: 3) {
             Text(label)
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(size: 10, weight: .bold, design: .rounded))
                 .foregroundStyle(color)
 
             Text("\(Int(value))g")
@@ -287,11 +261,11 @@ struct CalorieResultSheet: View {
             HStack(alignment: .top, spacing: 8) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.item)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundStyle(.primary)
 
                     Text(item.portion)
-                        .font(.system(size: 12))
+                        .font(.system(size: 12, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
 
@@ -301,15 +275,15 @@ struct CalorieResultSheet: View {
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
                 + Text(" cal")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
 
             // Macros
             HStack(spacing: 12) {
-                miniMacro(label: "P", value: item.protein, color: .blue)
-                miniMacro(label: "C", value: item.carbs, color: .orange)
-                miniMacro(label: "F", value: item.fats, color: .pink)
+                miniMacro(label: "P", value: item.protein, color: .proteinColor)
+                miniMacro(label: "C", value: item.carbs, color: .carbsColor)
+                miniMacro(label: "F", value: item.fats, color: .fatColor)
             }
 
             // Micros expandable section
@@ -317,21 +291,19 @@ struct CalorieResultSheet: View {
                 VStack(spacing: 6) {
                     Button {
                         HapticManager.shared.light()
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                            if expandedMicros.contains(item.id) {
-                                expandedMicros.remove(item.id)
-                            } else {
-                                expandedMicros.insert(item.id)
-                            }
+                        if expandedMicros.contains(item.id) {
+                            expandedMicros.remove(item.id)
+                        } else {
+                            expandedMicros.insert(item.id)
                         }
                     } label: {
                         HStack(spacing: 4) {
                             Text("Show Micros")
-                                .font(.system(size: 11, weight: .medium))
+                                .font(.system(size: 11, weight: .medium, design: .rounded))
                                 .foregroundStyle(.secondary)
 
                             Image(systemName: expandedMicros.contains(item.id) ? "chevron.up" : "chevron.down")
-                                .font(.system(size: 9, weight: .semibold))
+                                .font(.system(size: 9, weight: .semibold, design: .rounded))
                                 .foregroundStyle(.tertiary)
                         }
                     }
@@ -352,16 +324,13 @@ struct CalorieResultSheet: View {
             }
         }
         .padding(12)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-        )
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
     }
 
     private func microChip(_ micro: Micronutrient) -> some View {
         Text(micro.displayText)
-            .font(.system(size: 10, weight: .medium))
+            .font(.system(size: 10, weight: .medium, design: .rounded))
             .foregroundStyle(.secondary)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -371,11 +340,11 @@ struct CalorieResultSheet: View {
     private func miniMacro(label: String, value: Double, color: Color) -> some View {
         HStack(spacing: 3) {
             Text(label)
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(size: 10, weight: .bold, design: .rounded))
                 .foregroundStyle(color)
 
             Text("\(Int(value))g")
-                .font(.system(size: 11, weight: .medium))
+                .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundStyle(color)
         }
     }
@@ -385,15 +354,15 @@ struct CalorieResultSheet: View {
     private func errorContent(_ message: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 36))
+                .font(.system(size: 36, design: .rounded))
                 .foregroundStyle(.secondary)
 
             Text("Couldn't analyze meal")
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .foregroundStyle(.primary)
 
             Text(message)
-                .font(.system(size: 15))
+                .font(.system(size: 15, design: .rounded))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
@@ -464,11 +433,8 @@ struct CalorieResultSheet: View {
             }
         }
         .padding(12)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-        )
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
     }
     
     // MARK: - Shimmer Effect
@@ -493,5 +459,5 @@ struct CalorieResultSheet: View {
         logger.loggedMeals.append(meal)
     }
 
-    return CalorieResultSheet(mealId: previewMealId)
+    return MealSummaryView(mealId: previewMealId)
 }

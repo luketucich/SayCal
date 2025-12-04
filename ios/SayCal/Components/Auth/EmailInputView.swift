@@ -11,7 +11,7 @@ struct EmailInputView: View {
             // Header
             VStack(alignment: .leading, spacing: 8) {
                 Label("Enter your email", systemImage: "envelope.fill")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
 
                 Text("We'll send you a verification code")
                     .font(.subheadline)
@@ -33,11 +33,8 @@ struct EmailInputView: View {
                         .autocorrectionDisabled()
                 }
                 .padding()
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                )
+                .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .cardShadow()
 
                 if let errorMessage {
                     HStack(spacing: 8) {
@@ -56,7 +53,7 @@ struct EmailInputView: View {
                     HStack(spacing: 8) {
                         if isLoading {
                             ProgressView()
-                                .tint(Color(.systemBackground))
+                                .tint(Color.appBackground)
                         } else {
                             Text("Continue")
                             Image(systemName: "arrow.right")

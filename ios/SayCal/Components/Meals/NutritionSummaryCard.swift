@@ -26,9 +26,7 @@ struct NutritionSummaryCard: View {
     }
 
     private var progressBarColor: Color {
-        // Interpolate from orange/red (low progress) to green (high progress)
-        let hue = progress * 0.33 // 0.0 (red) to 0.33 (green) in HSB color space
-        return Color(hue: hue, saturation: 0.7, brightness: 0.8)
+        return .blue
     }
 
     private var carbsConsumed: Int {
@@ -69,7 +67,7 @@ struct NutritionSummaryCard: View {
                         .fill(Color.primary.opacity(0.1))
 
                     Capsule()
-                        .fill(progressBarColor)
+                        .fill(.blue)
                         .frame(width: geo.size.width * progress)
                         .animation(.spring(response: 0.5, dampingFraction: 0.8), value: progress)
                 }
@@ -78,28 +76,25 @@ struct NutritionSummaryCard: View {
 
             // Macros row
             HStack(spacing: 8) {
-                MacroStat(label: "Carbs", consumed: carbsConsumed, color: .orange)
+                MacroStat(label: "Carbs", consumed: carbsConsumed, color: .carbsColor)
 
                 Text("•")
                     .foregroundStyle(.secondary)
-                    .font(.system(size: 12))
+                    .font(.system(size: 12, design: .rounded))
 
-                MacroStat(label: "Fat", consumed: fatConsumed, color: .pink)
+                MacroStat(label: "Fat", consumed: fatConsumed, color: .fatColor)
 
                 Text("•")
                     .foregroundStyle(.secondary)
-                    .font(.system(size: 12))
+                    .font(.system(size: 12, design: .rounded))
 
-                MacroStat(label: "Protein", consumed: proteinConsumed, color: .blue)
+                MacroStat(label: "Protein", consumed: proteinConsumed, color: .proteinColor)
             }
             .frame(maxWidth: .infinity)
         }
         .padding(14)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-        )
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 18))
+        .cardShadow()
         .padding(.horizontal, 20)
     }
 }
@@ -117,7 +112,7 @@ struct MacroStat: View {
                 .contentTransition(.numericText())
 
             Text(label)
-                .font(.system(size: 11))
+                .font(.system(size: 11, design: .rounded))
                 .foregroundStyle(color.opacity(0.8))
         }
     }
@@ -127,5 +122,5 @@ struct MacroStat: View {
     NutritionSummaryCard(date: Date())
         .environmentObject(UserManager.shared)
         .padding()
-        .background(Color(.systemGroupedBackground))
+        .background(Color.appBackground)
 }

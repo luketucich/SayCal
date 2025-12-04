@@ -15,7 +15,7 @@ struct CodeInputView: View {
             // Header
             VStack(alignment: .leading, spacing: 8) {
                 Label("Enter verification code", systemImage: "number.circle.fill")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
 
                 Text("We sent a 6-digit code to \(email)")
                     .font(.subheadline)
@@ -72,7 +72,7 @@ struct CodeInputView: View {
                     HStack(spacing: 8) {
                         if isLoading {
                             ProgressView()
-                                .tint(Color(.systemBackground))
+                                .tint(Color.appBackground)
                         } else {
                             Text("Verify Code")
                             Image(systemName: "checkmark")
@@ -114,11 +114,8 @@ struct CodeDigitBox: View {
         Text(digit)
             .font(.system(size: 24, weight: .semibold, design: .rounded))
             .frame(width: 48, height: 56)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(isActive ? Color.primary : Color.primary.opacity(0.08), lineWidth: isActive ? 2 : 0.5)
-            )
+            .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .cardShadow()
     }
 }
 

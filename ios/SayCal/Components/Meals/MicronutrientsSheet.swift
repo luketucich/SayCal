@@ -90,11 +90,11 @@ struct MicronutrientsSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 6) {
                                 Image(systemName: icon)
-                                    .font(.system(size: 11, weight: .semibold))
+                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
                                     .foregroundStyle(.secondary)
 
                                 Text(category)
-                                    .font(.system(size: 11, weight: .bold))
+                                    .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundStyle(.secondary)
                                     .textCase(.uppercase)
                             }
@@ -109,7 +109,7 @@ struct MicronutrientsSheet: View {
                 .padding(16)
             }
             .scrollIndicators(.visible)
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
             .navigationTitle("Daily Micros")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -119,7 +119,7 @@ struct MicronutrientsSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -133,7 +133,7 @@ struct MicronutrientsSheet: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(target.name)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(.primary)
 
                 Spacer()
@@ -143,13 +143,13 @@ struct MicronutrientsSheet: View {
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                     Text(target.unit)
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                     Text("•")
-                        .font(.system(size: 9))
+                        .font(.system(size: 9, design: .rounded))
                         .foregroundStyle(.tertiary)
                     Text("\(Int(percentage))%")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(percentageColor(percentage))
                 }
             }
@@ -169,11 +169,8 @@ struct MicronutrientsSheet: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-        )
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
     }
 
     private func percentageColor(_ percentage: Double) -> Color {

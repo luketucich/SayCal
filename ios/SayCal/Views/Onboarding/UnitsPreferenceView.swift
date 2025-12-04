@@ -7,7 +7,7 @@ struct UnitsPreferenceView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Choose your units")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
 
                 Text("Select your preferred measurement system")
                     .font(.subheadline)
@@ -21,11 +21,8 @@ struct UnitsPreferenceView: View {
                 VStack(spacing: 20) {
                     UnitsPickerContent(selection: $state.unitsPreference)
                         .padding(16)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-                        )
+                        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
                         .padding(.horizontal, 20)
                         .onChange(of: state.unitsPreference) { _, _ in
                             HapticManager.shared.light()
@@ -35,7 +32,7 @@ struct UnitsPreferenceView: View {
                 }
                 .padding(.top, 20)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.appBackground)
 
             OnboardingFooter(showBack: false) {
                 state.nextStep()

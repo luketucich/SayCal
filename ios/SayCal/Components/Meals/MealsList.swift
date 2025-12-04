@@ -73,17 +73,25 @@ struct MealsList: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Image(systemName: "fork.knife")
-                .font(.system(size: 32))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 40, weight: .light, design: .rounded))
+                .foregroundStyle(.tertiary)
 
             Text("No meals logged yet")
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(.secondary)
+
+            Text("Tap the + button to add your first meal")
+                .font(.system(size: 13, weight: .regular, design: .rounded))
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
+        .padding(.vertical, 40)
+        .padding(.horizontal, 20)
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 16))
+        .cardShadow()
     }
 }
 
@@ -111,11 +119,11 @@ struct MealCategoryHeader: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: mealType.icon)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(.secondary)
 
             Text(mealType.rawValue)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 11, weight: .bold, design: .rounded))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
         }
@@ -139,18 +147,18 @@ struct MealCard: View {
         HStack(alignment: .center, spacing: 8) {
             if meal.isLoading {
                 Text(meal.timestamp, style: .time)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
 
                 Text("•")
-                    .font(.system(size: 10))
+                    .font(.system(size: 10, design: .rounded))
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 2)
 
                 // Show AI-generated title if available, otherwise shimmer
                 if let aiTitle = meal.aiGeneratedTitle {
                     Text(aiTitle)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
@@ -162,35 +170,35 @@ struct MealCard: View {
                 }
 
                 Text("•")
-                    .font(.system(size: 10))
+                    .font(.system(size: 10, design: .rounded))
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 2)
 
                 ShimmerView(width: 50, height: 14)
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold, design: .rounded))
                     .foregroundStyle(.tertiary)
             } else if let analysis = analysis {
                 Text(meal.timestamp, style: .time)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
 
                 Text("•")
-                    .font(.system(size: 10))
+                    .font(.system(size: 10, design: .rounded))
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 2)
 
                 // Prioritize AI-generated title, fall back to API description
                 Text(meal.aiGeneratedTitle ?? analysis.description)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .lineLimit(3)
 
                 Text("•")
-                    .font(.system(size: 10))
+                    .font(.system(size: 10, design: .rounded))
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 2)
 
@@ -198,21 +206,18 @@ struct MealCard: View {
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
                 + Text(" cal")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold, design: .rounded))
                     .foregroundStyle(.tertiary)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
-        )
+        .background(Color.appCardBackground, in: RoundedRectangle(cornerRadius: 10))
+        .cardShadow()
         .contentShape(Rectangle())
         .onTapGesture {
             if !meal.isLoading {
